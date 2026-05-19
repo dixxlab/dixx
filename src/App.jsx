@@ -584,9 +584,38 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
   );
 };
 
+const playBeep = (frequency = 800, duration = 150, type = 'sine') => {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioContext();
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration / 1000);
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + duration / 1000);
+  } catch (e) { /* navegador não suporta */ }
+};
+
 const RestTimer = ({ restTime, onSkip, onDone }) => {
   const [seconds, setSeconds] = useState(restTime);
-  useEffect(() => { if (seconds <= 0) { onDone(); return; } const t = setTimeout(() => setSeconds(s => s - 1), 1000); return () => clearTimeout(t); }, [seconds, onDone]);
+  useEffect(() => {
+    if (seconds <= 0) { onDone(); return; }
+    // Beep curto nos últimos 3 segundos (countdown)
+    if (seconds <= 3 && seconds > 0) playBeep(800, 120, 'sine');
+    const t = setTimeout(() => {
+      setSeconds(s => {
+        // Beep final quando chega a 0
+        if (s - 1 === 0) playBeep(1000, 400, 'sine');
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearTimeout(t);
+  }, [seconds, onDone]);
   const progress = ((restTime - seconds) / restTime) * 283;
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
@@ -615,7 +644,6 @@ const RestTimer = ({ restTime, onSkip, onDone }) => {
     </div>
   );
 };
-
 const Stats = ({ data }) => {
   const streak = calculateStreak(data.history);
   const prs = calculatePRs(data.history);
