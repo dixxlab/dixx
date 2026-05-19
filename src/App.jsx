@@ -88,7 +88,7 @@ const SplashStyles = () => (
     }
     .splash-text-1 { animation: splash-text-in 0.6s ease-out 0.5s both; }
     .splash-text-2 { animation: splash-text-in 0.6s ease-out 0.75s both; }
-    .splash-container { animation: splash-fadeout 0.4s ease-in 1.5s both; }
+    .splash-container { animation: splash-fadeout 0.5s ease-in 2.5s both; }
     .tab-content { animation: tab-enter 0.25s ease-out; }
   `}</style>
 );
@@ -431,7 +431,7 @@ const Dashboard = ({ data, onStartWorkout, onNavigate }) => {
     .reduce((sum, s) => sum + s.exercises.reduce((es, ex) => es + ex.sets.reduce((ss, set) => ss + (parseFloat(set.weight) || 0) * (parseInt(set.reps) || 0), 0), 0), 0);
 
   return (
-    <div className="px-5 pt-6 pb-24" style={{ background: C.bg, minHeight: '100%' }}>
+    <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
       <div className="flex justify-between items-center mb-6">
         <div>
           <div className="text-xs" style={{ color: C.textMuted }}>{greeting},</div>
@@ -476,7 +476,7 @@ const Dashboard = ({ data, onStartWorkout, onNavigate }) => {
 const WorkoutsList = ({ data, onSelectWorkout }) => {
   const todayIdx = getTodayWorkoutIdx(data.history);
   return (
-    <div className="px-5 pt-6 pb-24" style={{ background: C.bg, minHeight: '100%' }}>
+    <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
       <h1 className="text-2xl font-medium text-white mb-1">Seus treinos</h1>
       <p className="text-sm mb-6" style={{ color: C.textMuted }}>Divisão {data.user.division.split(' ')[0]}</p>
       <div className="space-y-3">
@@ -635,7 +635,7 @@ const Stats = ({ data }) => {
   });
 
   return (
-    <div className="px-5 pt-6 pb-24" style={{ background: C.bg, minHeight: '100%' }}>
+    <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
       <h1 className="text-2xl font-medium text-white mb-6">Sua jornada</h1>
       <div className="rounded-2xl p-4 mb-4" style={{ background: C.bgCard }}>
         <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Sequência atual</div>
@@ -708,7 +708,7 @@ const SettingRow = ({ icon: Icon, label, value }) => (
 const Profile = ({ data, onReset, onExport }) => {
   const streak = calculateStreak(data.history);
   return (
-    <div className="px-5 pt-6 pb-24" style={{ background: C.bg, minHeight: '100%' }}>
+    <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
       <h1 className="text-2xl font-medium text-white mb-6">Perfil</h1>
       <div className="rounded-2xl p-5 mb-6 text-center" style={{ background: C.bgCard }}>
         <div className="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center text-2xl font-medium" style={{ background: C.primary, color: C.bg }}>{data.user.name[0].toUpperCase()}</div>
@@ -773,7 +773,7 @@ const BottomNav = ({ active, onChange }) => {
     { id: 'profile', icon: User, label: 'Perfil' },
   ];
   return (
-    <div className="fixed bottom-0 left-0 right-0 mx-auto px-2 pt-2 flex justify-around z-40" style={{ background: C.bg, borderTop: `1px solid ${C.border}`, maxWidth: '500px', paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
+    <div className="fixed bottom-0 left-0 right-0 mx-auto px-2 pt-3 flex justify-around z-40" style={{ background: C.bg, borderTop: `1px solid ${C.border}`, maxWidth: '500px', paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)' }}>
       {tabs.map(({ id, icon: Icon, label }) => {
         const isActive = active === id;
         return (
@@ -798,7 +798,7 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    const t = setTimeout(() => setShowSplash(false), 1900);
+    const t = setTimeout(() => setShowSplash(false), 3000);
     return () => clearTimeout(t);
   }, []);
 
