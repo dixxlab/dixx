@@ -21,17 +21,9 @@ const resetData = () => {
 
 const initialData = { user: null, history: [], notes: {} };
 
-const DixxLogo = ({ size = 40, color = '#10b981' }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* X grande (de canto a canto) */}
-    <line x1="10" y1="10" x2="38" y2="38" stroke={color} strokeWidth="6" strokeLinecap="round"/>
-    <line x1="38" y1="10" x2="10" y2="38" stroke={color} strokeWidth="6" strokeLinecap="round"/>
-    {/* X menor sobreposto (deslocado pra direita-cima) */}
-    <line x1="22" y1="10" x2="38" y2="26" stroke={color} strokeWidth="5" strokeLinecap="round"/>
-    <line x1="38" y1="10" x2="22" y2="26" stroke={color} strokeWidth="5" strokeLinecap="round"/>
-  </svg>
+const DixxLogo = ({ size = 40 }) => (
+  <img src="/dixx-logo.png" alt="Dixx" width={size} height={size} style={{ display: 'block' }} />
 );
-
 const C = {
   bg: '#050d08',
   bgCard: '#0e1f15',
