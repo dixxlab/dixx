@@ -371,10 +371,8 @@ const Onboarding = ({ onComplete }) => {
         ))}
       </div>
       <div className="flex justify-center mb-8">
-        <div className="p-4 rounded-2xl" style={{ background: C.bgCard }}>
-          <DixxLogo size={48} color={C.primary} bgColor={C.bgCard} />
-        </div>
-      </div>
+  <DixxLogo size={64} />
+</div>
       <h1 className="text-3xl font-medium text-white mb-2 text-center">{current.title}</h1>
       <p className="text-sm text-center mb-10" style={{ color: C.textMuted }}>{current.subtitle}</p>
       <div className="flex-1">
