@@ -23,12 +23,12 @@ const initialData = { user: null, history: [], notes: {} };
 
 const DixxLogo = ({ size = 40, color = '#10b981', bgColor = '#050d08' }) => (
   <svg width={size} height={size} viewBox="0 0 48 48">
-    {/* X de fundo (mais grosso) */}
-    <path d="M8 8 L40 40" stroke={color} strokeWidth="7" strokeLinecap="round"/>
-    <path d="M40 8 L8 40" stroke={color} strokeWidth="7" strokeLinecap="round"/>
-    {/* X da frente (recorte no fundo pra dar profundidade) */}
-    <path d="M16 16 L32 32" stroke={bgColor} strokeWidth="3" strokeLinecap="round"/>
-    <path d="M32 16 L16 32" stroke={bgColor} strokeWidth="3" strokeLinecap="round"/>
+    {/* X da esquerda */}
+    <path d="M6 8 L26 28" stroke={color} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M26 8 L6 28" stroke={color} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+    {/* X da direita (sobreposto) */}
+    <path d="M22 20 L42 40" stroke={color} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M42 20 L22 40" stroke={color} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
 
