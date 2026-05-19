@@ -21,18 +21,14 @@ const resetData = () => {
 
 const initialData = { user: null, history: [], notes: {} };
 
-const DixxLogo = ({ size = 40, color = '#10b981', bgColor = '#050d08' }) => (
-  <svg width={size} height={size} viewBox="0 0 48 48">
-    {/* X grande (fundo) */}
-    <path d="M8 8 L40 40" stroke={color} strokeWidth="6" strokeLinecap="round"/>
-    <path d="M40 8 L8 40" stroke={color} strokeWidth="6" strokeLinecap="round"/>
-    {/* Recorte do X menor no X grande (cria a "separação" visual) */}
-    <path d="M24 24 L36 36" stroke={bgColor} strokeWidth="3" strokeLinecap="round"/>
-    <path d="M36 12 L24 24" stroke={bgColor} strokeWidth="3" strokeLinecap="round"/>
-    {/* X menor (frente, sobreposto à direita) */}
-    <path d="M22 22 L38 38" stroke={color} strokeWidth="4.5" strokeLinecap="round"/>
-    <path d="M38 22 L22 38" stroke={color} strokeWidth="4.5" strokeLinecap="round"/>
-  </svg>
+const DixxLogo = ({ size = 40 }) => (
+  <img
+    src="/pwa-512x512.png"
+    alt="Dixx"
+    width={size}
+    height={size}
+    style={{ display: 'block' }}
+  />
 );
 
 const C = {
