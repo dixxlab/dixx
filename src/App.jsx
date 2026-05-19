@@ -23,12 +23,15 @@ const initialData = { user: null, history: [], notes: {} };
 
 const DixxLogo = ({ size = 40, color = '#10b981', bgColor = '#050d08' }) => (
   <svg width={size} height={size} viewBox="0 0 48 48">
-    {/* X da esquerda */}
-    <path d="M6 8 L26 28" stroke={color} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M26 8 L6 28" stroke={color} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
-    {/* X da direita (sobreposto) */}
-    <path d="M22 20 L42 40" stroke={color} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M42 20 L22 40" stroke={color} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round"/>
+    {/* X grande (fundo) */}
+    <path d="M8 8 L40 40" stroke={color} strokeWidth="6" strokeLinecap="round"/>
+    <path d="M40 8 L8 40" stroke={color} strokeWidth="6" strokeLinecap="round"/>
+    {/* Recorte do X menor no X grande (cria a "separação" visual) */}
+    <path d="M24 24 L36 36" stroke={bgColor} strokeWidth="3" strokeLinecap="round"/>
+    <path d="M36 12 L24 24" stroke={bgColor} strokeWidth="3" strokeLinecap="round"/>
+    {/* X menor (frente, sobreposto à direita) */}
+    <path d="M22 22 L38 38" stroke={color} strokeWidth="4.5" strokeLinecap="round"/>
+    <path d="M38 22 L22 38" stroke={color} strokeWidth="4.5" strokeLinecap="round"/>
   </svg>
 );
 
@@ -101,10 +104,10 @@ const SplashScreen = () => (
       <DixxLogo size={96} color={C.primary} bgColor={C.bg} />
     </div>
     <div className="splash-text-1 text-4xl font-medium tracking-tight" style={{ color: C.primary, letterSpacing: '-0.02em' }}>
-      dixx
+      Dixx
     </div>
     <div className="splash-text-2 text-sm mt-2" style={{ color: C.textMuted }}>
-      seu amigo de treino
+      seu amigo pessoal de treino
     </div>
   </div>
 );
