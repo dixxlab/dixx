@@ -357,9 +357,9 @@ const Onboarding = ({ onComplete }) => {
   const [step, setStep] = useState(0);
   const [data, setData] = useState({ name: '', experience: '', division: '' });
   const steps = [
-    { title: 'Bem-vindo ao Dixx', subtitle: 'Seu app de treino. Vamos te conhecer rapidinho.', field: 'name', label: 'Como tu se chama?', type: 'input' },
-    { title: `Prazer, ${data.name || 'parceiro'}!`, subtitle: 'Qual teu nível na academia?', field: 'experience', label: 'Experiência', type: 'select', options: ['Iniciante', 'Intermediário', 'Avançado'] },
-    { title: 'Última coisa', subtitle: 'Como tu quer dividir os treinos?', field: 'division', label: 'Divisão', type: 'select', options: ['ABCD (4x semana)', 'ABCDE (5x semana)', 'AB (2x semana)'] },
+    { title: 'Bem-vindo ao Dixx', subtitle: 'Seu app de treino. Vamos te conhecer rapidinho.', field: 'name', label: 'Como você se chama?', type: 'input' },
+    { title: `Prazer, ${data.name || 'parceiro'}!`, subtitle: 'Qual seu nível na academia?', field: 'experience', label: 'Experiência', type: 'select', options: ['Iniciante', 'Intermediário', 'Avançado'] },
+    { title: 'Última coisa', subtitle: 'Como você quer dividir os treinos?', field: 'division', label: 'Divisão', type: 'select', options: ['ABCD (4x semana)', 'ABCDE (5x semana)', 'AB (2x semana)'] },
   ];
   const current = steps[step];
   const canProceed = data[current.field] !== '';
@@ -677,7 +677,7 @@ const Stats = ({ data }) => {
       {data.history.length === 0 && (
         <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
           <div className="text-4xl mb-2">🏋️</div>
-          <div className="text-sm">Comece teu primeiro treino<br/>pra ver tuas estatísticas!</div>
+          <div className="text-sm">Comece seu primeiro treino<br/>pra ver suas estatísticas!</div>
         </div>
       )}
     </div>
