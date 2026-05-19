@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X } from 'lucide-react';
 
-// ============ STORAGE HELPERS ============
 const STORAGE_KEY = 'dixx_data_v1';
 
 const loadData = () => {
@@ -20,13 +19,8 @@ const resetData = () => {
   try { localStorage.removeItem(STORAGE_KEY); } catch {}
 };
 
-const initialData = {
-  user: null,
-  history: [], // [{date, workoutId, exercises: [{name, sets: [{weight, reps}]}]}]
-  notes: {}, // {exerciseName: "nota"}
-};
+const initialData = { user: null, history: [], notes: {} };
 
-// ============ LOGO ============
 const DixxLogo = ({ size = 40, color = '#10b981', bgColor = '#050d08' }) => (
   <svg width={size} height={size} viewBox="0 0 48 48">
     <path d="M12 12 L36 36" stroke={color} strokeWidth="7" strokeLinecap="round"/>
@@ -45,7 +39,6 @@ const C = {
   border: '#1a3024',
 };
 
-// ============ EXERCISE ANIMATIONS ============
 const ExerciseAnimStyles = () => (
   <style>{`
     @keyframes ex-supino-bar { 0%,100% { transform: translateY(-22px); } 50% { transform: translateY(0px); } }
@@ -64,6 +57,54 @@ const ExerciseAnimStyles = () => (
     @keyframes ex-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
     .ex-anim { animation-duration: 2.4s; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
   `}</style>
+);
+
+const SplashStyles = () => (
+  <style>{`
+    @keyframes splash-logo-in {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes splash-text-in {
+      0% { transform: translateY(20px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes splash-glow {
+      0%, 100% { filter: drop-shadow(0 0 8px rgba(16,185,129,0.4)); }
+      50% { filter: drop-shadow(0 0 24px rgba(16,185,129,0.8)); }
+    }
+    @keyframes splash-fadeout {
+      0% { opacity: 1; }
+      100% { opacity: 0; pointer-events: none; }
+    }
+    @keyframes tab-enter {
+      0% { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .splash-logo {
+      animation: splash-logo-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both,
+                 splash-glow 2s ease-in-out 0.7s infinite;
+    }
+    .splash-text-1 { animation: splash-text-in 0.6s ease-out 0.5s both; }
+    .splash-text-2 { animation: splash-text-in 0.6s ease-out 0.75s both; }
+    .splash-container { animation: splash-fadeout 0.4s ease-in 1.5s both; }
+    .tab-content { animation: tab-enter 0.25s ease-out; }
+  `}</style>
+);
+
+const SplashScreen = () => (
+  <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center splash-container" style={{ background: C.bg }}>
+    <div className="splash-logo mb-6">
+      <DixxLogo size={96} color={C.primary} bgColor={C.bg} />
+    </div>
+    <div className="splash-text-1 text-4xl font-medium tracking-tight" style={{ color: C.primary, letterSpacing: '-0.02em' }}>
+      dixx
+    </div>
+    <div className="splash-text-2 text-sm mt-2" style={{ color: C.textMuted }}>
+      seu amigo de treino
+    </div>
+  </div>
 );
 
 const SupinoFig = ({ size = 90 }) => (
@@ -260,7 +301,6 @@ const workoutPlans = [
   ]},
 ];
 
-// Pega o último peso/reps registrado pra cada exercício
 const getLastSession = (history, exerciseName) => {
   for (let i = history.length - 1; i >= 0; i--) {
     const session = history[i];
@@ -273,25 +313,20 @@ const getLastSession = (history, exerciseName) => {
   return { weight: 0, reps: 0 };
 };
 
-// Calcula streak
 const calculateStreak = (history) => {
   if (history.length === 0) return 0;
-  const today = new Date().toDateString();
   const sorted = [...history].sort((a, b) => new Date(b.date) - new Date(a.date));
   let streak = 0;
   let currentDate = new Date();
   for (const session of sorted) {
     const sessionDate = new Date(session.date);
     const diffDays = Math.floor((currentDate - sessionDate) / (1000 * 60 * 60 * 24));
-    if (diffDays <= streak + 1) {
-      streak++;
-      currentDate = sessionDate;
-    } else break;
+    if (diffDays <= streak + 1) { streak++; currentDate = sessionDate; }
+    else break;
   }
   return streak;
 };
 
-// Calcula PRs
 const calculatePRs = (history) => {
   const prs = {};
   for (const session of history) {
@@ -308,9 +343,8 @@ const calculatePRs = (history) => {
     .sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
 };
 
-// Define qual treino é hoje baseado no histórico
 const getTodayWorkoutIdx = (history) => {
-  if (history.length === 0) return 0; // primeiro treino é A
+  if (history.length === 0) return 0;
   const lastSession = history[history.length - 1];
   const lastIdx = workoutPlans.findIndex(w => w.id === lastSession.workoutId);
   return (lastIdx + 1) % workoutPlans.length;
@@ -325,7 +359,6 @@ const formatRelative = (dateStr) => {
   return `há ${Math.floor(diff / 30)} meses`;
 };
 
-// ============ ONBOARDING ============
 const Onboarding = ({ onComplete }) => {
   const [step, setStep] = useState(0);
   const [data, setData] = useState({ name: '', experience: '', division: '' });
@@ -721,14 +754,14 @@ const WorkoutFinished = ({ summary, onClose }) => (
     <div className="text-7xl mb-4">🎉</div>
     <h1 className="text-3xl font-medium text-white mb-2">Treino concluído!</h1>
     <p className="text-sm text-center mb-8" style={{ color: C.textMuted }}>Mais um dia somado na sua jornada.</p>
-    <div className="w-full rounded-2xl p-5 mb-8" style={{ background: C.bgCard }}>
+    <div className="w-full max-w-md rounded-2xl p-5 mb-8" style={{ background: C.bgCard }}>
       <div className="grid grid-cols-3 gap-3 text-center">
         <div><div className="text-2xl font-medium" style={{ color: C.primary }}>{summary.exercises}</div><div className="text-[10px]" style={{ color: C.textMuted }}>exercícios</div></div>
         <div><div className="text-2xl font-medium" style={{ color: C.primary }}>{summary.minutes}min</div><div className="text-[10px]" style={{ color: C.textMuted }}>duração</div></div>
         <div><div className="text-2xl font-medium" style={{ color: C.primary }}>{summary.volume}t</div><div className="text-[10px]" style={{ color: C.textMuted }}>volume</div></div>
       </div>
     </div>
-    <button onClick={onClose} className="w-full p-4 rounded-2xl font-medium transition-all active:scale-95" style={{ background: C.primary, color: C.bg }}>Voltar pra home</button>
+    <button onClick={onClose} className="w-full max-w-md p-4 rounded-2xl font-medium transition-all active:scale-95" style={{ background: C.primary, color: C.bg }}>Voltar pra home</button>
   </div>
 );
 
@@ -740,7 +773,7 @@ const BottomNav = ({ active, onChange }) => {
     { id: 'profile', icon: User, label: 'Perfil' },
   ];
   return (
-    <div className="absolute bottom-0 left-0 right-0 px-2 pt-2 pb-4 flex justify-around" style={{ background: C.bg, borderTop: `1px solid ${C.border}` }}>
+    <div className="fixed bottom-0 left-0 right-0 mx-auto px-2 pt-2 flex justify-around z-40" style={{ background: C.bg, borderTop: `1px solid ${C.border}`, maxWidth: '500px', paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
       {tabs.map(({ id, icon: Icon, label }) => {
         const isActive = active === id;
         return (
@@ -762,8 +795,13 @@ export default function App() {
   const [showRest, setShowRest] = useState(false);
   const [restCallback, setRestCallback] = useState(null);
   const [finishedSummary, setFinishedSummary] = useState(null);
+  const [showSplash, setShowSplash] = useState(true);
 
-  // Salva no localStorage sempre que data mudar
+  useEffect(() => {
+    const t = setTimeout(() => setShowSplash(false), 1900);
+    return () => clearTimeout(t);
+  }, []);
+
   useEffect(() => { saveData(data); }, [data]);
 
   const handleOnboardingComplete = (userData) => {
@@ -777,7 +815,6 @@ export default function App() {
   };
 
   const handleFinishWorkout = (sets, workout, seconds) => {
-    // Salva sessão no histórico
     const session = {
       date: new Date().toISOString(),
       workoutId: workout.id,
@@ -830,28 +867,45 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#0a0a0a', fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif' }}>
+    <div
+      className="w-full mx-auto relative overflow-hidden flex flex-col"
+      style={{
+        background: C.bg,
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif',
+        minHeight: '100dvh',
+        height: '100dvh',
+        maxWidth: '500px',
+        paddingTop: 'env(safe-area-inset-top)',
+      }}
+    >
       <ExerciseAnimStyles />
-      <div className="relative w-full max-w-md mx-auto overflow-hidden" style={{ height: '90vh', maxHeight: '844px', background: C.bg, borderRadius: '40px', border: '8px solid #1a1a1a', boxShadow: '0 20px 60px rgba(0,0,0,0.5)' }}>
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 w-28 h-6 rounded-full z-10" style={{ background: '#000' }} />
-        <div className="flex justify-between items-center px-6 pt-3 pb-1 text-[11px] text-white font-medium" style={{ background: C.bg }}>
-          <span>9:41</span><span></span><span>🔋 100%</span>
-        </div>
-        <div className="overflow-y-auto" style={{ height: 'calc(100% - 24px)' }}>
-          {view === 'onboarding' && <Onboarding onComplete={handleOnboardingComplete} />}
-          {view === 'main' && data.user && (
-            <>
+      <SplashStyles />
+      {showSplash && <SplashScreen />}
+
+      <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
+        {view === 'onboarding' && (
+          <div key="onboarding" className="tab-content h-full">
+            <Onboarding onComplete={handleOnboardingComplete} />
+          </div>
+        )}
+        {view === 'main' && data.user && (
+          <>
+            <div key={activeTab} className="tab-content">
               {activeTab === 'home' && <Dashboard data={data} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} />}
               {activeTab === 'workouts' && <WorkoutsList data={data} onSelectWorkout={handleStartWorkout} />}
               {activeTab === 'stats' && <Stats data={data} />}
               {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} />}
-              <BottomNav active={activeTab} onChange={setActiveTab} />
-            </>
-          )}
-          {view === 'workout' && activeWorkout && <ActiveWorkout data={data} workout={activeWorkout} onFinish={handleFinishWorkout} onShowRest={handleShowRest} onSaveNote={handleSaveNote} />}
-          {view === 'finished' && finishedSummary && <WorkoutFinished summary={finishedSummary} onClose={() => { setView('main'); setActiveTab('home'); setFinishedSummary(null); }} />}
-          {showRest && <RestTimer restTime={90} onSkip={handleRestDone} onDone={handleRestDone} />}
-        </div>
+            </div>
+            <BottomNav active={activeTab} onChange={setActiveTab} />
+          </>
+        )}
+        {view === 'workout' && activeWorkout && (
+          <div key="workout" className="tab-content">
+            <ActiveWorkout data={data} workout={activeWorkout} onFinish={handleFinishWorkout} onShowRest={handleShowRest} onSaveNote={handleSaveNote} />
+          </div>
+        )}
+        {view === 'finished' && finishedSummary && <WorkoutFinished summary={finishedSummary} onClose={() => { setView('main'); setActiveTab('home'); setFinishedSummary(null); }} />}
+        {showRest && <RestTimer restTime={90} onSkip={handleRestDone} onDone={handleRestDone} />}
       </div>
     </div>
   );
