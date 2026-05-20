@@ -24,6 +24,7 @@ const initialData = { user: null, history: [], notes: {} };
 const DixxLogo = ({ size = 40 }) => (
   <img src="/dixx-logo.png" alt="Dixx" width={size} height={size} style={{ display: 'block' }} />
 );
+
 const C = {
   bg: '#050d08',
   bgCard: '#0e1f15',
@@ -31,6 +32,34 @@ const C = {
   text: '#ffffff',
   textMuted: '#6b8a78',
   border: '#1a3024',
+};
+
+let audioCtx = null;
+
+const initAudio = () => {
+  if (!audioCtx) {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AC();
+    } catch (e) {}
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+};
+
+const playBeep = (frequency = 800, duration = 150) => {
+  if (!audioCtx) return;
+  try {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = frequency;
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration / 1000);
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + duration / 1000);
+  } catch (e) {}
 };
 
 const ExerciseAnimStyles = () => (
@@ -90,13 +119,13 @@ const SplashStyles = () => (
 const SplashScreen = () => (
   <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center splash-container" style={{ background: C.bg }}>
     <div className="splash-logo mb-6">
-      <DixxLogo size={96} color={C.primary} bgColor={C.bg} />
+      <DixxLogo size={96} />
     </div>
     <div className="splash-text-1 text-4xl font-medium tracking-tight" style={{ color: C.primary, letterSpacing: '-0.02em' }}>
       Dixx
     </div>
     <div className="splash-text-2 text-sm mt-2" style={{ color: C.textMuted }}>
-      seu amigo pessoal de treino
+      seu amigo de treino
     </div>
   </div>
 );
@@ -371,8 +400,8 @@ const Onboarding = ({ onComplete }) => {
         ))}
       </div>
       <div className="flex justify-center mb-8">
-  <DixxLogo size={64} />
-</div>
+        <DixxLogo size={64} />
+      </div>
       <h1 className="text-3xl font-medium text-white mb-2 text-center">{current.title}</h1>
       <p className="text-sm text-center mb-10" style={{ color: C.textMuted }}>{current.subtitle}</p>
       <div className="flex-1">
@@ -507,6 +536,7 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
   useEffect(() => { setNoteText(data.notes[ex.name] || ''); setShowNote(false); }, [exerciseIdx, ex.name, data.notes]);
 
   const completeSet = () => {
+    initAudio();
     const newSets = [...sets];
     const set = newSets[exerciseIdx][activeSetIdx];
     if (!set.weight) set.weight = last.weight > 0 ? last.weight.toString() : '0';
@@ -584,33 +614,14 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
   );
 };
 
-const playBeep = (frequency = 800, duration = 150, type = 'sine') => {
-  try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const ctx = new AudioContext();
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
-    oscillator.type = type;
-    oscillator.frequency.value = frequency;
-    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + duration / 1000);
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + duration / 1000);
-  } catch (e) { /* navegador não suporta */ }
-};
-
 const RestTimer = ({ restTime, onSkip, onDone }) => {
   const [seconds, setSeconds] = useState(restTime);
   useEffect(() => {
     if (seconds <= 0) { onDone(); return; }
-    // Beep curto nos últimos 3 segundos (countdown)
-    if (seconds <= 3 && seconds > 0) playBeep(800, 120, 'sine');
+    if (seconds <= 3 && seconds > 0) playBeep(800, 120);
     const t = setTimeout(() => {
       setSeconds(s => {
-        // Beep final quando chega a 0
-        if (s - 1 === 0) playBeep(1000, 400, 'sine');
+        if (s - 1 === 0) playBeep(1000, 400);
         return s - 1;
       });
     }, 1000);
@@ -644,6 +655,7 @@ const RestTimer = ({ restTime, onSkip, onDone }) => {
     </div>
   );
 };
+
 const Stats = ({ data }) => {
   const streak = calculateStreak(data.history);
   const prs = calculatePRs(data.history);
