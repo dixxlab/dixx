@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft } from 'lucide-react';
+import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft, Trash2, ArrowUp, ArrowDown, MoreVertical, RotateCcw } from 'lucide-react';
 
 const STORAGE_KEY = 'dixx_data_v1';
 
@@ -19,7 +19,7 @@ const resetData = () => {
   try { localStorage.removeItem(STORAGE_KEY); } catch {}
 };
 
-const initialData = { user: null, history: [], notes: {} };
+const initialData = { user: null, history: [], notes: {}, customWorkouts: {} };
 
 const DixxLogo = ({ size = 40 }) => (
   <img src="/dixx-logo.png" alt="Dixx" width={size} height={size} style={{ display: 'block' }} />
@@ -32,6 +32,7 @@ const C = {
   text: '#ffffff',
   textMuted: '#6b8a78',
   border: '#1a3024',
+  danger: '#ff6b6b',
 };
 
 let audioCtx = null;
@@ -64,7 +65,6 @@ const playBeep = (frequency = 800, duration = 150) => {
 
 // ===== BIBLIOTECA DE EXERCÍCIOS =====
 const exerciseLibrary = [
-  // PEITO (8)
   { id: 'supino-reto', name: 'Supino Reto', muscle: 'Peito', equipment: 'Barra', fig: 'supino', defaultSets: 4, defaultReps: '10', description: 'Deite no banco, segure a barra na largura dos ombros. Desça controlado até o peito e empurre pra cima.' },
   { id: 'supino-inclinado', name: 'Supino Inclinado', muscle: 'Peito', equipment: 'Barra', fig: 'supino', defaultSets: 3, defaultReps: '12', description: 'Banco inclinado 30-45°. Trabalha mais a porção superior do peito. Foco em manter cotovelos a 45°.' },
   { id: 'supino-declinado', name: 'Supino Declinado', muscle: 'Peito', equipment: 'Barra', fig: 'supino', defaultSets: 3, defaultReps: '12', description: 'Banco declinado. Foca a porção inferior do peito. Pés bem fixos no apoio.' },
@@ -73,8 +73,6 @@ const exerciseLibrary = [
   { id: 'crossover', name: 'Crossover na Polia', muscle: 'Peito', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '15', description: 'Polias altas. Traga as mãos em direção ao centro do corpo. Aperte o peito no final do movimento.' },
   { id: 'mergulho', name: 'Mergulho (Dips)', muscle: 'Peito', equipment: 'Paralelas', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Incline o tronco pra frente pra focar mais peito. Desça até os cotovelos formarem 90°.' },
   { id: 'peck-deck', name: 'Peck Deck (Voador)', muscle: 'Peito', equipment: 'Máquina', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Máquina específica. Aperte os braços contra os apoios sem usar impulso. Foco em apertar o peito.' },
-
-  // COSTAS (9)
   { id: 'puxada-alta', name: 'Puxada Alta', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 4, defaultReps: '10', description: 'Pegada larga, puxe a barra até a altura do queixo. Foque em puxar com os cotovelos, não com as mãos.' },
   { id: 'puxada-pegada-fechada', name: 'Puxada Pegada Fechada', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Pegada neutra ou supinada. Foca mais a parte inferior das costas e bíceps. Tronco levemente inclinado.' },
   { id: 'remada-curvada', name: 'Remada Curvada', muscle: 'Costas', equipment: 'Barra', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Tronco a 45°, puxe a barra em direção ao umbigo. Cotovelos próximos ao corpo.' },
@@ -84,8 +82,6 @@ const exerciseLibrary = [
   { id: 'pulldown', name: 'Pulldown com Braços Retos', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '15', description: 'Braços estendidos, traga a barra até as coxas. Isola o latíssimo. Sem flexão dos cotovelos.' },
   { id: 'levantamento-terra', name: 'Levantamento Terra', muscle: 'Costas', equipment: 'Barra', fig: 'agacha', defaultSets: 4, defaultReps: '8', description: 'Composto pesado. Costas retas, quadril desce, barra próxima ao corpo. Cuidado com a execução.' },
   { id: 'pull-up', name: 'Barra Fixa', muscle: 'Costas', equipment: 'Barra Fixa', fig: 'puxada', defaultSets: 4, defaultReps: '8', description: 'Pegada pronada, suba até o queixo passar da barra. Movimento controlado, sem balanço.' },
-
-  // PERNAS - QUADRÍCEPS (7)
   { id: 'agachamento-livre', name: 'Agachamento Livre', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 4, defaultReps: '10', description: 'Rei dos exercícios. Pés na largura dos ombros, desce até as coxas paralelas ao chão. Costas retas.' },
   { id: 'agachamento-frontal', name: 'Agachamento Frontal', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Barra apoiada na clavícula. Mais focado em quadríceps. Tronco mais ereto que o livre.' },
   { id: 'leg-press', name: 'Leg Press', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Pés na altura média do apoio. Desça até os joelhos formarem 90°. Não trave os joelhos no topo.' },
@@ -93,18 +89,12 @@ const exerciseLibrary = [
   { id: 'cadeira-extensora', name: 'Cadeira Extensora', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Isolado de quadríceps. Estenda até quase travar o joelho, segure 1 segundo no topo.' },
   { id: 'avanco', name: 'Avanço (Afundo)', muscle: 'Pernas', equipment: 'Halteres', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Passo à frente, desce até os dois joelhos formarem 90°. Alterne pernas. Trabalha equilíbrio.' },
   { id: 'sissy-squat', name: 'Sissy Squat', muscle: 'Pernas', equipment: 'Corpo livre', fig: 'agacha', defaultSets: 3, defaultReps: '15', description: 'Avançado. Joelhos vão pra frente enquanto tronco inclina pra trás. Isolamento extremo de quadríceps.' },
-
-  // PERNAS - POSTERIOR (4)
   { id: 'stiff', name: 'Stiff', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Pernas semi-rígidas, desça a barra até sentir alongamento no posterior. Foco em isquiotibiais.' },
   { id: 'mesa-flexora', name: 'Mesa Flexora', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Deitado, flexione os joelhos contraindo o posterior. Movimento controlado em ambas as fases.' },
   { id: 'cadeira-flexora', name: 'Cadeira Flexora Sentada', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Sentado, flexione os joelhos. Alternativa à mesa flexora. Mantém o quadril mais estável.' },
   { id: 'good-morning', name: 'Good Morning', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Barra nas costas, incline o tronco pra frente mantendo costas retas. Trabalha posterior e lombar.' },
-
-  // PERNAS - PANTURRILHA (2)
   { id: 'panturrilha-pe', name: 'Panturrilha em Pé', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 4, defaultReps: '15', description: 'Suba na ponta dos pés o máximo possível, segure 1 segundo no topo. Trabalha gastrocnêmio.' },
   { id: 'panturrilha-sentado', name: 'Panturrilha Sentado', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 4, defaultReps: '15', description: 'Foca o sóleo. Joelhos a 90°, suba na ponta dos pés. Amplitude completa de movimento.' },
-
-  // OMBRO (7)
   { id: 'desenvolvimento', name: 'Desenvolvimento Militar', muscle: 'Ombro', equipment: 'Barra', fig: 'desen', defaultSets: 4, defaultReps: '10', description: 'Barra na altura dos ombros, empurre acima da cabeça. Foco no deltoide anterior e médio.' },
   { id: 'desenvolvimento-halteres', name: 'Desenvolvimento com Halteres', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Sentado ou em pé. Mais natural que com barra. Halteres partem da altura dos ombros.' },
   { id: 'arnold-press', name: 'Arnold Press', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Halteres começam com palmas pra dentro, gira durante a subida. Trabalha todo o deltoide.' },
@@ -112,40 +102,28 @@ const exerciseLibrary = [
   { id: 'elevacao-frontal', name: 'Elevação Frontal', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Levante os halteres à frente até a altura dos ombros. Foca o deltoide anterior.' },
   { id: 'crucifixo-inverso', name: 'Crucifixo Inverso', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '15', description: 'Tronco inclinado, abra os braços lateralmente. Foca o deltoide posterior. Pouco peso.' },
   { id: 'encolhimento', name: 'Encolhimento (Shrug)', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '15', description: 'Eleve os ombros em direção às orelhas. Segure 1 segundo no topo. Trabalha trapézio superior.' },
-
-  // BÍCEPS (5)
   { id: 'rosca-direta', name: 'Rosca Direta', muscle: 'Bíceps', equipment: 'Barra', fig: 'rosca', defaultSets: 4, defaultReps: '10', description: 'Cotovelos fixos ao lado do corpo. Suba a barra até a altura do peito sem balançar o tronco.' },
   { id: 'rosca-martelo', name: 'Rosca Martelo', muscle: 'Bíceps', equipment: 'Halteres', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Pegada neutra (martelo). Trabalha bíceps + braquial. Cotovelos fixos.' },
   { id: 'rosca-alternada', name: 'Rosca Alternada', muscle: 'Bíceps', equipment: 'Halteres', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Halteres, um braço de cada vez. Supina o punho durante a subida. Mais foco em cada braço.' },
   { id: 'rosca-concentrada', name: 'Rosca Concentrada', muscle: 'Bíceps', equipment: 'Halter', fig: 'rosca', defaultSets: 3, defaultReps: '10', description: 'Cotovelo apoiado na coxa interna. Isola muito o bíceps. Movimento bem controlado.' },
   { id: 'rosca-scott', name: 'Rosca Scott', muscle: 'Bíceps', equipment: 'Barra W', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Banco Scott, cotovelos fixos no apoio. Pico de contração no bíceps. Cuidado pra não estender total.' },
-
-  // TRÍCEPS (5)
   { id: 'triceps-pulley', name: 'Tríceps Pulley', muscle: 'Tríceps', equipment: 'Polia', fig: 'puxada', defaultSets: 4, defaultReps: '10', description: 'Cotovelos fixos ao lado do corpo. Estenda os braços completamente, segure 1 segundo embaixo.' },
   { id: 'triceps-testa', name: 'Tríceps Testa', muscle: 'Tríceps', equipment: 'Barra W', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Deitado, barra desce em direção à testa. Cotovelos fixos apontando pro teto.' },
   { id: 'triceps-frances', name: 'Tríceps Francês', muscle: 'Tríceps', equipment: 'Halter', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Halter atrás da cabeça, com as duas mãos. Estenda os braços pra cima. Trabalha cabeça longa.' },
   { id: 'triceps-corda', name: 'Tríceps Corda', muscle: 'Tríceps', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Corda na polia alta. Abra as mãos no final do movimento pra maior contração.' },
   { id: 'triceps-mergulho-banco', name: 'Mergulho no Banco', muscle: 'Tríceps', equipment: 'Banco', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Mãos apoiadas no banco atrás. Desça com cotovelos pra trás, não pros lados. Foca tríceps.' },
-
-  // ABDÔMEN (6)
   { id: 'abdominal-reto', name: 'Abdominal Reto', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '20', description: 'Deitado, suba o tronco contraindo o abdômen. Não puxe o pescoço, queixo pra cima.' },
   { id: 'prancha', name: 'Prancha', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '30s', description: 'Isométrico. Apoie nos antebraços, corpo reto da cabeça aos pés. Não deixe o quadril cair.' },
   { id: 'abdominal-infra', name: 'Abdominal Infra (Pernas)', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '15', description: 'Deitado, eleve as pernas em direção ao peito. Trabalha mais a parte inferior do abdômen.' },
   { id: 'abdominal-oblique', name: 'Abdominal Oblíquo', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '15', description: 'Suba o tronco torcendo, cotovelo em direção ao joelho oposto. Trabalha laterais do abdômen.' },
   { id: 'abdominal-bicicleta', name: 'Abdominal Bicicleta', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '20', description: 'Pedalando no ar, encoste cotovelo no joelho oposto alternadamente. Trabalha reto + oblíquo.' },
   { id: 'prancha-lateral', name: 'Prancha Lateral', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '30s', description: 'Apoie num antebraço só, corpo de lado. Trabalha oblíquos. Faça os dois lados.' },
-
-  // ANTEBRAÇO (2)
   { id: 'rosca-punho', name: 'Rosca de Punho', muscle: 'Antebraço', equipment: 'Barra', fig: 'rosca', defaultSets: 3, defaultReps: '15', description: 'Antebraços apoiados, só os punhos saem do apoio. Flexione os punhos pra cima.' },
   { id: 'rosca-inversa', name: 'Rosca Inversa', muscle: 'Antebraço', equipment: 'Barra', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Pegada pronada (palmas pra baixo). Trabalha braquiorradial e antebraços.' },
-
-  // GLÚTEO (4)
   { id: 'hip-thrust', name: 'Hip Thrust', muscle: 'Glúteo', equipment: 'Barra', fig: 'agacha', defaultSets: 4, defaultReps: '12', description: 'Costas no banco, barra no quadril. Eleve o quadril contraindo o glúteo no topo. Aperte 1 segundo.' },
   { id: 'elevacao-pelvica', name: 'Elevação Pélvica', muscle: 'Glúteo', equipment: 'Corpo livre', fig: 'agacha', defaultSets: 3, defaultReps: '15', description: 'Deitado, pés no chão. Eleve o quadril contraindo o glúteo. Versão sem peso da hip thrust.' },
   { id: 'coice-polia', name: 'Coice na Polia (Glúteo)', muscle: 'Glúteo', equipment: 'Polia', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Tornozeleira na polia baixa. Eleve a perna pra trás contraindo o glúteo. Tronco estável.' },
   { id: 'abducao', name: 'Abdução de Quadril', muscle: 'Glúteo', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '15', description: 'Máquina específica. Abra as pernas contra a resistência. Foca glúteo médio.' },
-
-  // CARDIO (4)
   { id: 'esteira', name: 'Esteira (Caminhada/Corrida)', muscle: 'Cardio', equipment: 'Esteira', fig: 'agacha', defaultSets: 1, defaultReps: '20min', description: 'Aquecimento ou cardio principal. Comece em ritmo confortável, vá aumentando aos poucos.' },
   { id: 'bike', name: 'Bicicleta Ergométrica', muscle: 'Cardio', equipment: 'Bike', fig: 'agacha', defaultSets: 1, defaultReps: '20min', description: 'Cardio sem impacto, bom pra quem tem problema no joelho. Mantenha cadência constante.' },
   { id: 'eliptico', name: 'Elíptico', muscle: 'Cardio', equipment: 'Elíptico', fig: 'desen', defaultSets: 1, defaultReps: '20min', description: 'Cardio sem impacto que envolve membros superiores. Postura ereta, movimento fluido.' },
@@ -154,7 +132,6 @@ const exerciseLibrary = [
 
 const muscleGroups = ['Todos', 'Peito', 'Costas', 'Pernas', 'Ombro', 'Bíceps', 'Tríceps', 'Abdômen', 'Antebraço', 'Glúteo', 'Cardio'];
 
-// Helper pra pegar exercício da biblioteca pelo id
 const getExerciseById = (id) => exerciseLibrary.find(e => e.id === id);
 
 const ExerciseAnimStyles = () => (
@@ -200,6 +177,10 @@ const SplashStyles = () => (
       0% { opacity: 0; transform: translateY(8px); }
       100% { opacity: 1; transform: translateY(0); }
     }
+    @keyframes modal-in {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
     .splash-logo {
       animation: splash-logo-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both,
                  splash-glow 2s ease-in-out 0.7s infinite;
@@ -208,6 +189,7 @@ const SplashStyles = () => (
     .splash-text-2 { animation: splash-text-in 0.6s ease-out 0.75s both; }
     .splash-container { animation: splash-fadeout 0.5s ease-in 2.5s both; }
     .tab-content { animation: tab-enter 0.25s ease-out; }
+    .modal-in { animation: modal-in 0.25s ease-out; }
   `}</style>
 );
 
@@ -383,7 +365,7 @@ const ExerciseCard = ({ figKey, size = 110 }) => {
   );
 };
 
-const workoutPlans = [
+const defaultWorkoutPlans = [
   { id: 'A', name: 'Treino A', muscle: 'Peito + Tríceps', duration: 45, exercises: [
     { name: 'Supino Reto', sets: 4, reps: '10', fig: 'supino' },
     { name: 'Supino Inclinado', sets: 3, reps: '12', fig: 'supino' },
@@ -418,6 +400,11 @@ const workoutPlans = [
     { name: 'Prancha', sets: 3, reps: '30s', fig: 'abdo' },
   ]},
 ];
+
+// Função que pega os treinos atuais (mistura padrão com customizados)
+const getWorkoutPlans = (customWorkouts = {}) => {
+  return defaultWorkoutPlans.map(w => customWorkouts[w.id] || w);
+};
 
 const getLastSession = (history, exerciseName) => {
   for (let i = history.length - 1; i >= 0; i--) {
@@ -461,11 +448,11 @@ const calculatePRs = (history) => {
     .sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
 };
 
-const getTodayWorkoutIdx = (history) => {
+const getTodayWorkoutIdx = (history, plans) => {
   if (history.length === 0) return 0;
   const lastSession = history[history.length - 1];
-  const lastIdx = workoutPlans.findIndex(w => w.id === lastSession.workoutId);
-  return (lastIdx + 1) % workoutPlans.length;
+  const lastIdx = plans.findIndex(w => w.id === lastSession.workoutId);
+  return (lastIdx + 1) % plans.length;
 };
 
 const formatRelative = (dateStr) => {
@@ -536,9 +523,9 @@ const StatCard = ({ value, label, icon }) => (
   </div>
 );
 
-const Dashboard = ({ data, onStartWorkout, onNavigate }) => {
-  const todayIdx = getTodayWorkoutIdx(data.history);
-  const todayWorkout = workoutPlans[todayIdx];
+const Dashboard = ({ data, plans, onStartWorkout, onNavigate }) => {
+  const todayIdx = getTodayWorkoutIdx(data.history, plans);
+  const todayWorkout = plans[todayIdx];
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
   const streak = calculateStreak(data.history);
@@ -575,7 +562,7 @@ const Dashboard = ({ data, onStartWorkout, onNavigate }) => {
       </div>
       <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Próximos treinos</div>
       <div className="space-y-2">
-        {workoutPlans.filter((_, i) => i !== todayIdx).slice(0, 2).map((w) => (
+        {plans.filter((_, i) => i !== todayIdx).slice(0, 2).map((w) => (
           <div key={w.id} className="rounded-2xl p-3 flex justify-between items-center transition-all active:scale-95" style={{ background: C.bgCard }}>
             <div>
               <div className="text-sm font-medium text-white">{w.name}</div>
@@ -589,28 +576,52 @@ const Dashboard = ({ data, onStartWorkout, onNavigate }) => {
   );
 };
 
-const WorkoutsList = ({ data, onSelectWorkout, onOpenLibrary }) => {
-  const todayIdx = getTodayWorkoutIdx(data.history);
+const WorkoutsList = ({ data, plans, onSelectWorkout, onOpenLibrary, onEditWorkout, onResetWorkout }) => {
+  const [menuOpenId, setMenuOpenId] = useState(null);
+  const todayIdx = getTodayWorkoutIdx(data.history, plans);
+
   return (
     <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
       <h1 className="text-2xl font-medium text-white mb-1">Seus treinos</h1>
       <p className="text-sm mb-6" style={{ color: C.textMuted }}>Divisão {data.user.division.split(' ')[0]}</p>
       <div className="space-y-3">
-        {workoutPlans.map((w, i) => (
-          <button key={w.id} onClick={() => onSelectWorkout(w)} className="w-full rounded-2xl p-4 text-left transition-all active:scale-95"
-            style={{ background: C.bgCard, borderLeft: i === todayIdx ? `3px solid ${C.primary}` : 'none', paddingLeft: i === todayIdx ? '13px' : '16px' }}>
-            <div className="flex justify-between items-center mb-1">
-              <div className="font-medium text-white">{w.name}</div>
-              {i === todayIdx && <span className="text-[9px] px-2 py-0.5 rounded-full font-medium" style={{ background: C.primary, color: C.bg }}>HOJE</span>}
+        {plans.map((w, i) => {
+          const isCustom = !!data.customWorkouts[w.id];
+          return (
+            <div key={w.id} className="rounded-2xl relative" style={{ background: C.bgCard, borderLeft: i === todayIdx ? `3px solid ${C.primary}` : 'none' }}>
+              <button onClick={() => onSelectWorkout(w)} className="w-full p-4 text-left transition-all active:scale-95" style={{ paddingLeft: i === todayIdx ? '13px' : '16px', paddingRight: '50px' }}>
+                <div className="flex justify-between items-center mb-1">
+                  <div className="flex items-center gap-2">
+                    <div className="font-medium text-white">{w.name}</div>
+                    {isCustom && <span className="text-[9px] px-2 py-0.5 rounded-full font-medium" style={{ background: C.bgCard, color: C.primary, border: `1px solid ${C.primary}` }}>CUSTOM</span>}
+                  </div>
+                  {i === todayIdx && <span className="text-[9px] px-2 py-0.5 rounded-full font-medium" style={{ background: C.primary, color: C.bg }}>HOJE</span>}
+                </div>
+                <div className="text-xs" style={{ color: C.textMuted }}>{w.muscle} • {w.exercises.length} exercícios • ~{w.duration}min</div>
+              </button>
+              <button onClick={() => setMenuOpenId(menuOpenId === w.id ? null : w.id)} className="absolute right-2 top-1/2 -translate-y-1/2 p-2 transition-all active:scale-95">
+                <MoreVertical size={18} style={{ color: C.textMuted }} />
+              </button>
+              {menuOpenId === w.id && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setMenuOpenId(null)} />
+                  <div className="absolute right-2 top-12 rounded-xl shadow-lg z-40 modal-in overflow-hidden" style={{ background: C.bg, border: `1px solid ${C.border}`, minWidth: '180px' }}>
+                    <button onClick={() => { setMenuOpenId(null); onEditWorkout(w); }} className="w-full px-4 py-3 text-left text-sm text-white flex items-center gap-2 transition-all active:scale-95" style={{ background: C.bgCard }}>
+                      <Edit3 size={14} style={{ color: C.primary }} /> Editar treino
+                    </button>
+                    {isCustom && (
+                      <button onClick={() => { setMenuOpenId(null); onResetWorkout(w.id); }} className="w-full px-4 py-3 text-left text-sm flex items-center gap-2 transition-all active:scale-95" style={{ background: C.bgCard, color: C.danger, borderTop: `1px solid ${C.border}` }}>
+                        <RotateCcw size={14} /> Resetar pro padrão
+                      </button>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
-            <div className="text-xs" style={{ color: C.textMuted }}>{w.muscle} • {w.exercises.length} exercícios • ~{w.duration}min</div>
-          </button>
-        ))}
+          );
+        })}
         <button onClick={onOpenLibrary} className="w-full rounded-2xl p-4 transition-all active:scale-95 flex items-center justify-center gap-2 font-medium" style={{ background: C.bgCard, color: C.primary, border: `1px solid ${C.primary}` }}>
           <BookOpen size={16} /> Ver biblioteca completa
-        </button>
-        <button className="w-full rounded-2xl p-4 transition-all active:scale-95" style={{ background: 'transparent', border: `1px dashed ${C.primary}`, color: C.primary }}>
-          <div className="flex items-center justify-center gap-2 font-medium"><Plus size={16} /> Criar treino próprio</div>
         </button>
       </div>
     </div>
@@ -629,7 +640,6 @@ const Library = ({ onClose }) => {
   });
 
   if (selectedExercise) {
-    const Fig = getExerciseFig(selectedExercise.fig);
     return (
       <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
         <div className="flex items-center gap-3 mb-6">
@@ -707,6 +717,198 @@ const Library = ({ onClose }) => {
           </button>
         ))}
       </div>
+    </div>
+  );
+};
+
+// Modal pra adicionar exercício no editor
+const AddExerciseModal = ({ onAdd, onClose }) => {
+  const [filter, setFilter] = useState('Todos');
+  const [search, setSearch] = useState('');
+
+  const filtered = exerciseLibrary.filter(ex => {
+    const matchFilter = filter === 'Todos' || ex.muscle === filter;
+    const matchSearch = search === '' || ex.name.toLowerCase().includes(search.toLowerCase());
+    return matchFilter && matchSearch;
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col modal-in" style={{ background: C.bg }}>
+      <div className="px-5 pt-6 flex items-center gap-3 mb-4">
+        <button onClick={onClose} className="p-2 -ml-2 transition-all active:scale-95">
+          <X size={20} color={C.text} />
+        </button>
+        <h1 className="text-xl font-medium text-white">Adicionar exercício</h1>
+      </div>
+      <div className="px-5 mb-4">
+        <div className="relative mb-3">
+          <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: C.textMuted }} />
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar exercício..."
+            className="w-full pl-10 pr-4 py-3 rounded-2xl text-white outline-none text-sm"
+            style={{ background: C.bgCard, border: `1px solid ${C.border}` }} autoFocus />
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+          {muscleGroups.map((g) => (
+            <button key={g} onClick={() => setFilter(g)}
+              className="px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all active:scale-95"
+              style={{ background: filter === g ? C.primary : C.bgCard, color: filter === g ? C.bg : C.textMuted }}>
+              {g}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex-1 overflow-y-auto px-5 pb-6">
+        <div className="space-y-2">
+          {filtered.length === 0 ? (
+            <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
+              <div className="text-3xl mb-2">🔍</div>
+              <div className="text-sm">Nenhum exercício encontrado</div>
+            </div>
+          ) : filtered.map((ex) => (
+            <button key={ex.id} onClick={() => onAdd(ex)} className="w-full rounded-2xl p-4 text-left transition-all active:scale-95 flex justify-between items-center" style={{ background: C.bgCard }}>
+              <div className="flex-1">
+                <div className="text-sm font-medium text-white">{ex.name}</div>
+                <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>{ex.muscle} • {ex.equipment}</div>
+              </div>
+              <Plus size={18} style={{ color: C.primary }} />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Editor de treinos
+const WorkoutEditor = ({ workout, onSave, onClose }) => {
+  const [name, setName] = useState(workout.name);
+  const [muscle, setMuscle] = useState(workout.muscle);
+  const [exercises, setExercises] = useState(workout.exercises);
+  const [showAdd, setShowAdd] = useState(false);
+  const [editingIdx, setEditingIdx] = useState(null);
+
+  const moveUp = (idx) => {
+    if (idx === 0) return;
+    const newList = [...exercises];
+    [newList[idx - 1], newList[idx]] = [newList[idx], newList[idx - 1]];
+    setExercises(newList);
+  };
+
+  const moveDown = (idx) => {
+    if (idx === exercises.length - 1) return;
+    const newList = [...exercises];
+    [newList[idx], newList[idx + 1]] = [newList[idx + 1], newList[idx]];
+    setExercises(newList);
+  };
+
+  const removeExercise = (idx) => {
+    setExercises(exercises.filter((_, i) => i !== idx));
+  };
+
+  const addExercise = (ex) => {
+    setExercises([...exercises, { name: ex.name, sets: ex.defaultSets, reps: ex.defaultReps, fig: ex.fig }]);
+    setShowAdd(false);
+  };
+
+  const updateExercise = (idx, field, value) => {
+    const newList = [...exercises];
+    newList[idx] = { ...newList[idx], [field]: value };
+    setExercises(newList);
+  };
+
+  const handleSave = () => {
+    if (!name.trim()) {
+      alert('Coloca um nome no treino!');
+      return;
+    }
+    if (exercises.length === 0) {
+      alert('Adiciona pelo menos 1 exercício!');
+      return;
+    }
+    // Estima duração: ~5min por exercício
+    const duration = Math.max(20, exercises.length * 6);
+    onSave({ ...workout, name: name.trim(), muscle: muscle.trim() || 'Personalizado', exercises, duration });
+  };
+
+  if (showAdd) {
+    return <AddExerciseModal onAdd={addExercise} onClose={() => setShowAdd(false)} />;
+  }
+
+  return (
+    <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
+      <div className="flex items-center justify-between mb-6">
+        <button onClick={onClose} className="p-2 -ml-2 transition-all active:scale-95">
+          <ArrowLeft size={20} color={C.text} />
+        </button>
+        <button onClick={handleSave} className="px-4 py-2 rounded-xl text-sm font-medium transition-all active:scale-95" style={{ background: C.primary, color: C.bg }}>
+          Salvar
+        </button>
+      </div>
+
+      <h1 className="text-2xl font-medium text-white mb-1">Editar treino</h1>
+      <p className="text-sm mb-6" style={{ color: C.textMuted }}>Substitui o {workout.id} padrão</p>
+
+      <label className="text-xs uppercase tracking-wider mb-2 block" style={{ color: C.textMuted }}>Nome do treino</label>
+      <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Peito Pesado"
+        className="w-full p-3 rounded-2xl text-white outline-none text-sm mb-4"
+        style={{ background: C.bgCard, border: `1px solid ${C.border}` }} />
+
+      <label className="text-xs uppercase tracking-wider mb-2 block" style={{ color: C.textMuted }}>Grupo muscular</label>
+      <input type="text" value={muscle} onChange={(e) => setMuscle(e.target.value)} placeholder="Ex: Peito + Tríceps"
+        className="w-full p-3 rounded-2xl text-white outline-none text-sm mb-6"
+        style={{ background: C.bgCard, border: `1px solid ${C.border}` }} />
+
+      <div className="flex items-center justify-between mb-3">
+        <div className="text-xs uppercase tracking-wider" style={{ color: C.textMuted }}>Exercícios ({exercises.length})</div>
+      </div>
+
+      <div className="space-y-2 mb-3">
+        {exercises.map((ex, idx) => (
+          <div key={idx} className="rounded-2xl p-3" style={{ background: C.bgCard }}>
+            <div className="flex items-start gap-2 mb-2">
+              <div className="flex-1">
+                <div className="text-sm font-medium text-white mb-1">{ex.name}</div>
+                {editingIdx === idx ? (
+                  <div className="flex items-center gap-2 mt-2">
+                    <input type="number" value={ex.sets} onChange={(e) => updateExercise(idx, 'sets', parseInt(e.target.value) || 1)}
+                      className="w-14 p-2 rounded-lg text-white text-sm outline-none text-center"
+                      style={{ background: C.bg, border: `1px solid ${C.border}` }} />
+                    <span className="text-xs" style={{ color: C.textMuted }}>séries x</span>
+                    <input type="text" value={ex.reps} onChange={(e) => updateExercise(idx, 'reps', e.target.value)}
+                      className="w-16 p-2 rounded-lg text-white text-sm outline-none text-center"
+                      style={{ background: C.bg, border: `1px solid ${C.border}` }} />
+                    <span className="text-xs" style={{ color: C.textMuted }}>reps</span>
+                    <button onClick={() => setEditingIdx(null)} className="ml-auto text-xs px-3 py-1 rounded-lg" style={{ background: C.primary, color: C.bg }}>
+                      OK
+                    </button>
+                  </div>
+                ) : (
+                  <button onClick={() => setEditingIdx(idx)} className="text-xs flex items-center gap-1" style={{ color: C.textMuted }}>
+                    {ex.sets} séries × {ex.reps} reps <Edit3 size={10} />
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-1 mt-2">
+              <button onClick={() => moveUp(idx)} disabled={idx === 0} className="flex-1 p-2 rounded-lg transition-all active:scale-95 flex items-center justify-center"
+                style={{ background: C.bg, opacity: idx === 0 ? 0.3 : 1 }}>
+                <ArrowUp size={14} style={{ color: C.textMuted }} />
+              </button>
+              <button onClick={() => moveDown(idx)} disabled={idx === exercises.length - 1} className="flex-1 p-2 rounded-lg transition-all active:scale-95 flex items-center justify-center"
+                style={{ background: C.bg, opacity: idx === exercises.length - 1 ? 0.3 : 1 }}>
+                <ArrowDown size={14} style={{ color: C.textMuted }} />
+              </button>
+              <button onClick={() => removeExercise(idx)} className="flex-1 p-2 rounded-lg transition-all active:scale-95 flex items-center justify-center" style={{ background: C.bg }}>
+                <Trash2 size={14} style={{ color: C.danger }} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button onClick={() => setShowAdd(true)} className="w-full rounded-2xl p-4 transition-all active:scale-95 flex items-center justify-center gap-2 font-medium" style={{ background: 'transparent', border: `1px dashed ${C.primary}`, color: C.primary }}>
+        <Plus size={16} /> Adicionar exercício
+      </button>
     </div>
   );
 };
@@ -931,6 +1133,7 @@ const SettingRow = ({ icon: Icon, label, value }) => (
 
 const Profile = ({ data, onReset, onExport }) => {
   const streak = calculateStreak(data.history);
+  const customCount = Object.keys(data.customWorkouts || {}).length;
   return (
     <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
       <h1 className="text-2xl font-medium text-white mb-6">Perfil</h1>
@@ -964,11 +1167,11 @@ const Profile = ({ data, onReset, onExport }) => {
           </div>
           <ChevronRight size={16} style={{ color: C.textMuted }} />
         </button>
-        <button onClick={onReset} className="w-full rounded-2xl p-4 text-left transition-all active:scale-95" style={{ background: C.bgCard, color: '#ff6b6b' }}>
+        <button onClick={onReset} className="w-full rounded-2xl p-4 text-left transition-all active:scale-95" style={{ background: C.bgCard, color: C.danger }}>
           <div className="text-sm font-medium">Resetar dados (refazer onboarding)</div>
         </button>
       </div>
-      <div className="text-center mt-8 text-[10px]" style={{ color: C.textMuted }}>Dixx · v0.4 · {exerciseLibrary.length} exercícios 💾</div>
+      <div className="text-center mt-8 text-[10px]" style={{ color: C.textMuted }}>Dixx · v0.5 · {exerciseLibrary.length} exercícios · {customCount} treino{customCount !== 1 ? 's' : ''} custom 💾</div>
     </div>
   );
 };
@@ -1012,7 +1215,11 @@ const BottomNav = ({ active, onChange }) => {
 };
 
 export default function App() {
-  const [data, setData] = useState(() => loadData() || initialData);
+  const [data, setData] = useState(() => {
+    const loaded = loadData() || initialData;
+    if (!loaded.customWorkouts) loaded.customWorkouts = {};
+    return loaded;
+  });
   const [view, setView] = useState(data.user ? 'main' : 'onboarding');
   const [activeTab, setActiveTab] = useState('home');
   const [activeWorkout, setActiveWorkout] = useState(null);
@@ -1021,6 +1228,9 @@ export default function App() {
   const [finishedSummary, setFinishedSummary] = useState(null);
   const [showSplash, setShowSplash] = useState(true);
   const [showLibrary, setShowLibrary] = useState(false);
+  const [editingWorkout, setEditingWorkout] = useState(null);
+
+  const plans = getWorkoutPlans(data.customWorkouts);
 
   useEffect(() => {
     const t = setTimeout(() => setShowSplash(false), 3000);
@@ -1069,7 +1279,7 @@ export default function App() {
   const handleRestDone = () => { setShowRest(false); if (restCallback) restCallback(); };
 
   const handleReset = () => {
-    if (confirm('Tem certeza? Vai apagar todos os dados (treinos, PRs, histórico).')) {
+    if (confirm('Tem certeza? Vai apagar todos os dados (treinos, PRs, histórico, customizações).')) {
       resetData();
       setData(initialData);
       setView('onboarding');
@@ -1089,6 +1299,19 @@ export default function App() {
     a.download = `dixx-backup-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleSaveCustomWorkout = (workout) => {
+    setData({ ...data, customWorkouts: { ...data.customWorkouts, [workout.id]: workout } });
+    setEditingWorkout(null);
+  };
+
+  const handleResetWorkout = (workoutId) => {
+    if (confirm('Resetar esse treino pro padrão? Você vai perder as customizações.')) {
+      const newCustom = { ...data.customWorkouts };
+      delete newCustom[workoutId];
+      setData({ ...data, customWorkouts: newCustom });
+    }
   };
 
   return (
@@ -1116,19 +1339,21 @@ export default function App() {
         )}
         {view === 'main' && data.user && (
           <>
-            <div key={showLibrary ? 'library' : activeTab} className="tab-content">
-              {showLibrary ? (
+            <div key={editingWorkout ? 'edit' : (showLibrary ? 'library' : activeTab)} className="tab-content">
+              {editingWorkout ? (
+                <WorkoutEditor workout={editingWorkout} onSave={handleSaveCustomWorkout} onClose={() => setEditingWorkout(null)} />
+              ) : showLibrary ? (
                 <Library onClose={() => setShowLibrary(false)} />
               ) : (
                 <>
-                  {activeTab === 'home' && <Dashboard data={data} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} />}
-                  {activeTab === 'workouts' && <WorkoutsList data={data} onSelectWorkout={handleStartWorkout} onOpenLibrary={() => setShowLibrary(true)} />}
+                  {activeTab === 'home' && <Dashboard data={data} plans={plans} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} />}
+                  {activeTab === 'workouts' && <WorkoutsList data={data} plans={plans} onSelectWorkout={handleStartWorkout} onOpenLibrary={() => setShowLibrary(true)} onEditWorkout={setEditingWorkout} onResetWorkout={handleResetWorkout} />}
                   {activeTab === 'stats' && <Stats data={data} />}
                   {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} />}
                 </>
               )}
             </div>
-            {!showLibrary && <BottomNav active={activeTab} onChange={setActiveTab} />}
+            {!showLibrary && !editingWorkout && <BottomNav active={activeTab} onChange={setActiveTab} />}
           </>
         )}
         {view === 'workout' && activeWorkout && (
