@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X } from 'lucide-react';
+import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft } from 'lucide-react';
 
 const STORAGE_KEY = 'dixx_data_v1';
 
@@ -61,6 +61,101 @@ const playBeep = (frequency = 800, duration = 150) => {
     osc.stop(audioCtx.currentTime + duration / 1000);
   } catch (e) {}
 };
+
+// ===== BIBLIOTECA DE EXERCÍCIOS =====
+const exerciseLibrary = [
+  // PEITO (8)
+  { id: 'supino-reto', name: 'Supino Reto', muscle: 'Peito', equipment: 'Barra', fig: 'supino', defaultSets: 4, defaultReps: '10', description: 'Deite no banco, segure a barra na largura dos ombros. Desça controlado até o peito e empurre pra cima.' },
+  { id: 'supino-inclinado', name: 'Supino Inclinado', muscle: 'Peito', equipment: 'Barra', fig: 'supino', defaultSets: 3, defaultReps: '12', description: 'Banco inclinado 30-45°. Trabalha mais a porção superior do peito. Foco em manter cotovelos a 45°.' },
+  { id: 'supino-declinado', name: 'Supino Declinado', muscle: 'Peito', equipment: 'Barra', fig: 'supino', defaultSets: 3, defaultReps: '12', description: 'Banco declinado. Foca a porção inferior do peito. Pés bem fixos no apoio.' },
+  { id: 'supino-halteres', name: 'Supino com Halteres', muscle: 'Peito', equipment: 'Halteres', fig: 'supino', defaultSets: 3, defaultReps: '12', description: 'Amplitude maior que com barra. Halteres descem até a linha do peito, palmas viradas pra frente.' },
+  { id: 'crucifixo', name: 'Crucifixo', muscle: 'Peito', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Braços levemente flexionados. Abra em arco até sentir alongamento, fechando como se abraçasse um barril.' },
+  { id: 'crossover', name: 'Crossover na Polia', muscle: 'Peito', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '15', description: 'Polias altas. Traga as mãos em direção ao centro do corpo. Aperte o peito no final do movimento.' },
+  { id: 'mergulho', name: 'Mergulho (Dips)', muscle: 'Peito', equipment: 'Paralelas', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Incline o tronco pra frente pra focar mais peito. Desça até os cotovelos formarem 90°.' },
+  { id: 'peck-deck', name: 'Peck Deck (Voador)', muscle: 'Peito', equipment: 'Máquina', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Máquina específica. Aperte os braços contra os apoios sem usar impulso. Foco em apertar o peito.' },
+
+  // COSTAS (9)
+  { id: 'puxada-alta', name: 'Puxada Alta', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 4, defaultReps: '10', description: 'Pegada larga, puxe a barra até a altura do queixo. Foque em puxar com os cotovelos, não com as mãos.' },
+  { id: 'puxada-pegada-fechada', name: 'Puxada Pegada Fechada', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Pegada neutra ou supinada. Foca mais a parte inferior das costas e bíceps. Tronco levemente inclinado.' },
+  { id: 'remada-curvada', name: 'Remada Curvada', muscle: 'Costas', equipment: 'Barra', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Tronco a 45°, puxe a barra em direção ao umbigo. Cotovelos próximos ao corpo.' },
+  { id: 'remada-sentada', name: 'Remada Sentada', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Costas retas, puxe o triângulo até o abdômen. Aperte as escápulas no final do movimento.' },
+  { id: 'remada-cavalinho', name: 'Remada Cavalinho (T-Bar)', muscle: 'Costas', equipment: 'Barra T', fig: 'puxada', defaultSets: 3, defaultReps: '10', description: 'Pegada neutra na barra. Puxe contra o abdômen. Ótimo pra espessura das costas.' },
+  { id: 'remada-unilateral', name: 'Remada Unilateral (Serrote)', muscle: 'Costas', equipment: 'Halter', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Apoie joelho e mão no banco. Puxe o halter até a lateral do tronco. Foco unilateral pra corrigir desequilíbrios.' },
+  { id: 'pulldown', name: 'Pulldown com Braços Retos', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '15', description: 'Braços estendidos, traga a barra até as coxas. Isola o latíssimo. Sem flexão dos cotovelos.' },
+  { id: 'levantamento-terra', name: 'Levantamento Terra', muscle: 'Costas', equipment: 'Barra', fig: 'agacha', defaultSets: 4, defaultReps: '8', description: 'Composto pesado. Costas retas, quadril desce, barra próxima ao corpo. Cuidado com a execução.' },
+  { id: 'pull-up', name: 'Barra Fixa', muscle: 'Costas', equipment: 'Barra Fixa', fig: 'puxada', defaultSets: 4, defaultReps: '8', description: 'Pegada pronada, suba até o queixo passar da barra. Movimento controlado, sem balanço.' },
+
+  // PERNAS - QUADRÍCEPS (7)
+  { id: 'agachamento-livre', name: 'Agachamento Livre', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 4, defaultReps: '10', description: 'Rei dos exercícios. Pés na largura dos ombros, desce até as coxas paralelas ao chão. Costas retas.' },
+  { id: 'agachamento-frontal', name: 'Agachamento Frontal', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Barra apoiada na clavícula. Mais focado em quadríceps. Tronco mais ereto que o livre.' },
+  { id: 'leg-press', name: 'Leg Press', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Pés na altura média do apoio. Desça até os joelhos formarem 90°. Não trave os joelhos no topo.' },
+  { id: 'hack-squat', name: 'Hack Squat', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Máquina com apoio nas costas. Foca quadríceps. Desça controlado, joelhos alinhados com os pés.' },
+  { id: 'cadeira-extensora', name: 'Cadeira Extensora', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Isolado de quadríceps. Estenda até quase travar o joelho, segure 1 segundo no topo.' },
+  { id: 'avanco', name: 'Avanço (Afundo)', muscle: 'Pernas', equipment: 'Halteres', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Passo à frente, desce até os dois joelhos formarem 90°. Alterne pernas. Trabalha equilíbrio.' },
+  { id: 'sissy-squat', name: 'Sissy Squat', muscle: 'Pernas', equipment: 'Corpo livre', fig: 'agacha', defaultSets: 3, defaultReps: '15', description: 'Avançado. Joelhos vão pra frente enquanto tronco inclina pra trás. Isolamento extremo de quadríceps.' },
+
+  // PERNAS - POSTERIOR (4)
+  { id: 'stiff', name: 'Stiff', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Pernas semi-rígidas, desça a barra até sentir alongamento no posterior. Foco em isquiotibiais.' },
+  { id: 'mesa-flexora', name: 'Mesa Flexora', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Deitado, flexione os joelhos contraindo o posterior. Movimento controlado em ambas as fases.' },
+  { id: 'cadeira-flexora', name: 'Cadeira Flexora Sentada', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Sentado, flexione os joelhos. Alternativa à mesa flexora. Mantém o quadril mais estável.' },
+  { id: 'good-morning', name: 'Good Morning', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Barra nas costas, incline o tronco pra frente mantendo costas retas. Trabalha posterior e lombar.' },
+
+  // PERNAS - PANTURRILHA (2)
+  { id: 'panturrilha-pe', name: 'Panturrilha em Pé', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 4, defaultReps: '15', description: 'Suba na ponta dos pés o máximo possível, segure 1 segundo no topo. Trabalha gastrocnêmio.' },
+  { id: 'panturrilha-sentado', name: 'Panturrilha Sentado', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 4, defaultReps: '15', description: 'Foca o sóleo. Joelhos a 90°, suba na ponta dos pés. Amplitude completa de movimento.' },
+
+  // OMBRO (7)
+  { id: 'desenvolvimento', name: 'Desenvolvimento Militar', muscle: 'Ombro', equipment: 'Barra', fig: 'desen', defaultSets: 4, defaultReps: '10', description: 'Barra na altura dos ombros, empurre acima da cabeça. Foco no deltoide anterior e médio.' },
+  { id: 'desenvolvimento-halteres', name: 'Desenvolvimento com Halteres', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Sentado ou em pé. Mais natural que com barra. Halteres partem da altura dos ombros.' },
+  { id: 'arnold-press', name: 'Arnold Press', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Halteres começam com palmas pra dentro, gira durante a subida. Trabalha todo o deltoide.' },
+  { id: 'elevacao-lateral', name: 'Elevação Lateral', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Levante os halteres lateralmente até a altura dos ombros. Pouco peso, foco na execução. Isola o deltoide médio.' },
+  { id: 'elevacao-frontal', name: 'Elevação Frontal', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Levante os halteres à frente até a altura dos ombros. Foca o deltoide anterior.' },
+  { id: 'crucifixo-inverso', name: 'Crucifixo Inverso', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '15', description: 'Tronco inclinado, abra os braços lateralmente. Foca o deltoide posterior. Pouco peso.' },
+  { id: 'encolhimento', name: 'Encolhimento (Shrug)', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '15', description: 'Eleve os ombros em direção às orelhas. Segure 1 segundo no topo. Trabalha trapézio superior.' },
+
+  // BÍCEPS (5)
+  { id: 'rosca-direta', name: 'Rosca Direta', muscle: 'Bíceps', equipment: 'Barra', fig: 'rosca', defaultSets: 4, defaultReps: '10', description: 'Cotovelos fixos ao lado do corpo. Suba a barra até a altura do peito sem balançar o tronco.' },
+  { id: 'rosca-martelo', name: 'Rosca Martelo', muscle: 'Bíceps', equipment: 'Halteres', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Pegada neutra (martelo). Trabalha bíceps + braquial. Cotovelos fixos.' },
+  { id: 'rosca-alternada', name: 'Rosca Alternada', muscle: 'Bíceps', equipment: 'Halteres', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Halteres, um braço de cada vez. Supina o punho durante a subida. Mais foco em cada braço.' },
+  { id: 'rosca-concentrada', name: 'Rosca Concentrada', muscle: 'Bíceps', equipment: 'Halter', fig: 'rosca', defaultSets: 3, defaultReps: '10', description: 'Cotovelo apoiado na coxa interna. Isola muito o bíceps. Movimento bem controlado.' },
+  { id: 'rosca-scott', name: 'Rosca Scott', muscle: 'Bíceps', equipment: 'Barra W', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Banco Scott, cotovelos fixos no apoio. Pico de contração no bíceps. Cuidado pra não estender total.' },
+
+  // TRÍCEPS (5)
+  { id: 'triceps-pulley', name: 'Tríceps Pulley', muscle: 'Tríceps', equipment: 'Polia', fig: 'puxada', defaultSets: 4, defaultReps: '10', description: 'Cotovelos fixos ao lado do corpo. Estenda os braços completamente, segure 1 segundo embaixo.' },
+  { id: 'triceps-testa', name: 'Tríceps Testa', muscle: 'Tríceps', equipment: 'Barra W', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Deitado, barra desce em direção à testa. Cotovelos fixos apontando pro teto.' },
+  { id: 'triceps-frances', name: 'Tríceps Francês', muscle: 'Tríceps', equipment: 'Halter', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Halter atrás da cabeça, com as duas mãos. Estenda os braços pra cima. Trabalha cabeça longa.' },
+  { id: 'triceps-corda', name: 'Tríceps Corda', muscle: 'Tríceps', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Corda na polia alta. Abra as mãos no final do movimento pra maior contração.' },
+  { id: 'triceps-mergulho-banco', name: 'Mergulho no Banco', muscle: 'Tríceps', equipment: 'Banco', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Mãos apoiadas no banco atrás. Desça com cotovelos pra trás, não pros lados. Foca tríceps.' },
+
+  // ABDÔMEN (6)
+  { id: 'abdominal-reto', name: 'Abdominal Reto', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '20', description: 'Deitado, suba o tronco contraindo o abdômen. Não puxe o pescoço, queixo pra cima.' },
+  { id: 'prancha', name: 'Prancha', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '30s', description: 'Isométrico. Apoie nos antebraços, corpo reto da cabeça aos pés. Não deixe o quadril cair.' },
+  { id: 'abdominal-infra', name: 'Abdominal Infra (Pernas)', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '15', description: 'Deitado, eleve as pernas em direção ao peito. Trabalha mais a parte inferior do abdômen.' },
+  { id: 'abdominal-oblique', name: 'Abdominal Oblíquo', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '15', description: 'Suba o tronco torcendo, cotovelo em direção ao joelho oposto. Trabalha laterais do abdômen.' },
+  { id: 'abdominal-bicicleta', name: 'Abdominal Bicicleta', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '20', description: 'Pedalando no ar, encoste cotovelo no joelho oposto alternadamente. Trabalha reto + oblíquo.' },
+  { id: 'prancha-lateral', name: 'Prancha Lateral', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '30s', description: 'Apoie num antebraço só, corpo de lado. Trabalha oblíquos. Faça os dois lados.' },
+
+  // ANTEBRAÇO (2)
+  { id: 'rosca-punho', name: 'Rosca de Punho', muscle: 'Antebraço', equipment: 'Barra', fig: 'rosca', defaultSets: 3, defaultReps: '15', description: 'Antebraços apoiados, só os punhos saem do apoio. Flexione os punhos pra cima.' },
+  { id: 'rosca-inversa', name: 'Rosca Inversa', muscle: 'Antebraço', equipment: 'Barra', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Pegada pronada (palmas pra baixo). Trabalha braquiorradial e antebraços.' },
+
+  // GLÚTEO (4)
+  { id: 'hip-thrust', name: 'Hip Thrust', muscle: 'Glúteo', equipment: 'Barra', fig: 'agacha', defaultSets: 4, defaultReps: '12', description: 'Costas no banco, barra no quadril. Eleve o quadril contraindo o glúteo no topo. Aperte 1 segundo.' },
+  { id: 'elevacao-pelvica', name: 'Elevação Pélvica', muscle: 'Glúteo', equipment: 'Corpo livre', fig: 'agacha', defaultSets: 3, defaultReps: '15', description: 'Deitado, pés no chão. Eleve o quadril contraindo o glúteo. Versão sem peso da hip thrust.' },
+  { id: 'coice-polia', name: 'Coice na Polia (Glúteo)', muscle: 'Glúteo', equipment: 'Polia', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Tornozeleira na polia baixa. Eleve a perna pra trás contraindo o glúteo. Tronco estável.' },
+  { id: 'abducao', name: 'Abdução de Quadril', muscle: 'Glúteo', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '15', description: 'Máquina específica. Abra as pernas contra a resistência. Foca glúteo médio.' },
+
+  // CARDIO (4)
+  { id: 'esteira', name: 'Esteira (Caminhada/Corrida)', muscle: 'Cardio', equipment: 'Esteira', fig: 'agacha', defaultSets: 1, defaultReps: '20min', description: 'Aquecimento ou cardio principal. Comece em ritmo confortável, vá aumentando aos poucos.' },
+  { id: 'bike', name: 'Bicicleta Ergométrica', muscle: 'Cardio', equipment: 'Bike', fig: 'agacha', defaultSets: 1, defaultReps: '20min', description: 'Cardio sem impacto, bom pra quem tem problema no joelho. Mantenha cadência constante.' },
+  { id: 'eliptico', name: 'Elíptico', muscle: 'Cardio', equipment: 'Elíptico', fig: 'desen', defaultSets: 1, defaultReps: '20min', description: 'Cardio sem impacto que envolve membros superiores. Postura ereta, movimento fluido.' },
+  { id: 'hiit', name: 'HIIT', muscle: 'Cardio', equipment: 'Variado', fig: 'agacha', defaultSets: 8, defaultReps: '30s', description: 'Treino intervalado de alta intensidade. 30s forte + 30s leve, repete várias vezes. Queima muita caloria.' },
+];
+
+const muscleGroups = ['Todos', 'Peito', 'Costas', 'Pernas', 'Ombro', 'Bíceps', 'Tríceps', 'Abdômen', 'Antebraço', 'Glúteo', 'Cardio'];
+
+// Helper pra pegar exercício da biblioteca pelo id
+const getExerciseById = (id) => exerciseLibrary.find(e => e.id === id);
 
 const ExerciseAnimStyles = () => (
   <style>{`
@@ -494,7 +589,7 @@ const Dashboard = ({ data, onStartWorkout, onNavigate }) => {
   );
 };
 
-const WorkoutsList = ({ data, onSelectWorkout }) => {
+const WorkoutsList = ({ data, onSelectWorkout, onOpenLibrary }) => {
   const todayIdx = getTodayWorkoutIdx(data.history);
   return (
     <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
@@ -511,9 +606,106 @@ const WorkoutsList = ({ data, onSelectWorkout }) => {
             <div className="text-xs" style={{ color: C.textMuted }}>{w.muscle} • {w.exercises.length} exercícios • ~{w.duration}min</div>
           </button>
         ))}
+        <button onClick={onOpenLibrary} className="w-full rounded-2xl p-4 transition-all active:scale-95 flex items-center justify-center gap-2 font-medium" style={{ background: C.bgCard, color: C.primary, border: `1px solid ${C.primary}` }}>
+          <BookOpen size={16} /> Ver biblioteca completa
+        </button>
         <button className="w-full rounded-2xl p-4 transition-all active:scale-95" style={{ background: 'transparent', border: `1px dashed ${C.primary}`, color: C.primary }}>
           <div className="flex items-center justify-center gap-2 font-medium"><Plus size={16} /> Criar treino próprio</div>
         </button>
+      </div>
+    </div>
+  );
+};
+
+const Library = ({ onClose }) => {
+  const [filter, setFilter] = useState('Todos');
+  const [search, setSearch] = useState('');
+  const [selectedExercise, setSelectedExercise] = useState(null);
+
+  const filtered = exerciseLibrary.filter(ex => {
+    const matchFilter = filter === 'Todos' || ex.muscle === filter;
+    const matchSearch = search === '' || ex.name.toLowerCase().includes(search.toLowerCase());
+    return matchFilter && matchSearch;
+  });
+
+  if (selectedExercise) {
+    const Fig = getExerciseFig(selectedExercise.fig);
+    return (
+      <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
+        <div className="flex items-center gap-3 mb-6">
+          <button onClick={() => setSelectedExercise(null)} className="p-2 -ml-2 transition-all active:scale-95">
+            <ArrowLeft size={20} color={C.text} />
+          </button>
+          <h1 className="text-lg font-medium text-white">{selectedExercise.name}</h1>
+        </div>
+        <div className="mb-5"><ExerciseCard figKey={selectedExercise.fig} size={120} /></div>
+        <div className="rounded-2xl p-4 mb-4" style={{ background: C.bgCard }}>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div>
+              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Músculo</div>
+              <div className="text-sm font-medium" style={{ color: C.primary }}>{selectedExercise.muscle}</div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Equipamento</div>
+              <div className="text-sm text-white">{selectedExercise.equipment}</div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Séries</div>
+              <div className="text-sm text-white">{selectedExercise.defaultSets}</div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Repetições</div>
+              <div className="text-sm text-white">{selectedExercise.defaultReps}</div>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-2xl p-4" style={{ background: C.bgCard }}>
+          <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Como executar</div>
+          <div className="text-sm text-white leading-relaxed">{selectedExercise.description}</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
+      <div className="flex items-center gap-3 mb-4">
+        <button onClick={onClose} className="p-2 -ml-2 transition-all active:scale-95">
+          <ArrowLeft size={20} color={C.text} />
+        </button>
+        <h1 className="text-2xl font-medium text-white">Biblioteca</h1>
+      </div>
+      <p className="text-sm mb-4" style={{ color: C.textMuted }}>{exerciseLibrary.length} exercícios disponíveis</p>
+      <div className="relative mb-4">
+        <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: C.textMuted }} />
+        <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar exercício..."
+          className="w-full pl-10 pr-4 py-3 rounded-2xl text-white outline-none text-sm"
+          style={{ background: C.bgCard, border: `1px solid ${C.border}` }} />
+      </div>
+      <div className="flex gap-2 overflow-x-auto mb-4 pb-2" style={{ scrollbarWidth: 'none' }}>
+        {muscleGroups.map((g) => (
+          <button key={g} onClick={() => setFilter(g)}
+            className="px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all active:scale-95"
+            style={{ background: filter === g ? C.primary : C.bgCard, color: filter === g ? C.bg : C.textMuted }}>
+            {g}
+          </button>
+        ))}
+      </div>
+      <div className="space-y-2">
+        {filtered.length === 0 ? (
+          <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
+            <div className="text-3xl mb-2">🔍</div>
+            <div className="text-sm">Nenhum exercício encontrado</div>
+          </div>
+        ) : filtered.map((ex) => (
+          <button key={ex.id} onClick={() => setSelectedExercise(ex)} className="w-full rounded-2xl p-4 text-left transition-all active:scale-95 flex justify-between items-center" style={{ background: C.bgCard }}>
+            <div className="flex-1">
+              <div className="text-sm font-medium text-white">{ex.name}</div>
+              <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>{ex.muscle} • {ex.equipment}</div>
+            </div>
+            <ChevronRight size={16} style={{ color: C.textMuted }} />
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -776,7 +968,7 @@ const Profile = ({ data, onReset, onExport }) => {
           <div className="text-sm font-medium">Resetar dados (refazer onboarding)</div>
         </button>
       </div>
-      <div className="text-center mt-8 text-[10px]" style={{ color: C.textMuted }}>Dixx · v0.3 · localStorage ativo 💾</div>
+      <div className="text-center mt-8 text-[10px]" style={{ color: C.textMuted }}>Dixx · v0.4 · {exerciseLibrary.length} exercícios 💾</div>
     </div>
   );
 };
@@ -828,6 +1020,7 @@ export default function App() {
   const [restCallback, setRestCallback] = useState(null);
   const [finishedSummary, setFinishedSummary] = useState(null);
   const [showSplash, setShowSplash] = useState(true);
+  const [showLibrary, setShowLibrary] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setShowSplash(false), 3000);
@@ -923,13 +1116,19 @@ export default function App() {
         )}
         {view === 'main' && data.user && (
           <>
-            <div key={activeTab} className="tab-content">
-              {activeTab === 'home' && <Dashboard data={data} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} />}
-              {activeTab === 'workouts' && <WorkoutsList data={data} onSelectWorkout={handleStartWorkout} />}
-              {activeTab === 'stats' && <Stats data={data} />}
-              {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} />}
+            <div key={showLibrary ? 'library' : activeTab} className="tab-content">
+              {showLibrary ? (
+                <Library onClose={() => setShowLibrary(false)} />
+              ) : (
+                <>
+                  {activeTab === 'home' && <Dashboard data={data} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} />}
+                  {activeTab === 'workouts' && <WorkoutsList data={data} onSelectWorkout={handleStartWorkout} onOpenLibrary={() => setShowLibrary(true)} />}
+                  {activeTab === 'stats' && <Stats data={data} />}
+                  {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} />}
+                </>
+              )}
             </div>
-            <BottomNav active={activeTab} onChange={setActiveTab} />
+            {!showLibrary && <BottomNav active={activeTab} onChange={setActiveTab} />}
           </>
         )}
         {view === 'workout' && activeWorkout && (
