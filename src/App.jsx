@@ -1378,7 +1378,7 @@ export default function App() {
                   {activeTab === 'home' && <Dashboard data={data} plans={plans} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} />}
                   {activeTab === 'workouts' && <WorkoutsList data={data} plans={plans} onSelectWorkout={handleStartWorkout} onOpenLibrary={() => setShowLibrary(true)} onEditWorkout={setEditingWorkout} onResetWorkout={handleResetWorkout} />}
                   {activeTab === 'stats' && <Stats data={data} />}
-                  activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} onChangePhoto={handleChangePhoto} />
+                  {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} onChangePhoto={handleChangePhoto} />}
                 </>
               )}
             </div>
