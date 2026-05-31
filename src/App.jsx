@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft, Trash2, ArrowUp, ArrowDown, MoreVertical, RotateCcw } from 'lucide-react';
+import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft, Trash2, ArrowUp, ArrowDown, MoreVertical, RotateCcw, Camera }  from 'lucide-react';
 
 const STORAGE_KEY = 'dixx_data_v1';
 
@@ -19,7 +19,7 @@ const resetData = () => {
   try { localStorage.removeItem(STORAGE_KEY); } catch {}
 };
 
-const initialData = { user: null, history: [], notes: {}, customWorkouts: {} };
+const initialData = { user: null, history: [], notes: {}, customWorkouts: {}, photo: null };
 
 const DixxLogo = ({ size = 40 }) => (
   <img src="/dixx-logo.png" alt="Dixx" width={size} height={size} style={{ display: 'block' }} />
@@ -513,6 +513,16 @@ const Onboarding = ({ onComplete }) => {
     </div>
   );
 };
+const Avatar = ({ name, photo, size = 40, onClick }) => {
+  const initial = name && name[0] ? name[0].toUpperCase() : '?';
+  return (
+    <button onClick={onClick} disabled={!onClick} className="rounded-full flex items-center justify-center font-medium transition-transform active:scale-95 overflow-hidden"
+      style={{ width: size, height: size, background: C.primary, color: C.bg, fontSize: size * 0.4, cursor: onClick ? 'pointer' : 'default' }}>
+      {photo ? <img src={photo} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initial}
+    </button>
+  );
+};
+
 
 const StatCard = ({ value, label, icon }) => (
   <div className="rounded-2xl p-3 text-center" style={{ background: C.bgCard }}>
@@ -540,7 +550,7 @@ const Dashboard = ({ data, plans, onStartWorkout, onNavigate }) => {
           <div className="text-xs" style={{ color: C.textMuted }}>{greeting},</div>
           <div className="text-xl font-medium text-white flex items-center gap-2">{data.user.name} <span>💪</span></div>
         </div>
-        <button onClick={() => onNavigate('profile')} className="w-10 h-10 rounded-full flex items-center justify-center font-medium text-sm transition-transform active:scale-95" style={{ background: C.primary, color: C.bg }}>{data.user.name[0].toUpperCase()}</button>
+        <Avatar name={data.user.name} photo={data.photo} size={40} onClick={() => onNavigate('profile')} />
       </div>
       <div className="rounded-3xl p-5 mb-4 transition-all" style={{ background: C.bgCard, border: `1px solid ${C.primary}` }}>
         <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Treino de hoje</div>
@@ -1131,14 +1141,19 @@ const SettingRow = ({ icon: Icon, label, value }) => (
   </button>
 );
 
-const Profile = ({ data, onReset, onExport }) => {
+const Profile = ({ data, onReset, onExport, onChangePhoto }) => {
   const streak = calculateStreak(data.history);
   const customCount = Object.keys(data.customWorkouts || {}).length;
   return (
     <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
       <h1 className="text-2xl font-medium text-white mb-6">Perfil</h1>
       <div className="rounded-2xl p-5 mb-6 text-center" style={{ background: C.bgCard }}>
-        <div className="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center text-2xl font-medium" style={{ background: C.primary, color: C.bg }}>{data.user.name[0].toUpperCase()}</div>
+      <div className="mx-auto mb-3 relative" style={{ width: 80, height: 80 }}>
+  <Avatar name={data.user.name} photo={data.photo} size={80} onClick={onChangePhoto} />
+  <div className="absolute bottom-0 right-0 rounded-full flex items-center justify-center" style={{ width: 28, height: 28, background: C.primary, border: `2px solid ${C.bgCard}` }}>
+    <Camera size={14} color={C.bg} />
+  </div>
+</div>
         <div className="text-lg font-medium text-white">{data.user.name}</div>
         <div className="text-xs" style={{ color: C.textMuted }}>{data.user.experience} • {data.user.division.split(' ')[0]}</div>
         <div className="grid grid-cols-2 gap-3 mt-4 pt-4" style={{ borderTop: `1px solid ${C.border}` }}>
@@ -1291,7 +1306,21 @@ export default function App() {
     setData({ ...data, notes: { ...data.notes, [exerciseName]: text } });
   };
 
-  const handleExport = () => {
+  const handleChangePhoto = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setData({ ...data, photo: ev.target.result });
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  };const handleExport = () => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1349,7 +1378,7 @@ export default function App() {
                   {activeTab === 'home' && <Dashboard data={data} plans={plans} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} />}
                   {activeTab === 'workouts' && <WorkoutsList data={data} plans={plans} onSelectWorkout={handleStartWorkout} onOpenLibrary={() => setShowLibrary(true)} onEditWorkout={setEditingWorkout} onResetWorkout={handleResetWorkout} />}
                   {activeTab === 'stats' && <Stats data={data} />}
-                  {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} />}
+                  activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} onChangePhoto={handleChangePhoto} />
                 </>
               )}
             </div>
