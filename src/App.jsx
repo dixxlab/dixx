@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft, Trash2, ArrowUp, ArrowDown, MoreVertical, RotateCcw, Camera } from 'lucide-react';
+import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft, Trash2, ArrowUp, ArrowDown, MoreVertical, RotateCcw, Camera, SkipForward } from 'lucide-react';
 
 const STORAGE_KEY = 'dixx_data_v1';
 
@@ -882,6 +882,7 @@ const WorkoutEditor = ({ workout, onSave, onClose }) => {
 
 const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
   const [exerciseIdx, setExerciseIdx] = useState(0);
+  const [postponed, setPostponed] = useState([]);
   const [sets, setSets] = useState(workout.exercises.map(ex => Array(ex.sets).fill(null).map(() => ({ weight: '', reps: '', done: false }))));
   const [activeSetIdx, setActiveSetIdx] = useState(0);
   const [elapsed, setElapsed] = useState(0);
@@ -968,9 +969,14 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
           );
         })}
       </div>
-      <button onClick={completeSet} className="w-full p-4 rounded-2xl font-medium transition-all active:scale-95 flex items-center justify-center gap-2" style={{ background: C.primary, color: C.bg }}>
-        <Check size={18} strokeWidth={2.5} /> Concluir série {activeSetIdx + 1}
-      </button>
+      <div className="flex gap-2">
+        <button onClick={() => {}} className="px-4 rounded-2xl font-medium transition-all active:scale-95 flex items-center justify-center gap-2" style={{ background: C.bgCard, color: C.textMuted }}>
+          <SkipForward size={18} />
+        </button>
+        <button onClick={completeSet} className="flex-1 p-4 rounded-2xl font-medium transition-all active:scale-95 flex items-center justify-center gap-2" style={{ background: C.primary, color: C.bg }}>
+          <Check size={18} strokeWidth={2.5} /> Concluir série {activeSetIdx + 1}
+        </button>
+      </div>
     </div>
   );
 };
