@@ -907,27 +907,34 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
     if (!set.reps) set.reps = ex.reps;
     set.done = true;
     setSets(newSets);
-  onShowRest(() => {
-      if (activeSetIdx < ex.sets - 1) setActiveSetIdx(activeSetIdx + 1);
-      else if (postponed.length > 0) {
+ onShowRest(() => {
+      // Marca o conjunto de exercícios já feitos (incluindo o atual)
+      const doneIdxs = new Set();
+      newSets.forEach((exSets, i) => {
+        if (exSets.every(s => s.done)) doneIdxs.add(i);
+      });
+      
+      if (activeSetIdx < ex.sets - 1) {
+        setActiveSetIdx(activeSetIdx + 1);
+      } else if (postponed.length > 0) {
+        // Tem exercícios adiados, vai pro próximo adiado
         const next = postponed[0];
         setPostponed(postponed.slice(1));
         setExerciseIdx(next);
         setActiveSetIdx(0);
-      }
-      else if (exerciseIdx < workout.exercises.length - 1) {
-        let nextIdx = exerciseIdx + 1;
-        while (nextIdx < workout.exercises.length && sets[nextIdx].every(s => s.done)) {
-          nextIdx++;
+      } else {
+        // Procura próximo exercício não feito
+        let nextIdx = -1;
+        for (let i = 0; i < workout.exercises.length; i++) {
+          if (!doneIdxs.has(i)) { nextIdx = i; break; }
         }
-        if (nextIdx < workout.exercises.length) {
+        if (nextIdx >= 0) {
           setExerciseIdx(nextIdx);
           setActiveSetIdx(0);
         } else {
           onFinish(sets, workout, elapsed);
         }
       }
-      else onFinish(sets, workout, elapsed);
     });
   };
   const updateSet = (idx, field, value) => { const newSets = [...sets]; newSets[exerciseIdx][idx][field] = value; setSets(newSets); };
