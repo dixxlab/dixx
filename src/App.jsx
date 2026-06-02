@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft, Trash2, ArrowUp, ArrowDown, MoreVertical, RotateCcw, Camera }  from 'lucide-react';
+import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft, Trash2, ArrowUp, ArrowDown, MoreVertical, RotateCcw, Camera } from 'lucide-react';
 
 const STORAGE_KEY = 'dixx_data_v1';
 
@@ -20,6 +20,7 @@ const resetData = () => {
 };
 
 const initialData = { user: null, history: [], notes: {}, customWorkouts: {}, photo: null, restTime: 90, divisionCount: 4 };
+
 const DixxLogo = ({ size = 40 }) => (
   <img src="/dixx-logo.png" alt="Dixx" width={size} height={size} style={{ display: 'block' }} />
 );
@@ -32,6 +33,16 @@ const C = {
   textMuted: '#6b8a78',
   border: '#1a3024',
   danger: '#ff6b6b',
+};
+
+const Avatar = ({ name, photo, size = 40, onClick }) => {
+  const initial = name && name[0] ? name[0].toUpperCase() : '?';
+  return (
+    <button onClick={onClick} disabled={!onClick} className="rounded-full flex items-center justify-center font-medium transition-transform active:scale-95 overflow-hidden"
+      style={{ width: size, height: size, background: C.primary, color: C.bg, fontSize: size * 0.4, cursor: onClick ? 'pointer' : 'default' }}>
+      {photo ? <img src={photo} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initial}
+    </button>
+  );
 };
 
 let audioCtx = null;
@@ -62,7 +73,6 @@ const playBeep = (frequency = 800, duration = 150) => {
   } catch (e) {}
 };
 
-// ===== BIBLIOTECA DE EXERCÍCIOS =====
 const exerciseLibrary = [
   { id: 'supino-reto', name: 'Supino Reto', muscle: 'Peito', equipment: 'Barra', fig: 'supino', defaultSets: 4, defaultReps: '10', description: 'Deite no banco, segure a barra na largura dos ombros. Desça controlado até o peito e empurre pra cima.' },
   { id: 'supino-inclinado', name: 'Supino Inclinado', muscle: 'Peito', equipment: 'Barra', fig: 'supino', defaultSets: 3, defaultReps: '12', description: 'Banco inclinado 30-45°. Trabalha mais a porção superior do peito. Foco em manter cotovelos a 45°.' },
@@ -131,8 +141,6 @@ const exerciseLibrary = [
 
 const muscleGroups = ['Todos', 'Peito', 'Costas', 'Pernas', 'Ombro', 'Bíceps', 'Tríceps', 'Abdômen', 'Antebraço', 'Glúteo', 'Cardio'];
 
-const getExerciseById = (id) => exerciseLibrary.find(e => e.id === id);
-
 const ExerciseAnimStyles = () => (
   <style>{`
     @keyframes ex-supino-bar { 0%,100% { transform: translateY(-22px); } 50% { transform: translateY(0px); } }
@@ -155,35 +163,13 @@ const ExerciseAnimStyles = () => (
 
 const SplashStyles = () => (
   <style>{`
-    @keyframes splash-logo-in {
-      0% { transform: scale(0); opacity: 0; }
-      60% { transform: scale(1.1); opacity: 1; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    @keyframes splash-text-in {
-      0% { transform: translateY(20px); opacity: 0; }
-      100% { transform: translateY(0); opacity: 1; }
-    }
-    @keyframes splash-glow {
-      0%, 100% { filter: drop-shadow(0 0 8px rgba(16,185,129,0.4)); }
-      50% { filter: drop-shadow(0 0 24px rgba(16,185,129,0.8)); }
-    }
-    @keyframes splash-fadeout {
-      0% { opacity: 1; }
-      100% { opacity: 0; pointer-events: none; }
-    }
-    @keyframes tab-enter {
-      0% { opacity: 0; transform: translateY(8px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes modal-in {
-      0% { opacity: 0; transform: translateY(20px); }
-      100% { opacity: 1; transform: translateY(0); }
-    }
-    .splash-logo {
-      animation: splash-logo-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both,
-                 splash-glow 2s ease-in-out 0.7s infinite;
-    }
+    @keyframes splash-logo-in { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes splash-text-in { 0% { transform: translateY(20px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+    @keyframes splash-glow { 0%, 100% { filter: drop-shadow(0 0 8px rgba(16,185,129,0.4)); } 50% { filter: drop-shadow(0 0 24px rgba(16,185,129,0.8)); } }
+    @keyframes splash-fadeout { 0% { opacity: 1; } 100% { opacity: 0; pointer-events: none; } }
+    @keyframes tab-enter { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: translateY(0); } }
+    @keyframes modal-in { 0% { opacity: 0; transform: translateY(20px); } 100% { opacity: 1; transform: translateY(0); } }
+    .splash-logo { animation: splash-logo-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both, splash-glow 2s ease-in-out 0.7s infinite; }
     .splash-text-1 { animation: splash-text-in 0.6s ease-out 0.5s both; }
     .splash-text-2 { animation: splash-text-in 0.6s ease-out 0.75s both; }
     .splash-container { animation: splash-fadeout 0.5s ease-in 2.5s both; }
@@ -194,15 +180,9 @@ const SplashStyles = () => (
 
 const SplashScreen = () => (
   <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center splash-container" style={{ background: C.bg }}>
-    <div className="splash-logo mb-6">
-      <DixxLogo size={96} />
-    </div>
-    <div className="splash-text-1 text-4xl font-medium tracking-tight" style={{ color: C.primary, letterSpacing: '-0.02em' }}>
-      Dixx
-    </div>
-    <div className="splash-text-2 text-sm mt-2" style={{ color: C.textMuted }}>
-      seu amigo de treino
-    </div>
+    <div className="splash-logo mb-6"><DixxLogo size={96} /></div>
+    <div className="splash-text-1 text-4xl font-medium tracking-tight" style={{ color: C.primary, letterSpacing: '-0.02em' }}>Dixx</div>
+    <div className="splash-text-2 text-sm mt-2" style={{ color: C.textMuted }}>seu amigo de treino</div>
   </div>
 );
 
@@ -408,7 +388,6 @@ const defaultWorkoutPlans = [
   ]},
 ];
 
-// Função que pega os treinos atuais (mistura padrão com customizados)
 const getWorkoutPlans = (customWorkouts = {}) => {
   return defaultWorkoutPlans.map(w => customWorkouts[w.id] || w);
 };
@@ -488,9 +467,7 @@ const Onboarding = ({ onComplete }) => {
           <div key={i} className="h-1 flex-1 rounded-full transition-all duration-500" style={{ background: i <= step ? C.primary : C.bgCard }} />
         ))}
       </div>
-      <div className="flex justify-center mb-8">
-        <DixxLogo size={64} />
-      </div>
+      <div className="flex justify-center mb-8"><DixxLogo size={64} /></div>
       <h1 className="text-3xl font-medium text-white mb-2 text-center">{current.title}</h1>
       <p className="text-sm text-center mb-10" style={{ color: C.textMuted }}>{current.subtitle}</p>
       <div className="flex-1">
@@ -520,16 +497,6 @@ const Onboarding = ({ onComplete }) => {
     </div>
   );
 };
-const Avatar = ({ name, photo, size = 40, onClick }) => {
-  const initial = name && name[0] ? name[0].toUpperCase() : '?';
-  return (
-    <button onClick={onClick} disabled={!onClick} className="rounded-full flex items-center justify-center font-medium transition-transform active:scale-95 overflow-hidden"
-      style={{ width: size, height: size, background: C.primary, color: C.bg, fontSize: size * 0.4, cursor: onClick ? 'pointer' : 'default' }}>
-      {photo ? <img src={photo} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : initial}
-    </button>
-  );
-};
-
 
 const StatCard = ({ value, label, icon }) => (
   <div className="rounded-2xl p-3 text-center" style={{ background: C.bgCard }}>
@@ -600,7 +567,7 @@ const WorkoutsList = ({ data, plans, onSelectWorkout, onOpenLibrary, onEditWorko
   return (
     <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
       <h1 className="text-2xl font-medium text-white mb-1">Seus treinos</h1>
-      <p className="text-sm mb-6" style={{ color: C.textMuted }}>Divisão {data.user.division.split(' ')[0]}</p>
+      <p className="text-sm mb-6" style={{ color: C.textMuted }}>Divisão {plans.map(p => p.id).join('')}</p>
       <div className="space-y-3">
         {plans.map((w, i) => {
           const isCustom = !!data.customWorkouts[w.id];
@@ -738,7 +705,6 @@ const Library = ({ onClose }) => {
   );
 };
 
-// Modal pra adicionar exercício no editor
 const AddExerciseModal = ({ onAdd, onClose }) => {
   const [filter, setFilter] = useState('Todos');
   const [search, setSearch] = useState('');
@@ -796,7 +762,6 @@ const AddExerciseModal = ({ onAdd, onClose }) => {
   );
 };
 
-// Editor de treinos
 const WorkoutEditor = ({ workout, onSave, onClose }) => {
   const [name, setName] = useState(workout.name);
   const [muscle, setMuscle] = useState(workout.muscle);
@@ -834,15 +799,8 @@ const WorkoutEditor = ({ workout, onSave, onClose }) => {
   };
 
   const handleSave = () => {
-    if (!name.trim()) {
-      alert('Coloca um nome no treino!');
-      return;
-    }
-    if (exercises.length === 0) {
-      alert('Adiciona pelo menos 1 exercício!');
-      return;
-    }
-    // Estima duração: ~5min por exercício
+    if (!name.trim()) { alert('Coloca um nome no treino!'); return; }
+    if (exercises.length === 0) { alert('Adiciona pelo menos 1 exercício!'); return; }
     const duration = Math.max(20, exercises.length * 6);
     onSave({ ...workout, name: name.trim(), muscle: muscle.trim() || 'Personalizado', exercises, duration });
   };
@@ -861,24 +819,19 @@ const WorkoutEditor = ({ workout, onSave, onClose }) => {
           Salvar
         </button>
       </div>
-
       <h1 className="text-2xl font-medium text-white mb-1">Editar treino</h1>
       <p className="text-sm mb-6" style={{ color: C.textMuted }}>Substitui o {workout.id} padrão</p>
-
       <label className="text-xs uppercase tracking-wider mb-2 block" style={{ color: C.textMuted }}>Nome do treino</label>
       <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Peito Pesado"
         className="w-full p-3 rounded-2xl text-white outline-none text-sm mb-4"
         style={{ background: C.bgCard, border: `1px solid ${C.border}` }} />
-
       <label className="text-xs uppercase tracking-wider mb-2 block" style={{ color: C.textMuted }}>Grupo muscular</label>
       <input type="text" value={muscle} onChange={(e) => setMuscle(e.target.value)} placeholder="Ex: Peito + Tríceps"
         className="w-full p-3 rounded-2xl text-white outline-none text-sm mb-6"
         style={{ background: C.bgCard, border: `1px solid ${C.border}` }} />
-
       <div className="flex items-center justify-between mb-3">
         <div className="text-xs uppercase tracking-wider" style={{ color: C.textMuted }}>Exercícios ({exercises.length})</div>
       </div>
-
       <div className="space-y-2 mb-3">
         {exercises.map((ex, idx) => (
           <div key={idx} className="rounded-2xl p-3" style={{ background: C.bgCard }}>
@@ -895,9 +848,7 @@ const WorkoutEditor = ({ workout, onSave, onClose }) => {
                       className="w-16 p-2 rounded-lg text-white text-sm outline-none text-center"
                       style={{ background: C.bg, border: `1px solid ${C.border}` }} />
                     <span className="text-xs" style={{ color: C.textMuted }}>reps</span>
-                    <button onClick={() => setEditingIdx(null)} className="ml-auto text-xs px-3 py-1 rounded-lg" style={{ background: C.primary, color: C.bg }}>
-                      OK
-                    </button>
+                    <button onClick={() => setEditingIdx(null)} className="ml-auto text-xs px-3 py-1 rounded-lg" style={{ background: C.primary, color: C.bg }}>OK</button>
                   </div>
                 ) : (
                   <button onClick={() => setEditingIdx(idx)} className="text-xs flex items-center gap-1" style={{ color: C.textMuted }}>
@@ -922,7 +873,6 @@ const WorkoutEditor = ({ workout, onSave, onClose }) => {
           </div>
         ))}
       </div>
-
       <button onClick={() => setShowAdd(true)} className="w-full rounded-2xl p-4 transition-all active:scale-95 flex items-center justify-center gap-2 font-medium" style={{ background: 'transparent', border: `1px dashed ${C.primary}`, color: C.primary }}>
         <Plus size={16} /> Adicionar exercício
       </button>
@@ -1135,47 +1085,18 @@ const Stats = ({ data }) => {
   );
 };
 
-const DivisionPicker = ({ currentValue, onSave, onClose }) => {
-  const options = [
-    { count: 2, label: 'AB', desc: '2 dias por semana' },
-    { count: 3, label: 'ABC', desc: '3 dias por semana' },
-    { count: 4, label: 'ABCD', desc: '4 dias por semana' },
-    { count: 5, label: 'ABCDE', desc: '5 dias por semana' },
-  ];
-  const handleSelect = (count) => {
-    if (count < currentValue) {
-      const willDelete = currentValue - count;
-      if (!confirm(`Vai apagar ${willDelete} treino(s) extras e suas customizações. Tem certeza?`)) return;
-    }
-    onSave(count);
-  };
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center modal-in" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-t-3xl p-5 pb-8" style={{ background: C.bgCard }}>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-medium text-white">Divisão de treinos</h2>
-          <button onClick={onClose} className="p-1 transition-all active:scale-95">
-            <X size={20} color={C.textMuted} />
-          </button>
-        </div>
-        <p className="text-xs mb-4" style={{ color: C.textMuted }}>Escolha quantos treinos diferentes você quer fazer na semana.</p>
-        <div className="space-y-2">
-          {options.map((opt) => (
-            <button key={opt.count} onClick={() => handleSelect(opt.count)}
-              className="w-full p-4 rounded-2xl text-left transition-all active:scale-95 flex justify-between items-center"
-              style={{ background: currentValue === opt.count ? C.primary : C.bg, color: currentValue === opt.count ? C.bg : C.text, border: `1px solid ${currentValue === opt.count ? C.primary : C.border}` }}>
-              <div>
-                <div className="text-base font-medium">{opt.label}</div>
-                <div className="text-xs mt-0.5" style={{ color: currentValue === opt.count ? C.bg : C.textMuted, opacity: currentValue === opt.count ? 0.7 : 1 }}>{opt.desc}</div>
-              </div>
-              {currentValue === opt.count && <Check size={18} />}
-            </button>
-          ))}
-        </div>
-      </div>
+const SettingRow = ({ icon: Icon, label, value, onClick }) => (
+  <button onClick={onClick} className="w-full rounded-2xl p-4 transition-all active:scale-95 flex justify-between items-center" style={{ background: C.bgCard }}>
+    <div className="flex items-center gap-3">
+      <Icon size={16} style={{ color: C.primary }} />
+      <div className="text-sm text-white">{label}</div>
     </div>
-  );
-};
+    <div className="flex items-center gap-2">
+      <div className="text-xs" style={{ color: C.textMuted }}>{value}</div>
+      <ChevronRight size={14} style={{ color: C.textMuted }} />
+    </div>
+  </button>
+);
 
 const RestTimePicker = ({ currentValue, onSave, onClose }) => {
   const [custom, setCustom] = useState('');
@@ -1185,9 +1106,7 @@ const RestTimePicker = ({ currentValue, onSave, onClose }) => {
       <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-t-3xl p-5 pb-8" style={{ background: C.bgCard }}>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-medium text-white">Tempo de descanso</h2>
-          <button onClick={onClose} className="p-1 transition-all active:scale-95">
-            <X size={20} color={C.textMuted} />
-          </button>
+          <button onClick={onClose} className="p-1 transition-all active:scale-95"><X size={20} color={C.textMuted} /></button>
         </div>
         <p className="text-xs mb-4" style={{ color: C.textMuted }}>Escolha entre as opções rápidas ou defina um valor customizado.</p>
         <div className="grid grid-cols-2 gap-2 mb-4">
@@ -1215,37 +1134,66 @@ const RestTimePicker = ({ currentValue, onSave, onClose }) => {
   );
 };
 
-const SettingRow = ({ icon: Icon, label, value, onClick }) => (
-  <button onClick={onClick} className="w-full rounded-2xl p-4 transition-all active:scale-95 flex justify-between items-center" style={{ background: C.bgCard }}>
-    <div className="flex items-center gap-3">
-      <Icon size={16} style={{ color: C.primary }} />
-      <div className="text-sm text-white">{label}</div>
+const DivisionPicker = ({ currentValue, onSave, onClose }) => {
+  const options = [
+    { count: 2, label: 'AB', desc: '2 dias por semana' },
+    { count: 3, label: 'ABC', desc: '3 dias por semana' },
+    { count: 4, label: 'ABCD', desc: '4 dias por semana' },
+    { count: 5, label: 'ABCDE', desc: '5 dias por semana' },
+  ];
+  const handleSelect = (count) => {
+    if (count < currentValue) {
+      const willDelete = currentValue - count;
+      if (!confirm(`Vai apagar ${willDelete} treino(s) extras e suas customizações. Tem certeza?`)) return;
+    }
+    onSave(count);
+  };
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center modal-in" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-t-3xl p-5 pb-8" style={{ background: C.bgCard }}>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-medium text-white">Divisão de treinos</h2>
+          <button onClick={onClose} className="p-1 transition-all active:scale-95"><X size={20} color={C.textMuted} /></button>
+        </div>
+        <p className="text-xs mb-4" style={{ color: C.textMuted }}>Escolha quantos treinos diferentes você quer fazer na semana.</p>
+        <div className="space-y-2">
+          {options.map((opt) => (
+            <button key={opt.count} onClick={() => handleSelect(opt.count)}
+              className="w-full p-4 rounded-2xl text-left transition-all active:scale-95 flex justify-between items-center"
+              style={{ background: currentValue === opt.count ? C.primary : C.bg, color: currentValue === opt.count ? C.bg : C.text, border: `1px solid ${currentValue === opt.count ? C.primary : C.border}` }}>
+              <div>
+                <div className="text-base font-medium">{opt.label}</div>
+                <div className="text-xs mt-0.5" style={{ color: currentValue === opt.count ? C.bg : C.textMuted, opacity: currentValue === opt.count ? 0.7 : 1 }}>{opt.desc}</div>
+              </div>
+              {currentValue === opt.count && <Check size={18} />}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
-    <div className="flex items-center gap-2">
-      <div className="text-xs" style={{ color: C.textMuted }}>{value}</div>
-      <ChevronRight size={14} style={{ color: C.textMuted }} />
-    </div>
-  </button>
-);
+  );
+};
 
+const Profile = ({ data, onReset, onExport, onChangePhoto, onChangeRestTime, onChangeDivision }) => {
   const [showRestPicker, setShowRestPicker] = useState(false);
-  const Profile = ({ data, onReset, onExport, onChangePhoto, onChangeRestTime, onChangeDivision }) => {
   const [showDivisionPicker, setShowDivisionPicker] = useState(false);
   const streak = calculateStreak(data.history);
   const customCount = Object.keys(data.customWorkouts || {}).length;
   const restTime = data.restTime || 90;
+  const divisionCount = data.divisionCount || 4;
+  const divisionLabels = ['', '', 'AB', 'ABC', 'ABCD', 'ABCDE'];
   return (
     <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
       <h1 className="text-2xl font-medium text-white mb-6">Perfil</h1>
       <div className="rounded-2xl p-5 mb-6 text-center" style={{ background: C.bgCard }}>
-      <div className="mx-auto mb-3 relative" style={{ width: 80, height: 80 }}>
-  <Avatar name={data.user.name} photo={data.photo} size={80} onClick={onChangePhoto} />
-  <div className="absolute bottom-0 right-0 rounded-full flex items-center justify-center" style={{ width: 28, height: 28, background: C.primary, border: `2px solid ${C.bgCard}` }}>
-    <Camera size={14} color={C.bg} />
-  </div>
-</div>
+        <div className="mx-auto mb-3 relative" style={{ width: 80, height: 80 }}>
+          <Avatar name={data.user.name} photo={data.photo} size={80} onClick={onChangePhoto} />
+          <div className="absolute bottom-0 right-0 rounded-full flex items-center justify-center" style={{ width: 28, height: 28, background: C.primary, border: `2px solid ${C.bgCard}` }}>
+            <Camera size={14} color={C.bg} />
+          </div>
+        </div>
         <div className="text-lg font-medium text-white">{data.user.name}</div>
-        <div className="text-xs" style={{ color: C.textMuted }}>{data.user.experience} • {data.user.division.split(' ')[0]}</div>
+        <div className="text-xs" style={{ color: C.textMuted }}>{data.user.experience} • {divisionLabels[divisionCount]}</div>
         <div className="grid grid-cols-2 gap-3 mt-4 pt-4" style={{ borderTop: `1px solid ${C.border}` }}>
           <div>
             <div className="text-xl font-medium" style={{ color: C.primary }}>{data.history.length}</div>
@@ -1260,9 +1208,9 @@ const SettingRow = ({ icon: Icon, label, value, onClick }) => (
       <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Configurações</div>
       <div className="space-y-1 mb-6">
         <SettingRow icon={Clock} label="Tempo de descanso" value={`${restTime}s`} onClick={() => setShowRestPicker(true)} />
-      {showRestPicker && <RestTimePicker currentValue={restTime} onSave={(v) => { onChangeRestTime(v); setShowRestPicker(false); }} onClose={() => setShowRestPicker(false)} />}
-    <SettingRow icon={Dumbbell} label="Divisão" value={divisionLabels[divisionCount]} onClick={() => setShowDivisionPicker(true)} />
-      {showDivisionPicker && <DivisionPicker currentValue={divisionCount} onSave={(v) => { onChangeDivision(v); setShowDivisionPicker(false); }} onClose={() => setShowDivisionPicker(false)} />}  </div>
+        <SettingRow icon={Dumbbell} label="Divisão" value={divisionLabels[divisionCount]} onClick={() => setShowDivisionPicker(true)} />
+        <SettingRow icon={Settings} label="Tema" value="Verde floresta" />
+      </div>
       <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Dados</div>
       <div className="space-y-1">
         <button onClick={onExport} className="w-full rounded-2xl p-4 text-left transition-all active:scale-95 flex justify-between items-center" style={{ background: C.bgCard }}>
@@ -1276,7 +1224,9 @@ const SettingRow = ({ icon: Icon, label, value, onClick }) => (
           <div className="text-sm font-medium">Resetar dados (refazer onboarding)</div>
         </button>
       </div>
-      <div className="text-center mt-8 text-[10px]" style={{ color: C.textMuted }}>Dixx · v0.5 · {exerciseLibrary.length} exercícios · {customCount} treino{customCount !== 1 ? 's' : ''} custom 💾</div>
+      <div className="text-center mt-8 text-[10px]" style={{ color: C.textMuted }}>Dixx · v0.6 · {exerciseLibrary.length} exercícios · {customCount} treino{customCount !== 1 ? 's' : ''} custom 💾</div>
+      {showRestPicker && <RestTimePicker currentValue={restTime} onSave={(v) => { onChangeRestTime(v); setShowRestPicker(false); }} onClose={() => setShowRestPicker(false)} />}
+      {showDivisionPicker && <DivisionPicker currentValue={divisionCount} onSave={(v) => { onChangeDivision(v); setShowDivisionPicker(false); }} onClose={() => setShowDivisionPicker(false)} />}
     </div>
   );
 };
@@ -1305,7 +1255,7 @@ const BottomNav = ({ active, onChange }) => {
     { id: 'profile', icon: User, label: 'Perfil' },
   ];
   return (
-    <div className="fixed bottom-0 left-0 right-0 mx-auto px-2 pt-3 flex justify-around z-40" style={{ background: C.bg, borderTop: 'none', maxWidth: '500px', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <div className="fixed bottom-0 left-0 right-0 mx-auto px-2 pt-3 flex justify-around z-40" style={{ background: C.bg, maxWidth: '500px', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {tabs.map(({ id, icon: Icon, label }) => {
         const isActive = active === id;
         return (
@@ -1323,6 +1273,8 @@ export default function App() {
   const [data, setData] = useState(() => {
     const loaded = loadData() || initialData;
     if (!loaded.customWorkouts) loaded.customWorkouts = {};
+    if (!loaded.restTime) loaded.restTime = 90;
+    if (!loaded.divisionCount) loaded.divisionCount = 4;
     return loaded;
   });
   const [view, setView] = useState(data.user ? 'main' : 'onboarding');
@@ -1335,7 +1287,8 @@ export default function App() {
   const [showLibrary, setShowLibrary] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState(null);
 
-const plans = getWorkoutPlans(data.customWorkouts);
+  const plans = getWorkoutPlans(data.customWorkouts).slice(0, data.divisionCount || 4);
+
   useEffect(() => {
     const t = setTimeout(() => setShowSplash(false), 3000);
     return () => clearTimeout(t);
@@ -1395,36 +1348,7 @@ const plans = getWorkoutPlans(data.customWorkouts);
     setData({ ...data, notes: { ...data.notes, [exerciseName]: text } });
   };
 
-  const handleChangeRestTime = (seconds) => {
-    setData({ ...data, restTime: seconds });
-  };
-  const handleChangeDivision = (newCount) => {
-    const currentCount = data.divisionCount || 4;
-    if (newCount < currentCount) {
-      // Remove customizações dos treinos que vão sumir
-      const idsToRemove = ['A', 'B', 'C', 'D', 'E'].slice(newCount);
-      const newCustom = { ...data.customWorkouts };
-      idsToRemove.forEach(id => delete newCustom[id]);
-      setData({ ...data, divisionCount: newCount, customWorkouts: newCustom });
-    } else {
-      setData({ ...data, divisionCount: newCount });
-    }
-  };
-  const handleChangePhoto = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        setData({ ...data, photo: ev.target.result });
-      };
-      reader.readAsDataURL(file);
-    };
-    input.click();
-  };const handleExport = () => {
+  const handleExport = () => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1444,6 +1368,36 @@ const plans = getWorkoutPlans(data.customWorkouts);
       const newCustom = { ...data.customWorkouts };
       delete newCustom[workoutId];
       setData({ ...data, customWorkouts: newCustom });
+    }
+  };
+
+  const handleChangePhoto = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => { setData({ ...data, photo: ev.target.result }); };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  };
+
+  const handleChangeRestTime = (seconds) => {
+    setData({ ...data, restTime: seconds });
+  };
+
+  const handleChangeDivision = (newCount) => {
+    const currentCount = data.divisionCount || 4;
+    if (newCount < currentCount) {
+      const idsToRemove = ['A', 'B', 'C', 'D', 'E'].slice(newCount);
+      const newCustom = { ...data.customWorkouts };
+      idsToRemove.forEach(id => delete newCustom[id]);
+      setData({ ...data, divisionCount: newCount, customWorkouts: newCustom });
+    } else {
+      setData({ ...data, divisionCount: newCount });
     }
   };
 
@@ -1481,7 +1435,7 @@ const plans = getWorkoutPlans(data.customWorkouts);
                   {activeTab === 'home' && <Dashboard data={data} plans={plans} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} />}
                   {activeTab === 'workouts' && <WorkoutsList data={data} plans={plans} onSelectWorkout={handleStartWorkout} onOpenLibrary={() => setShowLibrary(true)} onEditWorkout={setEditingWorkout} onResetWorkout={handleResetWorkout} />}
                   {activeTab === 'stats' && <Stats data={data} />}
-                  {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} onChangePhoto={handleChangePhoto}  />}onChangeRestTime={handleChangeRestTime} onChangeDivision={handleChangeDivision}
+                  {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} onChangePhoto={handleChangePhoto} onChangeRestTime={handleChangeRestTime} onChangeDivision={handleChangeDivision} />}
                 </>
               )}
             </div>
@@ -1494,7 +1448,7 @@ const plans = getWorkoutPlans(data.customWorkouts);
           </div>
         )}
         {view === 'finished' && finishedSummary && <WorkoutFinished summary={finishedSummary} onClose={() => { setView('main'); setActiveTab('home'); setFinishedSummary(null); }} />}
-       {showRest && <RestTimer restTime={data.restTime || 90} onSkip={handleRestDone} onDone={handleRestDone} />}
+        {showRest && <RestTimer restTime={data.restTime || 90} onSkip={handleRestDone} onDone={handleRestDone} />}
       </div>
     </div>
   );
