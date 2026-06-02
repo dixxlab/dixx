@@ -19,8 +19,7 @@ const resetData = () => {
   try { localStorage.removeItem(STORAGE_KEY); } catch {}
 };
 
-const initialData = { user: null, history: [], notes: {}, customWorkouts: {}, photo: null, restTime: 90 };
-
+const initialData = { user: null, history: [], notes: {}, customWorkouts: {}, photo: null, restTime: 90, divisionCount: 4 };
 const DixxLogo = ({ size = 40 }) => (
   <img src="/dixx-logo.png" alt="Dixx" width={size} height={size} style={{ display: 'block' }} />
 );
@@ -398,6 +397,14 @@ const defaultWorkoutPlans = [
     { name: 'Encolhimento', sets: 3, reps: '15', fig: 'desen' },
     { name: 'Abdominal Reto', sets: 3, reps: '20', fig: 'abdo' },
     { name: 'Prancha', sets: 3, reps: '30s', fig: 'abdo' },
+  ]},
+  { id: 'E', name: 'Treino E', muscle: 'Braços', duration: 40, exercises: [
+    { name: 'Rosca Direta', sets: 4, reps: '10', fig: 'rosca' },
+    { name: 'Rosca Martelo', sets: 3, reps: '12', fig: 'rosca' },
+    { name: 'Rosca Scott', sets: 3, reps: '12', fig: 'rosca' },
+    { name: 'Tríceps Pulley', sets: 4, reps: '10', fig: 'puxada' },
+    { name: 'Tríceps Testa', sets: 3, reps: '12', fig: 'desen' },
+    { name: 'Tríceps Corda', sets: 3, reps: '12', fig: 'puxada' },
   ]},
 ];
 
@@ -1128,6 +1135,48 @@ const Stats = ({ data }) => {
   );
 };
 
+const DivisionPicker = ({ currentValue, onSave, onClose }) => {
+  const options = [
+    { count: 2, label: 'AB', desc: '2 dias por semana' },
+    { count: 3, label: 'ABC', desc: '3 dias por semana' },
+    { count: 4, label: 'ABCD', desc: '4 dias por semana' },
+    { count: 5, label: 'ABCDE', desc: '5 dias por semana' },
+  ];
+  const handleSelect = (count) => {
+    if (count < currentValue) {
+      const willDelete = currentValue - count;
+      if (!confirm(`Vai apagar ${willDelete} treino(s) extras e suas customizações. Tem certeza?`)) return;
+    }
+    onSave(count);
+  };
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center modal-in" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-t-3xl p-5 pb-8" style={{ background: C.bgCard }}>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-medium text-white">Divisão de treinos</h2>
+          <button onClick={onClose} className="p-1 transition-all active:scale-95">
+            <X size={20} color={C.textMuted} />
+          </button>
+        </div>
+        <p className="text-xs mb-4" style={{ color: C.textMuted }}>Escolha quantos treinos diferentes você quer fazer na semana.</p>
+        <div className="space-y-2">
+          {options.map((opt) => (
+            <button key={opt.count} onClick={() => handleSelect(opt.count)}
+              className="w-full p-4 rounded-2xl text-left transition-all active:scale-95 flex justify-between items-center"
+              style={{ background: currentValue === opt.count ? C.primary : C.bg, color: currentValue === opt.count ? C.bg : C.text, border: `1px solid ${currentValue === opt.count ? C.primary : C.border}` }}>
+              <div>
+                <div className="text-base font-medium">{opt.label}</div>
+                <div className="text-xs mt-0.5" style={{ color: currentValue === opt.count ? C.bg : C.textMuted, opacity: currentValue === opt.count ? 0.7 : 1 }}>{opt.desc}</div>
+              </div>
+              {currentValue === opt.count && <Check size={18} />}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const RestTimePicker = ({ currentValue, onSave, onClose }) => {
   const [custom, setCustom] = useState('');
   const presets = [60, 90, 120, 180];
@@ -1179,8 +1228,8 @@ const SettingRow = ({ icon: Icon, label, value, onClick }) => (
   </button>
 );
 
-const Profile = ({ data, onReset, onExport, onChangePhoto, onChangeRestTime }) => {
-  const [showRestPicker, setShowRestPicker] = useState(false);
+  const [showRestPicker, setShowRestPicker] = useState(false);const Profile = ({ data, onReset, onExport, onChangePhoto, onChangeRestTime, onChangeDivision }) => {
+    const [showDivisionPicker, setShowDivisionPicker] = useState(false);
   const streak = calculateStreak(data.history);
   const customCount = Object.keys(data.customWorkouts || {}).length;
   const restTime = data.restTime || 90;
@@ -1211,9 +1260,8 @@ const Profile = ({ data, onReset, onExport, onChangePhoto, onChangeRestTime }) =
       <div className="space-y-1 mb-6">
         <SettingRow icon={Clock} label="Tempo de descanso" value={`${restTime}s`} onClick={() => setShowRestPicker(true)} />
       {showRestPicker && <RestTimePicker currentValue={restTime} onSave={(v) => { onChangeRestTime(v); setShowRestPicker(false); }} onClose={() => setShowRestPicker(false)} />}
-        <SettingRow icon={Dumbbell} label="Divisão" value={data.user.division.split(' ')[0]} />
-        <SettingRow icon={Settings} label="Tema" value="Verde floresta" />
-      </div>
+    <SettingRow icon={Dumbbell} label="Divisão" value={divisionLabels[divisionCount]} onClick={() => setShowDivisionPicker(true)} />
+      {showDivisionPicker && <DivisionPicker currentValue={divisionCount} onSave={(v) => { onChangeDivision(v); setShowDivisionPicker(false); }} onClose={() => setShowDivisionPicker(false)} />}  </div>
       <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Dados</div>
       <div className="space-y-1">
         <button onClick={onExport} className="w-full rounded-2xl p-4 text-left transition-all active:scale-95 flex justify-between items-center" style={{ background: C.bgCard }}>
@@ -1286,8 +1334,7 @@ export default function App() {
   const [showLibrary, setShowLibrary] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState(null);
 
-  const plans = getWorkoutPlans(data.customWorkouts);
-
+const plans = getWorkoutPlans(data.customWorkouts);
   useEffect(() => {
     const t = setTimeout(() => setShowSplash(false), 3000);
     return () => clearTimeout(t);
@@ -1349,6 +1396,18 @@ export default function App() {
 
   const handleChangeRestTime = (seconds) => {
     setData({ ...data, restTime: seconds });
+  };
+  const handleChangeDivision = (newCount) => {
+    const currentCount = data.divisionCount || 4;
+    if (newCount < currentCount) {
+      // Remove customizações dos treinos que vão sumir
+      const idsToRemove = ['A', 'B', 'C', 'D', 'E'].slice(newCount);
+      const newCustom = { ...data.customWorkouts };
+      idsToRemove.forEach(id => delete newCustom[id]);
+      setData({ ...data, divisionCount: newCount, customWorkouts: newCustom });
+    } else {
+      setData({ ...data, divisionCount: newCount });
+    }
   };
   const handleChangePhoto = () => {
     const input = document.createElement('input');
@@ -1421,7 +1480,7 @@ export default function App() {
                   {activeTab === 'home' && <Dashboard data={data} plans={plans} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} />}
                   {activeTab === 'workouts' && <WorkoutsList data={data} plans={plans} onSelectWorkout={handleStartWorkout} onOpenLibrary={() => setShowLibrary(true)} onEditWorkout={setEditingWorkout} onResetWorkout={handleResetWorkout} />}
                   {activeTab === 'stats' && <Stats data={data} />}
-                  {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} onChangePhoto={handleChangePhoto} onChangeRestTime={handleChangeRestTime} />}
+                  {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} onChangePhoto={handleChangePhoto}  />}onChangeRestTime={handleChangeRestTime} onChangeDivision={handleChangeDivision}
                 </>
               )}
             </div>
