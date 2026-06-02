@@ -883,6 +883,8 @@ const WorkoutEditor = ({ workout, onSave, onClose }) => {
 const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
   const [exerciseIdx, setExerciseIdx] = useState(0);
   const [postponed, setPostponed] = useState([]);
+  const [showSkipModal, setShowSkipModal] = useState(false);
+  const [showSubstituteModal, setShowSubstituteModal] = useState(false);
   const [sets, setSets] = useState(workout.exercises.map(ex => Array(ex.sets).fill(null).map(() => ({ weight: '', reps: '', done: false }))));
   const [activeSetIdx, setActiveSetIdx] = useState(0);
   const [elapsed, setElapsed] = useState(0);
@@ -905,13 +907,37 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
     if (!set.reps) set.reps = ex.reps;
     set.done = true;
     setSets(newSets);
-    onShowRest(() => {
+   onShowRest(() => {
       if (activeSetIdx < ex.sets - 1) setActiveSetIdx(activeSetIdx + 1);
       else if (exerciseIdx < workout.exercises.length - 1) { setExerciseIdx(exerciseIdx + 1); setActiveSetIdx(0); }
+      else if (postponed.length > 0) {
+        // Volta pros exercícios adiados
+        const next = postponed[0];
+        setPostponed(postponed.slice(1));
+        setExerciseIdx(next);
+        setActiveSetIdx(0);
+      }
       else onFinish(sets, workout, elapsed);
     });
   };
   const updateSet = (idx, field, value) => { const newSets = [...sets]; newSets[exerciseIdx][idx][field] = value; setSets(newSets); };
+
+  const postponeExercise = () => {
+    setPostponed([...postponed, exerciseIdx]);
+    setShowSkipModal(false);
+    if (exerciseIdx < workout.exercises.length - 1) {
+      setExerciseIdx(exerciseIdx + 1);
+      setActiveSetIdx(0);
+    } else if (postponed.length > 0) {
+      // Volta pros adiados
+      const next = postponed[0];
+      setPostponed(postponed.slice(1));
+      setExerciseIdx(next);
+      setActiveSetIdx(0);
+    } else {
+      onFinish(sets, workout, elapsed);
+    }
+  };
 
   return (
     <div className="px-5 pt-6 pb-6" style={{ background: C.bg, minHeight: '100%' }}>
@@ -970,12 +996,43 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
         })}
       </div>
       <div className="flex gap-2">
-        <button onClick={() => {}} className="px-4 rounded-2xl font-medium transition-all active:scale-95 flex items-center justify-center gap-2" style={{ background: C.bgCard, color: C.textMuted }}>
+        <button onClick={() => setShowSkipModal(true)} className="px-4 rounded-2xl font-medium transition-all active:scale-95 flex items-center justify-center gap-2" style={{ background: C.bgCard, color: C.textMuted }}>
           <SkipForward size={18} />
         </button>
         <button onClick={completeSet} className="flex-1 p-4 rounded-2xl font-medium transition-all active:scale-95 flex items-center justify-center gap-2" style={{ background: C.primary, color: C.bg }}>
           <Check size={18} strokeWidth={2.5} /> Concluir série {activeSetIdx + 1}
         </button>
+      </div>
+      {showSkipModal && <SkipModal onPostpone={postponeExercise} onSubstitute={() => { setShowSkipModal(false); setShowSubstituteModal(true); }} onClose={() => setShowSkipModal(false)} />}
+    </div>
+  );
+};
+
+const SkipModal = ({ onPostpone, onSubstitute, onClose }) => {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center modal-in" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-t-3xl p-5 pb-8" style={{ background: C.bgCard }}>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-medium text-white">Pular exercício</h2>
+          <button onClick={onClose} className="p-1 transition-all active:scale-95"><X size={20} color={C.textMuted} /></button>
+        </div>
+        <p className="text-xs mb-4" style={{ color: C.textMuted }}>Máquina ocupada? Escolha o que fazer:</p>
+        <div className="space-y-2">
+          <button onClick={onPostpone} className="w-full p-4 rounded-2xl text-left transition-all active:scale-95 flex items-center gap-3" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
+            <div style={{ fontSize: '24px' }}>🔄</div>
+            <div>
+              <div className="text-sm font-medium text-white">Adiar pro final</div>
+              <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>Faço esse depois, vou pro próximo</div>
+            </div>
+          </button>
+          <button onClick={onSubstitute} className="w-full p-4 rounded-2xl text-left transition-all active:scale-95 flex items-center gap-3" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
+            <div style={{ fontSize: '24px' }}>🔀</div>
+            <div>
+              <div className="text-sm font-medium text-white">Substituir por outro</div>
+              <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>Troco por exercício similar</div>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
   );
