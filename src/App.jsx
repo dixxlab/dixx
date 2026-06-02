@@ -1166,8 +1166,8 @@ const RestTimePicker = ({ currentValue, onSave, onClose }) => {
   );
 };
 
-const SettingRow = ({ icon: Icon, label, value }) => (
-  <button className="w-full rounded-2xl p-4 transition-all active:scale-95 flex justify-between items-center" style={{ background: C.bgCard }}>
+const SettingRow = ({ icon: Icon, label, value, onClick }) => (
+  <button onClick={onClick} className="w-full rounded-2xl p-4 transition-all active:scale-95 flex justify-between items-center" style={{ background: C.bgCard }}>
     <div className="flex items-center gap-3">
       <Icon size={16} style={{ color: C.primary }} />
       <div className="text-sm text-white">{label}</div>
