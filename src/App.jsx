@@ -1228,8 +1228,9 @@ const SettingRow = ({ icon: Icon, label, value, onClick }) => (
   </button>
 );
 
-  const [showRestPicker, setShowRestPicker] = useState(false);const Profile = ({ data, onReset, onExport, onChangePhoto, onChangeRestTime, onChangeDivision }) => {
-    const [showDivisionPicker, setShowDivisionPicker] = useState(false);
+  const [showRestPicker, setShowRestPicker] = useState(false);
+  const Profile = ({ data, onReset, onExport, onChangePhoto, onChangeRestTime, onChangeDivision }) => {
+  const [showDivisionPicker, setShowDivisionPicker] = useState(false);
   const streak = calculateStreak(data.history);
   const customCount = Object.keys(data.customWorkouts || {}).length;
   const restTime = data.restTime || 90;
