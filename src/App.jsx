@@ -907,15 +907,25 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
     if (!set.reps) set.reps = ex.reps;
     set.done = true;
     setSets(newSets);
-   onShowRest(() => {
+  onShowRest(() => {
       if (activeSetIdx < ex.sets - 1) setActiveSetIdx(activeSetIdx + 1);
-      else if (exerciseIdx < workout.exercises.length - 1) { setExerciseIdx(exerciseIdx + 1); setActiveSetIdx(0); }
       else if (postponed.length > 0) {
-        // Volta pros exercícios adiados
         const next = postponed[0];
         setPostponed(postponed.slice(1));
         setExerciseIdx(next);
         setActiveSetIdx(0);
+      }
+      else if (exerciseIdx < workout.exercises.length - 1) {
+        let nextIdx = exerciseIdx + 1;
+        while (nextIdx < workout.exercises.length && sets[nextIdx].every(s => s.done)) {
+          nextIdx++;
+        }
+        if (nextIdx < workout.exercises.length) {
+          setExerciseIdx(nextIdx);
+          setActiveSetIdx(0);
+        } else {
+          onFinish(sets, workout, elapsed);
+        }
       }
       else onFinish(sets, workout, elapsed);
     });
