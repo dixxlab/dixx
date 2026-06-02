@@ -1397,7 +1397,6 @@ export default function App() {
         height: '100dvh',
         maxWidth: '500px',
         paddingTop: 'env(safe-area-inset-top)',
-       // paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
       <ExerciseAnimStyles />
