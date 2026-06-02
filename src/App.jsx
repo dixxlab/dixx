@@ -1256,7 +1256,7 @@ const BottomNav = ({ active, onChange }) => {
     { id: 'profile', icon: User, label: 'Perfil' },
   ];
   return (
-    <div className="fixed bottom-0 left-0 right-0 mx-auto px-2 pt-3 flex justify-around z-40" style={{ background: C.bg, borderTop: `1px solid ${C.border}`, maxWidth: '500px', paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <div className="fixed bottom-0 left-0 right-0 mx-auto px-2 pt-3 flex justify-around z-40" style={{ background: 'transparent', borderTop: 'none', maxWidth: '500px', paddingBottom: 'env(safe-area-inset-bottom)' }}>
       {tabs.map(({ id, icon: Icon, label }) => {
         const isActive = active === id;
         return (
