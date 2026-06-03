@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft, Trash2, ArrowUp, ArrowDown, MoreVertical, RotateCcw, Camera, SkipForward } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft, Trash2, ArrowUp, ArrowDown, MoreVertical, RotateCcw, Camera, SkipForward, Activity, Flame, Target, Zap, Award, TrendingDown } from 'lucide-react';
 
 const STORAGE_KEY = 'dixx_data_v1';
 
@@ -29,10 +29,13 @@ const C = {
   bg: '#050d08',
   bgCard: '#0e1f15',
   primary: '#10b981',
+  primaryDark: '#059669',
   text: '#ffffff',
   textMuted: '#6b8a78',
   border: '#1a3024',
   danger: '#ff6b6b',
+  warning: '#f59e0b',
+  info: '#3b82f6',
 };
 
 const Avatar = ({ name, photo, size = 40, onClick }) => {
@@ -49,10 +52,7 @@ let audioCtx = null;
 
 const initAudio = () => {
   if (!audioCtx) {
-    try {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      audioCtx = new AC();
-    } catch (e) {}
+    try { const AC = window.AudioContext || window.webkitAudioContext; audioCtx = new AC(); } catch (e) {}
   }
   if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 };
@@ -75,68 +75,68 @@ const playBeep = (frequency = 800, duration = 150) => {
 
 const exerciseLibrary = [
   { id: 'supino-reto', name: 'Supino Reto', muscle: 'Peito', equipment: 'Barra', fig: 'supino', defaultSets: 4, defaultReps: '10', description: 'Deite no banco, segure a barra na largura dos ombros. Desça controlado até o peito e empurre pra cima.' },
-  { id: 'supino-inclinado', name: 'Supino Inclinado', muscle: 'Peito', equipment: 'Barra', fig: 'supino', defaultSets: 3, defaultReps: '12', description: 'Banco inclinado 30-45°. Trabalha mais a porção superior do peito. Foco em manter cotovelos a 45°.' },
-  { id: 'supino-declinado', name: 'Supino Declinado', muscle: 'Peito', equipment: 'Barra', fig: 'supino', defaultSets: 3, defaultReps: '12', description: 'Banco declinado. Foca a porção inferior do peito. Pés bem fixos no apoio.' },
-  { id: 'supino-halteres', name: 'Supino com Halteres', muscle: 'Peito', equipment: 'Halteres', fig: 'supino', defaultSets: 3, defaultReps: '12', description: 'Amplitude maior que com barra. Halteres descem até a linha do peito, palmas viradas pra frente.' },
-  { id: 'crucifixo', name: 'Crucifixo', muscle: 'Peito', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Braços levemente flexionados. Abra em arco até sentir alongamento, fechando como se abraçasse um barril.' },
-  { id: 'crossover', name: 'Crossover na Polia', muscle: 'Peito', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '15', description: 'Polias altas. Traga as mãos em direção ao centro do corpo. Aperte o peito no final do movimento.' },
-  { id: 'mergulho', name: 'Mergulho (Dips)', muscle: 'Peito', equipment: 'Paralelas', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Incline o tronco pra frente pra focar mais peito. Desça até os cotovelos formarem 90°.' },
-  { id: 'peck-deck', name: 'Peck Deck (Voador)', muscle: 'Peito', equipment: 'Máquina', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Máquina específica. Aperte os braços contra os apoios sem usar impulso. Foco em apertar o peito.' },
-  { id: 'puxada-alta', name: 'Puxada Alta', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 4, defaultReps: '10', description: 'Pegada larga, puxe a barra até a altura do queixo. Foque em puxar com os cotovelos, não com as mãos.' },
-  { id: 'puxada-pegada-fechada', name: 'Puxada Pegada Fechada', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Pegada neutra ou supinada. Foca mais a parte inferior das costas e bíceps. Tronco levemente inclinado.' },
-  { id: 'remada-curvada', name: 'Remada Curvada', muscle: 'Costas', equipment: 'Barra', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Tronco a 45°, puxe a barra em direção ao umbigo. Cotovelos próximos ao corpo.' },
-  { id: 'remada-sentada', name: 'Remada Sentada', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Costas retas, puxe o triângulo até o abdômen. Aperte as escápulas no final do movimento.' },
-  { id: 'remada-cavalinho', name: 'Remada Cavalinho (T-Bar)', muscle: 'Costas', equipment: 'Barra T', fig: 'puxada', defaultSets: 3, defaultReps: '10', description: 'Pegada neutra na barra. Puxe contra o abdômen. Ótimo pra espessura das costas.' },
-  { id: 'remada-unilateral', name: 'Remada Unilateral (Serrote)', muscle: 'Costas', equipment: 'Halter', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Apoie joelho e mão no banco. Puxe o halter até a lateral do tronco. Foco unilateral pra corrigir desequilíbrios.' },
-  { id: 'pulldown', name: 'Pulldown com Braços Retos', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '15', description: 'Braços estendidos, traga a barra até as coxas. Isola o latíssimo. Sem flexão dos cotovelos.' },
-  { id: 'levantamento-terra', name: 'Levantamento Terra', muscle: 'Costas', equipment: 'Barra', fig: 'agacha', defaultSets: 4, defaultReps: '8', description: 'Composto pesado. Costas retas, quadril desce, barra próxima ao corpo. Cuidado com a execução.' },
-  { id: 'pull-up', name: 'Barra Fixa', muscle: 'Costas', equipment: 'Barra Fixa', fig: 'puxada', defaultSets: 4, defaultReps: '8', description: 'Pegada pronada, suba até o queixo passar da barra. Movimento controlado, sem balanço.' },
-  { id: 'agachamento-livre', name: 'Agachamento Livre', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 4, defaultReps: '10', description: 'Rei dos exercícios. Pés na largura dos ombros, desce até as coxas paralelas ao chão. Costas retas.' },
-  { id: 'agachamento-frontal', name: 'Agachamento Frontal', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Barra apoiada na clavícula. Mais focado em quadríceps. Tronco mais ereto que o livre.' },
-  { id: 'leg-press', name: 'Leg Press', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Pés na altura média do apoio. Desça até os joelhos formarem 90°. Não trave os joelhos no topo.' },
-  { id: 'hack-squat', name: 'Hack Squat', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Máquina com apoio nas costas. Foca quadríceps. Desça controlado, joelhos alinhados com os pés.' },
-  { id: 'cadeira-extensora', name: 'Cadeira Extensora', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Isolado de quadríceps. Estenda até quase travar o joelho, segure 1 segundo no topo.' },
-  { id: 'avanco', name: 'Avanço (Afundo)', muscle: 'Pernas', equipment: 'Halteres', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Passo à frente, desce até os dois joelhos formarem 90°. Alterne pernas. Trabalha equilíbrio.' },
-  { id: 'sissy-squat', name: 'Sissy Squat', muscle: 'Pernas', equipment: 'Corpo livre', fig: 'agacha', defaultSets: 3, defaultReps: '15', description: 'Avançado. Joelhos vão pra frente enquanto tronco inclina pra trás. Isolamento extremo de quadríceps.' },
-  { id: 'stiff', name: 'Stiff', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Pernas semi-rígidas, desça a barra até sentir alongamento no posterior. Foco em isquiotibiais.' },
-  { id: 'mesa-flexora', name: 'Mesa Flexora', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Deitado, flexione os joelhos contraindo o posterior. Movimento controlado em ambas as fases.' },
-  { id: 'cadeira-flexora', name: 'Cadeira Flexora Sentada', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Sentado, flexione os joelhos. Alternativa à mesa flexora. Mantém o quadril mais estável.' },
-  { id: 'good-morning', name: 'Good Morning', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Barra nas costas, incline o tronco pra frente mantendo costas retas. Trabalha posterior e lombar.' },
-  { id: 'panturrilha-pe', name: 'Panturrilha em Pé', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 4, defaultReps: '15', description: 'Suba na ponta dos pés o máximo possível, segure 1 segundo no topo. Trabalha gastrocnêmio.' },
-  { id: 'panturrilha-sentado', name: 'Panturrilha Sentado', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 4, defaultReps: '15', description: 'Foca o sóleo. Joelhos a 90°, suba na ponta dos pés. Amplitude completa de movimento.' },
-  { id: 'desenvolvimento', name: 'Desenvolvimento Militar', muscle: 'Ombro', equipment: 'Barra', fig: 'desen', defaultSets: 4, defaultReps: '10', description: 'Barra na altura dos ombros, empurre acima da cabeça. Foco no deltoide anterior e médio.' },
-  { id: 'desenvolvimento-halteres', name: 'Desenvolvimento com Halteres', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Sentado ou em pé. Mais natural que com barra. Halteres partem da altura dos ombros.' },
-  { id: 'arnold-press', name: 'Arnold Press', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Halteres começam com palmas pra dentro, gira durante a subida. Trabalha todo o deltoide.' },
-  { id: 'elevacao-lateral', name: 'Elevação Lateral', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Levante os halteres lateralmente até a altura dos ombros. Pouco peso, foco na execução. Isola o deltoide médio.' },
-  { id: 'elevacao-frontal', name: 'Elevação Frontal', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Levante os halteres à frente até a altura dos ombros. Foca o deltoide anterior.' },
-  { id: 'crucifixo-inverso', name: 'Crucifixo Inverso', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '15', description: 'Tronco inclinado, abra os braços lateralmente. Foca o deltoide posterior. Pouco peso.' },
-  { id: 'encolhimento', name: 'Encolhimento (Shrug)', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '15', description: 'Eleve os ombros em direção às orelhas. Segure 1 segundo no topo. Trabalha trapézio superior.' },
-  { id: 'rosca-direta', name: 'Rosca Direta', muscle: 'Bíceps', equipment: 'Barra', fig: 'rosca', defaultSets: 4, defaultReps: '10', description: 'Cotovelos fixos ao lado do corpo. Suba a barra até a altura do peito sem balançar o tronco.' },
-  { id: 'rosca-martelo', name: 'Rosca Martelo', muscle: 'Bíceps', equipment: 'Halteres', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Pegada neutra (martelo). Trabalha bíceps + braquial. Cotovelos fixos.' },
-  { id: 'rosca-alternada', name: 'Rosca Alternada', muscle: 'Bíceps', equipment: 'Halteres', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Halteres, um braço de cada vez. Supina o punho durante a subida. Mais foco em cada braço.' },
-  { id: 'rosca-concentrada', name: 'Rosca Concentrada', muscle: 'Bíceps', equipment: 'Halter', fig: 'rosca', defaultSets: 3, defaultReps: '10', description: 'Cotovelo apoiado na coxa interna. Isola muito o bíceps. Movimento bem controlado.' },
-  { id: 'rosca-scott', name: 'Rosca Scott', muscle: 'Bíceps', equipment: 'Barra W', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Banco Scott, cotovelos fixos no apoio. Pico de contração no bíceps. Cuidado pra não estender total.' },
-  { id: 'triceps-pulley', name: 'Tríceps Pulley', muscle: 'Tríceps', equipment: 'Polia', fig: 'puxada', defaultSets: 4, defaultReps: '10', description: 'Cotovelos fixos ao lado do corpo. Estenda os braços completamente, segure 1 segundo embaixo.' },
-  { id: 'triceps-testa', name: 'Tríceps Testa', muscle: 'Tríceps', equipment: 'Barra W', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Deitado, barra desce em direção à testa. Cotovelos fixos apontando pro teto.' },
-  { id: 'triceps-frances', name: 'Tríceps Francês', muscle: 'Tríceps', equipment: 'Halter', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Halter atrás da cabeça, com as duas mãos. Estenda os braços pra cima. Trabalha cabeça longa.' },
-  { id: 'triceps-corda', name: 'Tríceps Corda', muscle: 'Tríceps', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Corda na polia alta. Abra as mãos no final do movimento pra maior contração.' },
-  { id: 'triceps-mergulho-banco', name: 'Mergulho no Banco', muscle: 'Tríceps', equipment: 'Banco', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Mãos apoiadas no banco atrás. Desça com cotovelos pra trás, não pros lados. Foca tríceps.' },
-  { id: 'abdominal-reto', name: 'Abdominal Reto', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '20', description: 'Deitado, suba o tronco contraindo o abdômen. Não puxe o pescoço, queixo pra cima.' },
-  { id: 'prancha', name: 'Prancha', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '30s', description: 'Isométrico. Apoie nos antebraços, corpo reto da cabeça aos pés. Não deixe o quadril cair.' },
-  { id: 'abdominal-infra', name: 'Abdominal Infra (Pernas)', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '15', description: 'Deitado, eleve as pernas em direção ao peito. Trabalha mais a parte inferior do abdômen.' },
-  { id: 'abdominal-oblique', name: 'Abdominal Oblíquo', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '15', description: 'Suba o tronco torcendo, cotovelo em direção ao joelho oposto. Trabalha laterais do abdômen.' },
-  { id: 'abdominal-bicicleta', name: 'Abdominal Bicicleta', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '20', description: 'Pedalando no ar, encoste cotovelo no joelho oposto alternadamente. Trabalha reto + oblíquo.' },
-  { id: 'prancha-lateral', name: 'Prancha Lateral', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '30s', description: 'Apoie num antebraço só, corpo de lado. Trabalha oblíquos. Faça os dois lados.' },
-  { id: 'rosca-punho', name: 'Rosca de Punho', muscle: 'Antebraço', equipment: 'Barra', fig: 'rosca', defaultSets: 3, defaultReps: '15', description: 'Antebraços apoiados, só os punhos saem do apoio. Flexione os punhos pra cima.' },
-  { id: 'rosca-inversa', name: 'Rosca Inversa', muscle: 'Antebraço', equipment: 'Barra', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Pegada pronada (palmas pra baixo). Trabalha braquiorradial e antebraços.' },
-  { id: 'hip-thrust', name: 'Hip Thrust', muscle: 'Glúteo', equipment: 'Barra', fig: 'agacha', defaultSets: 4, defaultReps: '12', description: 'Costas no banco, barra no quadril. Eleve o quadril contraindo o glúteo no topo. Aperte 1 segundo.' },
-  { id: 'elevacao-pelvica', name: 'Elevação Pélvica', muscle: 'Glúteo', equipment: 'Corpo livre', fig: 'agacha', defaultSets: 3, defaultReps: '15', description: 'Deitado, pés no chão. Eleve o quadril contraindo o glúteo. Versão sem peso da hip thrust.' },
-  { id: 'coice-polia', name: 'Coice na Polia (Glúteo)', muscle: 'Glúteo', equipment: 'Polia', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Tornozeleira na polia baixa. Eleve a perna pra trás contraindo o glúteo. Tronco estável.' },
-  { id: 'abducao', name: 'Abdução de Quadril', muscle: 'Glúteo', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '15', description: 'Máquina específica. Abra as pernas contra a resistência. Foca glúteo médio.' },
-  { id: 'esteira', name: 'Esteira (Caminhada/Corrida)', muscle: 'Cardio', equipment: 'Esteira', fig: 'agacha', defaultSets: 1, defaultReps: '20min', description: 'Aquecimento ou cardio principal. Comece em ritmo confortável, vá aumentando aos poucos.' },
-  { id: 'bike', name: 'Bicicleta Ergométrica', muscle: 'Cardio', equipment: 'Bike', fig: 'agacha', defaultSets: 1, defaultReps: '20min', description: 'Cardio sem impacto, bom pra quem tem problema no joelho. Mantenha cadência constante.' },
-  { id: 'eliptico', name: 'Elíptico', muscle: 'Cardio', equipment: 'Elíptico', fig: 'desen', defaultSets: 1, defaultReps: '20min', description: 'Cardio sem impacto que envolve membros superiores. Postura ereta, movimento fluido.' },
-  { id: 'hiit', name: 'HIIT', muscle: 'Cardio', equipment: 'Variado', fig: 'agacha', defaultSets: 8, defaultReps: '30s', description: 'Treino intervalado de alta intensidade. 30s forte + 30s leve, repete várias vezes. Queima muita caloria.' },
+  { id: 'supino-inclinado', name: 'Supino Inclinado', muscle: 'Peito', equipment: 'Barra', fig: 'supino', defaultSets: 3, defaultReps: '12', description: 'Banco inclinado 30-45°. Trabalha mais a porção superior do peito.' },
+  { id: 'supino-declinado', name: 'Supino Declinado', muscle: 'Peito', equipment: 'Barra', fig: 'supino', defaultSets: 3, defaultReps: '12', description: 'Banco declinado. Foca a porção inferior do peito.' },
+  { id: 'supino-halteres', name: 'Supino com Halteres', muscle: 'Peito', equipment: 'Halteres', fig: 'supino', defaultSets: 3, defaultReps: '12', description: 'Amplitude maior que com barra.' },
+  { id: 'crucifixo', name: 'Crucifixo', muscle: 'Peito', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Braços levemente flexionados. Abra em arco até sentir alongamento.' },
+  { id: 'crossover', name: 'Crossover na Polia', muscle: 'Peito', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '15', description: 'Polias altas. Traga as mãos em direção ao centro do corpo.' },
+  { id: 'mergulho', name: 'Mergulho (Dips)', muscle: 'Peito', equipment: 'Paralelas', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Incline o tronco pra frente pra focar mais peito.' },
+  { id: 'peck-deck', name: 'Peck Deck (Voador)', muscle: 'Peito', equipment: 'Máquina', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Aperte os braços contra os apoios sem usar impulso.' },
+  { id: 'puxada-alta', name: 'Puxada Alta', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 4, defaultReps: '10', description: 'Pegada larga, puxe a barra até a altura do queixo.' },
+  { id: 'puxada-pegada-fechada', name: 'Puxada Pegada Fechada', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Pegada neutra ou supinada. Foca mais a parte inferior das costas.' },
+  { id: 'remada-curvada', name: 'Remada Curvada', muscle: 'Costas', equipment: 'Barra', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Tronco a 45°, puxe a barra em direção ao umbigo.' },
+  { id: 'remada-sentada', name: 'Remada Sentada', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Costas retas, puxe o triângulo até o abdômen.' },
+  { id: 'remada-cavalinho', name: 'Remada Cavalinho (T-Bar)', muscle: 'Costas', equipment: 'Barra T', fig: 'puxada', defaultSets: 3, defaultReps: '10', description: 'Pegada neutra na barra. Puxe contra o abdômen.' },
+  { id: 'remada-unilateral', name: 'Remada Unilateral (Serrote)', muscle: 'Costas', equipment: 'Halter', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Apoie joelho e mão no banco. Puxe o halter até a lateral do tronco.' },
+  { id: 'pulldown', name: 'Pulldown com Braços Retos', muscle: 'Costas', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '15', description: 'Braços estendidos, traga a barra até as coxas.' },
+  { id: 'levantamento-terra', name: 'Levantamento Terra', muscle: 'Costas', equipment: 'Barra', fig: 'agacha', defaultSets: 4, defaultReps: '8', description: 'Composto pesado. Costas retas, quadril desce.' },
+  { id: 'pull-up', name: 'Barra Fixa', muscle: 'Costas', equipment: 'Barra Fixa', fig: 'puxada', defaultSets: 4, defaultReps: '8', description: 'Pegada pronada, suba até o queixo passar da barra.' },
+  { id: 'agachamento-livre', name: 'Agachamento Livre', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 4, defaultReps: '10', description: 'Rei dos exercícios. Pés na largura dos ombros.' },
+  { id: 'agachamento-frontal', name: 'Agachamento Frontal', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Barra apoiada na clavícula. Mais focado em quadríceps.' },
+  { id: 'leg-press', name: 'Leg Press', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Pés na altura média do apoio. Desça até os joelhos formarem 90°.' },
+  { id: 'hack-squat', name: 'Hack Squat', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Máquina com apoio nas costas. Foca quadríceps.' },
+  { id: 'cadeira-extensora', name: 'Cadeira Extensora', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Isolado de quadríceps.' },
+  { id: 'avanco', name: 'Avanço (Afundo)', muscle: 'Pernas', equipment: 'Halteres', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Passo à frente, desce até os dois joelhos formarem 90°.' },
+  { id: 'sissy-squat', name: 'Sissy Squat', muscle: 'Pernas', equipment: 'Corpo livre', fig: 'agacha', defaultSets: 3, defaultReps: '15', description: 'Avançado. Joelhos vão pra frente enquanto tronco inclina pra trás.' },
+  { id: 'stiff', name: 'Stiff', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Pernas semi-rígidas, desça a barra até sentir alongamento no posterior.' },
+  { id: 'mesa-flexora', name: 'Mesa Flexora', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Deitado, flexione os joelhos contraindo o posterior.' },
+  { id: 'cadeira-flexora', name: 'Cadeira Flexora Sentada', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Sentado, flexione os joelhos.' },
+  { id: 'good-morning', name: 'Good Morning', muscle: 'Pernas', equipment: 'Barra', fig: 'agacha', defaultSets: 3, defaultReps: '10', description: 'Barra nas costas, incline o tronco pra frente mantendo costas retas.' },
+  { id: 'panturrilha-pe', name: 'Panturrilha em Pé', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 4, defaultReps: '15', description: 'Suba na ponta dos pés o máximo possível.' },
+  { id: 'panturrilha-sentado', name: 'Panturrilha Sentado', muscle: 'Pernas', equipment: 'Máquina', fig: 'agacha', defaultSets: 4, defaultReps: '15', description: 'Foca o sóleo. Joelhos a 90°.' },
+  { id: 'desenvolvimento', name: 'Desenvolvimento Militar', muscle: 'Ombro', equipment: 'Barra', fig: 'desen', defaultSets: 4, defaultReps: '10', description: 'Barra na altura dos ombros, empurre acima da cabeça.' },
+  { id: 'desenvolvimento-halteres', name: 'Desenvolvimento com Halteres', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Sentado ou em pé. Mais natural que com barra.' },
+  { id: 'arnold-press', name: 'Arnold Press', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Halteres começam com palmas pra dentro.' },
+  { id: 'elevacao-lateral', name: 'Elevação Lateral', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Levante os halteres lateralmente até a altura dos ombros.' },
+  { id: 'elevacao-frontal', name: 'Elevação Frontal', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Levante os halteres à frente até a altura dos ombros.' },
+  { id: 'crucifixo-inverso', name: 'Crucifixo Inverso', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '15', description: 'Tronco inclinado, abra os braços lateralmente.' },
+  { id: 'encolhimento', name: 'Encolhimento (Shrug)', muscle: 'Ombro', equipment: 'Halteres', fig: 'desen', defaultSets: 3, defaultReps: '15', description: 'Eleve os ombros em direção às orelhas.' },
+  { id: 'rosca-direta', name: 'Rosca Direta', muscle: 'Bíceps', equipment: 'Barra', fig: 'rosca', defaultSets: 4, defaultReps: '10', description: 'Cotovelos fixos ao lado do corpo. Suba a barra até a altura do peito.' },
+  { id: 'rosca-martelo', name: 'Rosca Martelo', muscle: 'Bíceps', equipment: 'Halteres', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Pegada neutra (martelo).' },
+  { id: 'rosca-alternada', name: 'Rosca Alternada', muscle: 'Bíceps', equipment: 'Halteres', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Halteres, um braço de cada vez.' },
+  { id: 'rosca-concentrada', name: 'Rosca Concentrada', muscle: 'Bíceps', equipment: 'Halter', fig: 'rosca', defaultSets: 3, defaultReps: '10', description: 'Cotovelo apoiado na coxa interna.' },
+  { id: 'rosca-scott', name: 'Rosca Scott', muscle: 'Bíceps', equipment: 'Barra W', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Banco Scott, cotovelos fixos no apoio.' },
+  { id: 'triceps-pulley', name: 'Tríceps Pulley', muscle: 'Tríceps', equipment: 'Polia', fig: 'puxada', defaultSets: 4, defaultReps: '10', description: 'Cotovelos fixos ao lado do corpo.' },
+  { id: 'triceps-testa', name: 'Tríceps Testa', muscle: 'Tríceps', equipment: 'Barra W', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Deitado, barra desce em direção à testa.' },
+  { id: 'triceps-frances', name: 'Tríceps Francês', muscle: 'Tríceps', equipment: 'Halter', fig: 'desen', defaultSets: 3, defaultReps: '12', description: 'Halter atrás da cabeça, com as duas mãos.' },
+  { id: 'triceps-corda', name: 'Tríceps Corda', muscle: 'Tríceps', equipment: 'Polia', fig: 'puxada', defaultSets: 3, defaultReps: '12', description: 'Corda na polia alta.' },
+  { id: 'triceps-mergulho-banco', name: 'Mergulho no Banco', muscle: 'Tríceps', equipment: 'Banco', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Mãos apoiadas no banco atrás.' },
+  { id: 'abdominal-reto', name: 'Abdominal Reto', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '20', description: 'Deitado, suba o tronco contraindo o abdômen.' },
+  { id: 'prancha', name: 'Prancha', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '30s', description: 'Isométrico. Apoie nos antebraços.' },
+  { id: 'abdominal-infra', name: 'Abdominal Infra (Pernas)', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '15', description: 'Deitado, eleve as pernas em direção ao peito.' },
+  { id: 'abdominal-oblique', name: 'Abdominal Oblíquo', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '15', description: 'Suba o tronco torcendo, cotovelo em direção ao joelho oposto.' },
+  { id: 'abdominal-bicicleta', name: 'Abdominal Bicicleta', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '20', description: 'Pedalando no ar, encoste cotovelo no joelho oposto alternadamente.' },
+  { id: 'prancha-lateral', name: 'Prancha Lateral', muscle: 'Abdômen', equipment: 'Corpo livre', fig: 'abdo', defaultSets: 3, defaultReps: '30s', description: 'Apoie num antebraço só, corpo de lado.' },
+  { id: 'rosca-punho', name: 'Rosca de Punho', muscle: 'Antebraço', equipment: 'Barra', fig: 'rosca', defaultSets: 3, defaultReps: '15', description: 'Antebraços apoiados, só os punhos saem do apoio.' },
+  { id: 'rosca-inversa', name: 'Rosca Inversa', muscle: 'Antebraço', equipment: 'Barra', fig: 'rosca', defaultSets: 3, defaultReps: '12', description: 'Pegada pronada (palmas pra baixo).' },
+  { id: 'hip-thrust', name: 'Hip Thrust', muscle: 'Glúteo', equipment: 'Barra', fig: 'agacha', defaultSets: 4, defaultReps: '12', description: 'Costas no banco, barra no quadril.' },
+  { id: 'elevacao-pelvica', name: 'Elevação Pélvica', muscle: 'Glúteo', equipment: 'Corpo livre', fig: 'agacha', defaultSets: 3, defaultReps: '15', description: 'Deitado, pés no chão. Eleve o quadril contraindo o glúteo.' },
+  { id: 'coice-polia', name: 'Coice na Polia (Glúteo)', muscle: 'Glúteo', equipment: 'Polia', fig: 'agacha', defaultSets: 3, defaultReps: '12', description: 'Tornozeleira na polia baixa.' },
+  { id: 'abducao', name: 'Abdução de Quadril', muscle: 'Glúteo', equipment: 'Máquina', fig: 'agacha', defaultSets: 3, defaultReps: '15', description: 'Máquina específica.' },
+  { id: 'esteira', name: 'Esteira (Caminhada/Corrida)', muscle: 'Cardio', equipment: 'Esteira', fig: 'agacha', defaultSets: 1, defaultReps: '20min', description: 'Aquecimento ou cardio principal.' },
+  { id: 'bike', name: 'Bicicleta Ergométrica', muscle: 'Cardio', equipment: 'Bike', fig: 'agacha', defaultSets: 1, defaultReps: '20min', description: 'Cardio sem impacto.' },
+  { id: 'eliptico', name: 'Elíptico', muscle: 'Cardio', equipment: 'Elíptico', fig: 'desen', defaultSets: 1, defaultReps: '20min', description: 'Cardio sem impacto que envolve membros superiores.' },
+  { id: 'hiit', name: 'HIIT', muscle: 'Cardio', equipment: 'Variado', fig: 'agacha', defaultSets: 8, defaultReps: '30s', description: 'Treino intervalado de alta intensidade.' },
 ];
 
 const muscleGroups = ['Todos', 'Peito', 'Costas', 'Pernas', 'Ombro', 'Bíceps', 'Tríceps', 'Abdômen', 'Antebraço', 'Glúteo', 'Cardio'];
@@ -157,7 +157,11 @@ const ExerciseAnimStyles = () => (
     @keyframes ex-desen-arm { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(0.5); } }
     @keyframes ex-abdo { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(-35deg); } }
     @keyframes ex-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    @keyframes chart-draw { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
+    @keyframes fade-up { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
     .ex-anim { animation-duration: 2.4s; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+    .chart-line { stroke-dasharray: 1000; animation: chart-draw 1.5s ease-out forwards; }
+    .fade-up { animation: fade-up 0.4s ease-out; }
   `}</style>
 );
 
@@ -450,6 +454,626 @@ const formatRelative = (dateStr) => {
   return `há ${Math.floor(diff / 30)} meses`;
 };
 
+// =========== UTILITÁRIOS DOS GRÁFICOS ===========
+
+// Calcula 1RM estimado (fórmula Epley: weight * (1 + reps/30))
+const estimate1RM = (weight, reps) => {
+  const w = parseFloat(weight) || 0;
+  const r = parseInt(reps) || 0;
+  if (w === 0 || r === 0) return 0;
+  if (r === 1) return w;
+  return w * (1 + r / 30);
+};
+
+// Filtra histórico por período (em dias)
+const filterByPeriod = (history, days) => {
+  if (days === 'all') return history;
+  const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+  return history.filter(s => new Date(s.date).getTime() >= cutoff);
+};
+
+// Pega o melhor set de um exercício em uma sessão (maior 1RM estimado)
+const getBestSetOfSession = (session, exerciseName) => {
+  const ex = session.exercises.find(e => e.name === exerciseName);
+  if (!ex || ex.sets.length === 0) return null;
+  let best = null;
+  let bestRM = 0;
+  for (const set of ex.sets) {
+    const rm = estimate1RM(set.weight, set.reps);
+    if (rm > bestRM) {
+      bestRM = rm;
+      best = { weight: parseFloat(set.weight) || 0, reps: parseInt(set.reps) || 0, oneRM: rm };
+    }
+  }
+  return best;
+};
+
+// Cria pontos do gráfico pra um exercício
+const buildChartData = (history, exerciseName, days) => {
+  const filtered = filterByPeriod(history, days);
+  const points = [];
+  for (const session of filtered) {
+    const best = getBestSetOfSession(session, exerciseName);
+    if (best) {
+      const ex = session.exercises.find(e => e.name === exerciseName);
+      const totalVolume = ex.sets.reduce((sum, s) => sum + (parseFloat(s.weight) || 0) * (parseInt(s.reps) || 0), 0);
+      const totalReps = ex.sets.reduce((sum, s) => sum + (parseInt(s.reps) || 0), 0);
+      points.push({
+        date: session.date,
+        weight: best.weight,
+        reps: best.reps,
+        oneRM: Math.round(best.oneRM * 10) / 10,
+        volume: totalVolume,
+        totalReps,
+        setsCount: ex.sets.length,
+      });
+    }
+  }
+  return points;
+};
+
+// Encontra os PRs (recordes) no histórico
+const findPRPoints = (chartData) => {
+  const prIndexes = [];
+  let maxWeight = 0;
+  chartData.forEach((p, i) => {
+    if (p.weight > maxWeight) {
+      maxWeight = p.weight;
+      if (i > 0) prIndexes.push(i); // só marca PR se não for o primeiro
+    }
+  });
+  return prIndexes;
+};
+
+// Gera insights inteligentes
+const generateInsights = (chartData, exerciseName) => {
+  if (chartData.length === 0) return [];
+  const insights = [];
+  
+  // Insight 1: comparar último com penúltimo
+  if (chartData.length >= 2) {
+    const last = chartData[chartData.length - 1];
+    const prev = chartData[chartData.length - 2];
+    const diff = last.weight - prev.weight;
+    if (diff > 0) {
+      insights.push({ type: 'success', icon: '📈', text: `+${diff}kg desde o último treino! Continua nessa pegada.` });
+    } else if (diff < 0) {
+      insights.push({ type: 'warning', icon: '📉', text: `Reduziu ${Math.abs(diff)}kg em relação ao último. Dia ruim ou de propósito?` });
+    } else {
+      insights.push({ type: 'info', icon: '➡️', text: `Mesmo peso do último treino. Tenta subir 2,5kg no próximo!` });
+    }
+  }
+  
+  // Insight 2: detectar platô (3+ treinos com mesmo peso máximo)
+  if (chartData.length >= 3) {
+    const lastThree = chartData.slice(-3);
+    const allSameWeight = lastThree.every(p => p.weight === lastThree[0].weight);
+    if (allSameWeight && lastThree[0].weight > 0) {
+      insights.push({ type: 'warning', icon: '⚠️', text: `Platô detectado: ${lastThree.length} treinos com ${lastThree[0].weight}kg. Variar reps ou descansar 1 semana pode ajudar.` });
+    }
+  }
+  
+  // Insight 3: progresso geral
+  if (chartData.length >= 4) {
+    const first = chartData[0];
+    const last = chartData[chartData.length - 1];
+    const totalGain = last.weight - first.weight;
+    if (totalGain > 0) {
+      const pct = ((last.weight - first.weight) / first.weight * 100).toFixed(0);
+      insights.push({ type: 'success', icon: '🚀', text: `+${totalGain}kg (+${pct}%) desde o primeiro treino. Tá voando!` });
+    }
+  }
+  
+  // Insight 4: estimar quando bate PR
+  if (chartData.length >= 3) {
+    const recent = chartData.slice(-3);
+    const trend = (recent[2].weight - recent[0].weight) / 2; // ganho médio por treino
+    if (trend > 0) {
+      const next = recent[2].weight + trend;
+      insights.push({ type: 'info', icon: '🎯', text: `Próximo treino: tenta ${Math.round(next * 2) / 2}kg (na tendência atual).` });
+    }
+  }
+  
+  return insights;
+};
+
+// Calcula heatmap dos últimos 12 semanas
+const buildHeatmap = (history) => {
+  const weeks = 12;
+  const today = new Date();
+  today.setHours(23, 59, 59, 999);
+  const startDate = new Date(today);
+  startDate.setDate(startDate.getDate() - (weeks * 7) + 1);
+  startDate.setHours(0, 0, 0, 0);
+  
+  // Conta treinos por dia
+  const countByDay = {};
+  history.forEach(s => {
+    const d = new Date(s.date);
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    countByDay[key] = (countByDay[key] || 0) + 1;
+  });
+  
+  // Monta grid de 12 semanas (7 dias cada)
+  const grid = [];
+  let current = new Date(startDate);
+  for (let w = 0; w < weeks; w++) {
+    const week = [];
+    for (let d = 0; d < 7; d++) {
+      const key = `${current.getFullYear()}-${current.getMonth()}-${current.getDate()}`;
+      const count = countByDay[key] || 0;
+      const isFuture = current > today;
+      week.push({ date: new Date(current), count, isFuture });
+      current.setDate(current.getDate() + 1);
+    }
+    grid.push(week);
+  }
+  return grid;
+};
+
+// =========== COMPONENTE DE GRÁFICO LINHA ===========
+
+const LineChart = ({ data, height = 180, dataKey = 'oneRM', label = '1RM', color, showPRs = false }) => {
+  const chartColor = color || C.primary;
+  const padding = { top: 20, right: 20, bottom: 30, left: 40 };
+  const width = 320;
+  
+  if (data.length === 0) {
+    return (
+      <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
+        <div className="text-3xl mb-2">📊</div>
+        <div className="text-sm">Sem dados ainda nesse período</div>
+      </div>
+    );
+  }
+  
+  if (data.length === 1) {
+    return (
+      <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
+        <div className="text-3xl mb-2">📍</div>
+        <div className="text-sm">Faz mais treinos pra ver evolução</div>
+        <div className="text-xs mt-2" style={{ color: C.primary }}>Atual: {data[0][dataKey]}{dataKey === 'oneRM' || dataKey === 'weight' ? 'kg' : ''}</div>
+      </div>
+    );
+  }
+  
+  const values = data.map(d => d[dataKey]);
+  const maxVal = Math.max(...values);
+  const minVal = Math.min(...values);
+  const range = maxVal - minVal || 1;
+  const yMin = Math.max(0, minVal - range * 0.15);
+  const yMax = maxVal + range * 0.15;
+  const yRange = yMax - yMin || 1;
+  
+  const innerWidth = width - padding.left - padding.right;
+  const innerHeight = height - padding.top - padding.bottom;
+  
+  const getX = (i) => padding.left + (i / (data.length - 1)) * innerWidth;
+  const getY = (val) => padding.top + (1 - (val - yMin) / yRange) * innerHeight;
+  
+  const pathData = data.map((d, i) => `${i === 0 ? 'M' : 'L'} ${getX(i)} ${getY(d[dataKey])}`).join(' ');
+  const areaPath = pathData + ` L ${getX(data.length - 1)} ${height - padding.bottom} L ${getX(0)} ${height - padding.bottom} Z`;
+  
+  const prIndexes = showPRs ? findPRPoints(data) : [];
+  
+  // Gera 4 linhas de grid no eixo Y
+  const gridLines = [];
+  for (let i = 0; i <= 3; i++) {
+    const y = padding.top + (i / 3) * innerHeight;
+    const val = yMax - (i / 3) * yRange;
+    gridLines.push({ y, val: Math.round(val * 10) / 10 });
+  }
+  
+  return (
+    <div className="rounded-2xl p-3" style={{ background: C.bgCard }}>
+      <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: 'auto' }}>
+        <defs>
+          <linearGradient id={`grad-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={chartColor} stopOpacity="0.3" />
+            <stop offset="100%" stopColor={chartColor} stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        
+        {/* Grid horizontal */}
+        {gridLines.map((g, i) => (
+          <g key={i}>
+            <line x1={padding.left} y1={g.y} x2={width - padding.right} y2={g.y} stroke={C.border} strokeWidth="0.5" strokeDasharray="2,2" />
+            <text x={padding.left - 6} y={g.y + 3} fill={C.textMuted} fontSize="9" textAnchor="end">{g.val}</text>
+          </g>
+        ))}
+        
+        {/* Área embaixo da linha */}
+        <path d={areaPath} fill={`url(#grad-${dataKey})`} />
+        
+        {/* Linha */}
+        <path d={pathData} fill="none" stroke={chartColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="chart-line" />
+        
+        {/* Pontos */}
+        {data.map((d, i) => {
+          const isPR = prIndexes.includes(i);
+          return (
+            <g key={i}>
+              <circle cx={getX(i)} cy={getY(d[dataKey])} r={isPR ? 5 : 3.5} fill={isPR ? C.warning : chartColor} stroke={C.bg} strokeWidth="2" />
+              {isPR && <text x={getX(i)} y={getY(d[dataKey]) - 10} textAnchor="middle" fontSize="11">🏆</text>}
+            </g>
+          );
+        })}
+        
+        {/* Eixo X: primeiro e último */}
+        <text x={getX(0)} y={height - 10} fill={C.textMuted} fontSize="9" textAnchor="middle">
+          {new Date(data[0].date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+        </text>
+        <text x={getX(data.length - 1)} y={height - 10} fill={C.textMuted} fontSize="9" textAnchor="middle">
+          {new Date(data[data.length - 1].date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
+        </text>
+      </svg>
+      <div className="text-center text-[10px] mt-1" style={{ color: C.textMuted }}>{label}</div>
+    </div>
+  );
+};
+
+// =========== HEATMAP ===========
+
+const Heatmap = ({ history }) => {
+  const grid = buildHeatmap(history);
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  
+  const getColor = (count, isFuture) => {
+    if (isFuture) return C.bg;
+    if (count === 0) return C.bgCard;
+    if (count === 1) return 'rgba(16,185,129,0.4)';
+    if (count === 2) return 'rgba(16,185,129,0.7)';
+    return C.primary;
+  };
+  
+  return (
+    <div className="rounded-2xl p-4" style={{ background: C.bgCard }}>
+      <div className="flex justify-between items-center mb-3">
+        <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Últimas 12 semanas</div>
+        <div className="flex items-center gap-1 text-[9px]" style={{ color: C.textMuted }}>
+          <span>Menos</span>
+          <div className="w-2 h-2 rounded-sm" style={{ background: C.bgCard }} />
+          <div className="w-2 h-2 rounded-sm" style={{ background: 'rgba(16,185,129,0.4)' }} />
+          <div className="w-2 h-2 rounded-sm" style={{ background: 'rgba(16,185,129,0.7)' }} />
+          <div className="w-2 h-2 rounded-sm" style={{ background: C.primary }} />
+          <span>Mais</span>
+        </div>
+      </div>
+      <div className="flex gap-1">
+        <div className="flex flex-col gap-1 justify-around mr-1">
+          {['S','T','Q','Q','S','S','D'].map((d, i) => (
+            <div key={i} className="text-[8px] h-4 flex items-center" style={{ color: C.textMuted }}>{i % 2 === 0 ? d : ''}</div>
+          ))}
+        </div>
+        <div className="flex gap-1 flex-1">
+          {grid.map((week, wi) => (
+            <div key={wi} className="flex flex-col gap-1 flex-1">
+              {week.map((day, di) => (
+                <div key={di} className="aspect-square rounded-sm" style={{ background: getColor(day.count, day.isFuture), minHeight: '14px' }} title={`${day.date.toLocaleDateString('pt-BR')}: ${day.count} treino(s)`} />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// =========== INSIGHTS CARD ===========
+
+const InsightCard = ({ insights }) => {
+  if (insights.length === 0) return null;
+  return (
+    <div className="space-y-2 mb-4">
+      {insights.map((ins, i) => {
+        const bgColor = ins.type === 'success' ? 'rgba(16,185,129,0.1)' : ins.type === 'warning' ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)';
+        const borderColor = ins.type === 'success' ? C.primary : ins.type === 'warning' ? C.warning : C.info;
+        return (
+          <div key={i} className="rounded-2xl p-3 flex items-start gap-2 fade-up" style={{ background: bgColor, border: `1px solid ${borderColor}` }}>
+            <div className="text-lg flex-shrink-0">{ins.icon}</div>
+            <div className="text-xs text-white leading-relaxed">{ins.text}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+// =========== TELA DE EVOLUÇÃO POR EXERCÍCIO ===========
+
+const ExerciseEvolution = ({ history, exerciseName, onClose }) => {
+  const [period, setPeriod] = useState(90);
+  const [metric, setMetric] = useState('oneRM');
+  
+  const chartData = useMemo(() => buildChartData(history, exerciseName, period), [history, exerciseName, period]);
+  const insights = useMemo(() => generateInsights(chartData, exerciseName), [chartData, exerciseName]);
+  
+  const periods = [
+    { val: 7, label: '7d' },
+    { val: 30, label: '30d' },
+    { val: 90, label: '90d' },
+    { val: 365, label: '1ano' },
+    { val: 'all', label: 'Tudo' },
+  ];
+  
+  const metrics = [
+    { val: 'oneRM', label: '1RM estimado', color: C.primary, unit: 'kg' },
+    { val: 'weight', label: 'Peso máximo', color: C.info, unit: 'kg' },
+    { val: 'volume', label: 'Volume total', color: C.warning, unit: 'kg' },
+    { val: 'totalReps', label: 'Reps totais', color: '#a855f7', unit: '' },
+  ];
+  
+  const currentMetric = metrics.find(m => m.val === metric);
+  
+  // Estatísticas resumo
+  const stats = useMemo(() => {
+    if (chartData.length === 0) return null;
+    const lastP = chartData[chartData.length - 1];
+    const maxWeight = Math.max(...chartData.map(p => p.weight));
+    const max1RM = Math.max(...chartData.map(p => p.oneRM));
+    const totalSessions = chartData.length;
+    const totalVolume = chartData.reduce((sum, p) => sum + p.volume, 0);
+    return { lastP, maxWeight, max1RM, totalSessions, totalVolume };
+  }, [chartData]);
+  
+  return (
+    <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
+      <div className="flex items-center gap-3 mb-2">
+        <button onClick={onClose} className="p-2 -ml-2 transition-all active:scale-95">
+          <ArrowLeft size={20} color={C.text} />
+        </button>
+        <div className="flex-1">
+          <h1 className="text-xl font-medium text-white">{exerciseName}</h1>
+          <p className="text-xs" style={{ color: C.textMuted }}>{chartData.length} treino(s) no período</p>
+        </div>
+      </div>
+      
+      {/* Filtro de período */}
+      <div className="flex gap-2 overflow-x-auto mb-4 pb-2 mt-4" style={{ scrollbarWidth: 'none' }}>
+        {periods.map((p) => (
+          <button key={p.val} onClick={() => setPeriod(p.val)}
+            className="px-3 py-1.5 rounded-full text-[11px] font-medium whitespace-nowrap transition-all active:scale-95"
+            style={{ background: period === p.val ? C.primary : C.bgCard, color: period === p.val ? C.bg : C.textMuted }}>
+            {p.label}
+          </button>
+        ))}
+      </div>
+      
+      {/* Estatísticas resumo */}
+      {stats && (
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <div className="rounded-2xl p-3" style={{ background: C.bgCard }}>
+            <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Peso atual</div>
+            <div className="text-xl font-medium" style={{ color: C.primary }}>{stats.lastP.weight}kg</div>
+            <div className="text-[10px]" style={{ color: C.textMuted }}>× {stats.lastP.reps} reps</div>
+          </div>
+          <div className="rounded-2xl p-3" style={{ background: C.bgCard }}>
+            <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>1RM estimado</div>
+            <div className="text-xl font-medium" style={{ color: C.warning }}>{stats.max1RM.toFixed(1)}kg</div>
+            <div className="text-[10px]" style={{ color: C.textMuted }}>máximo teórico</div>
+          </div>
+          <div className="rounded-2xl p-3" style={{ background: C.bgCard }}>
+            <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>PR de peso</div>
+            <div className="text-xl font-medium flex items-center gap-1" style={{ color: C.warning }}>{stats.maxWeight}kg <span className="text-sm">🏆</span></div>
+            <div className="text-[10px]" style={{ color: C.textMuted }}>recorde absoluto</div>
+          </div>
+          <div className="rounded-2xl p-3" style={{ background: C.bgCard }}>
+            <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Volume total</div>
+            <div className="text-xl font-medium" style={{ color: C.info }}>{(stats.totalVolume/1000).toFixed(1)}t</div>
+            <div className="text-[10px]" style={{ color: C.textMuted }}>no período</div>
+          </div>
+        </div>
+      )}
+      
+      {/* Insights */}
+      <InsightCard insights={insights} />
+      
+      {/* Seletor de métrica */}
+      <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Gráfico de evolução</div>
+      <div className="flex gap-2 overflow-x-auto mb-3 pb-2" style={{ scrollbarWidth: 'none' }}>
+        {metrics.map((m) => (
+          <button key={m.val} onClick={() => setMetric(m.val)}
+            className="px-3 py-1.5 rounded-full text-[10px] font-medium whitespace-nowrap transition-all active:scale-95"
+            style={{ background: metric === m.val ? m.color : C.bgCard, color: metric === m.val ? C.bg : C.textMuted }}>
+            {m.label}
+          </button>
+        ))}
+      </div>
+      
+      {/* Gráfico */}
+      <LineChart data={chartData} dataKey={metric} label={currentMetric.label} color={currentMetric.color} showPRs={metric === 'weight' || metric === 'oneRM'} />
+      
+      {/* Tabela de últimos 5 treinos */}
+      {chartData.length > 0 && (
+        <>
+          <div className="text-[10px] uppercase tracking-wider mb-2 mt-6" style={{ color: C.textMuted }}>Últimos treinos</div>
+          <div className="space-y-2">
+            {[...chartData].reverse().slice(0, 5).map((p, i) => (
+              <div key={i} className="rounded-2xl p-3 flex justify-between items-center" style={{ background: C.bgCard }}>
+                <div>
+                  <div className="text-sm font-medium text-white">{p.weight}kg × {p.reps} reps</div>
+                  <div className="text-[10px]" style={{ color: C.textMuted }}>{formatRelative(p.date)} • {p.setsCount} sets • {(p.volume/1000).toFixed(1)}t</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm font-medium" style={{ color: C.primary }}>{p.oneRM.toFixed(1)}kg</div>
+                  <div className="text-[9px]" style={{ color: C.textMuted }}>1RM</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+// =========== STATS TELA PRINCIPAL ===========
+
+const Stats = ({ data, onSelectExercise }) => {
+  const streak = calculateStreak(data.history);
+  const prs = calculatePRs(data.history);
+  const today = new Date();
+  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+  const calendar = Array.from({ length: daysInMonth }, (_, i) => {
+    const dayDate = new Date(today.getFullYear(), today.getMonth(), i + 1);
+    return data.history.some(s => new Date(s.date).toDateString() === dayDate.toDateString());
+  });
+  
+  // Lista de todos os exercícios já feitos com contagem
+  const allExercises = useMemo(() => {
+    const map = {};
+    data.history.forEach(s => {
+      s.exercises.forEach(ex => {
+        if (!map[ex.name]) {
+          map[ex.name] = { name: ex.name, count: 0, lastDate: s.date };
+          // Pega o fig do exerciseLibrary se existir
+          const libEx = exerciseLibrary.find(e => e.name === ex.name);
+          map[ex.name].fig = libEx ? libEx.fig : 'desen';
+        }
+        map[ex.name].count++;
+        if (new Date(s.date) > new Date(map[ex.name].lastDate)) {
+          map[ex.name].lastDate = s.date;
+        }
+      });
+    });
+    return Object.values(map).sort((a, b) => b.count - a.count);
+  }, [data.history]);
+  
+  // Stats gerais
+  const totalVolume = data.history.reduce((sum, s) =>
+    sum + s.exercises.reduce((es, ex) =>
+      es + ex.sets.reduce((ss, set) =>
+        ss + (parseFloat(set.weight) || 0) * (parseInt(set.reps) || 0), 0), 0), 0);
+  const totalSessions = data.history.length;
+  const avgPerWeek = totalSessions > 0 ?
+    (totalSessions / Math.max(1, Math.ceil((Date.now() - new Date(data.history[0].date)) / (1000 * 60 * 60 * 24 * 7)))).toFixed(1) : 0;
+  
+  return (
+    <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
+      <h1 className="text-2xl font-medium text-white mb-1">Sua evolução</h1>
+      <p className="text-sm mb-6" style={{ color: C.textMuted }}>Análise completa do progresso</p>
+      
+      {/* Stats gerais */}
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="rounded-2xl p-3" style={{ background: C.bgCard }}>
+          <div className="flex items-center gap-2 mb-1">
+            <Flame size={14} style={{ color: C.warning }} />
+            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Streak</div>
+          </div>
+          <div className="text-2xl font-medium" style={{ color: C.primary }}>{streak} {streak === 1 ? 'dia' : 'dias'}</div>
+        </div>
+        <div className="rounded-2xl p-3" style={{ background: C.bgCard }}>
+          <div className="flex items-center gap-2 mb-1">
+            <Activity size={14} style={{ color: C.info }} />
+            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Treinos/sem</div>
+          </div>
+          <div className="text-2xl font-medium" style={{ color: C.primary }}>{avgPerWeek}</div>
+        </div>
+        <div className="rounded-2xl p-3" style={{ background: C.bgCard }}>
+          <div className="flex items-center gap-2 mb-1">
+            <Trophy size={14} style={{ color: C.warning }} />
+            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Total treinos</div>
+          </div>
+          <div className="text-2xl font-medium" style={{ color: C.primary }}>{totalSessions}</div>
+        </div>
+        <div className="rounded-2xl p-3" style={{ background: C.bgCard }}>
+          <div className="flex items-center gap-2 mb-1">
+            <TrendingUp size={14} style={{ color: C.info }} />
+            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Volume total</div>
+          </div>
+          <div className="text-2xl font-medium" style={{ color: C.primary }}>{(totalVolume/1000).toFixed(1)}t</div>
+        </div>
+      </div>
+      
+      {/* Heatmap */}
+      {data.history.length > 0 && (
+        <>
+          <div className="flex items-center gap-2 mb-2 mt-4">
+            <Calendar size={14} style={{ color: C.primary }} />
+            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Consistência</div>
+          </div>
+          <Heatmap history={data.history} />
+        </>
+      )}
+      
+      {/* Mês atual (calendário) */}
+      <div className="text-[10px] uppercase tracking-wider mb-2 mt-4" style={{ color: C.textMuted }}>{today.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</div>
+      <div className="rounded-2xl p-4 mb-4" style={{ background: C.bgCard }}>
+        <div className="grid grid-cols-7 gap-1.5 mb-2">
+          {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, i) => (
+            <div key={i} className="text-center text-[10px]" style={{ color: C.textMuted }}>{d}</div>
+          ))}
+        </div>
+        <div className="grid grid-cols-7 gap-1.5">
+          {calendar.map((done, i) => (
+            <div key={i} className="aspect-square rounded-md flex items-center justify-center text-[10px] font-medium"
+              style={{ background: done ? C.primary : C.bg, color: done ? C.bg : C.textMuted, border: (i + 1) === today.getDate() ? `2px solid ${C.text}` : 'none' }}>
+              {i + 1}
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      {/* PRs recentes */}
+      {prs.length > 0 && (
+        <>
+          <div className="flex items-center gap-2 mb-2 mt-4">
+            <Award size={14} style={{ color: C.warning }} />
+            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Recordes pessoais</div>
+          </div>
+          <div className="space-y-2 mb-4">
+            {prs.map((pr, i) => (
+              <button key={i} onClick={() => onSelectExercise(pr.exercise)} className="w-full rounded-2xl p-3 flex justify-between items-center transition-all active:scale-95" style={{ background: C.bgCard }}>
+                <div className="text-left">
+                  <div className="text-sm font-medium text-white">{pr.exercise}</div>
+                  <div className="text-[10px]" style={{ color: C.textMuted }}>{formatRelative(pr.date)}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="font-medium flex items-center gap-1" style={{ color: C.primary }}>{pr.weight}kg <span>🏆</span></div>
+                  <ChevronRight size={16} style={{ color: C.textMuted }} />
+                </div>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+      
+      {/* Lista de exercícios pra ver gráfico */}
+      {allExercises.length > 0 && (
+        <>
+          <div className="flex items-center gap-2 mb-2 mt-4">
+            <BarChart3 size={14} style={{ color: C.primary }} />
+            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Evolução por exercício</div>
+          </div>
+          <div className="space-y-2">
+            {allExercises.map((ex, i) => (
+              <button key={i} onClick={() => onSelectExercise(ex.name)} className="w-full rounded-2xl p-3 flex justify-between items-center transition-all active:scale-95" style={{ background: C.bgCard }}>
+                <div className="text-left flex-1">
+                  <div className="text-sm font-medium text-white">{ex.name}</div>
+                  <div className="text-[10px]" style={{ color: C.textMuted }}>{ex.count} treino(s) • último {formatRelative(ex.lastDate)}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <TrendingUp size={14} style={{ color: C.primary }} />
+                  <ChevronRight size={16} style={{ color: C.textMuted }} />
+                </div>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+      
+      {data.history.length === 0 && (
+        <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
+          <div className="text-4xl mb-2">🏋️</div>
+          <div className="text-sm">Comece seu primeiro treino<br/>pra ver suas estatísticas evoluindo!</div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// =========== ONBOARDING ===========
+
 const Onboarding = ({ onComplete }) => {
   const [step, setStep] = useState(0);
   const [data, setData] = useState({ name: '', experience: '', division: '' });
@@ -506,6 +1130,8 @@ const StatCard = ({ value, label, icon }) => (
     <div className="text-[10px] mt-1" style={{ color: C.textMuted }}>{label}</div>
   </div>
 );
+
+// =========== DASHBOARD ===========
 
 const Dashboard = ({ data, plans, onStartWorkout, onNavigate }) => {
   const todayIdx = getTodayWorkoutIdx(data.history, plans);
@@ -880,6 +1506,98 @@ const WorkoutEditor = ({ workout, onSave, onClose }) => {
   );
 };
 
+// =========== ACTIVE WORKOUT ===========
+
+const SkipModal = ({ onPostpone, onSubstitute, onClose }) => {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center modal-in" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-t-3xl p-5 pb-8" style={{ background: C.bgCard }}>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-medium text-white">Pular exercício</h2>
+          <button onClick={onClose} className="p-1 transition-all active:scale-95"><X size={20} color={C.textMuted} /></button>
+        </div>
+        <p className="text-xs mb-4" style={{ color: C.textMuted }}>Máquina ocupada? Escolha o que fazer:</p>
+        <div className="space-y-2">
+          <button onClick={onPostpone} className="w-full p-4 rounded-2xl text-left transition-all active:scale-95 flex items-center gap-3" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
+            <div style={{ fontSize: '24px' }}>🔄</div>
+            <div>
+              <div className="text-sm font-medium text-white">Adiar pro final</div>
+              <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>Faço esse depois, vou pro próximo</div>
+            </div>
+          </button>
+          <button onClick={onSubstitute} className="w-full p-4 rounded-2xl text-left transition-all active:scale-95 flex items-center gap-3" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
+            <div style={{ fontSize: '24px' }}>🔀</div>
+            <div>
+              <div className="text-sm font-medium text-white">Substituir por outro</div>
+              <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>Troco por exercício similar</div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SubstituteModal = ({ currentMuscle, onSelect, onClose }) => {
+  const [filter, setFilter] = useState(currentMuscle || 'Todos');
+  const [search, setSearch] = useState('');
+
+  const filtered = exerciseLibrary.filter(ex => {
+    const matchFilter = filter === 'Todos' || ex.muscle === filter;
+    const matchSearch = search === '' || ex.name.toLowerCase().includes(search.toLowerCase());
+    return matchFilter && matchSearch;
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col modal-in" style={{ background: C.bg }}>
+      <div className="px-5 pt-6 flex items-center gap-3 mb-4">
+        <button onClick={onClose} className="p-2 -ml-2 transition-all active:scale-95">
+          <X size={20} color={C.text} />
+        </button>
+        <div className="flex-1">
+          <h1 className="text-xl font-medium text-white">Substituir por...</h1>
+          <p className="text-xs" style={{ color: C.textMuted }}>Sugestões de {currentMuscle || 'todos'} primeiro</p>
+        </div>
+      </div>
+      <div className="px-5 mb-4">
+        <div className="relative mb-3">
+          <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: C.textMuted }} />
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar exercício..."
+            className="w-full pl-10 pr-4 py-3 rounded-2xl text-white outline-none text-sm"
+            style={{ background: C.bgCard, border: `1px solid ${C.border}` }} autoFocus />
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
+          {muscleGroups.map((g) => (
+            <button key={g} onClick={() => setFilter(g)}
+              className="px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all active:scale-95"
+              style={{ background: filter === g ? C.primary : C.bgCard, color: filter === g ? C.bg : C.textMuted }}>
+              {g}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="flex-1 overflow-y-auto px-5 pb-6">
+        <div className="space-y-2">
+          {filtered.length === 0 ? (
+            <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
+              <div className="text-3xl mb-2">🔍</div>
+              <div className="text-sm">Nenhum exercício encontrado</div>
+            </div>
+          ) : filtered.map((ex) => (
+            <button key={ex.id} onClick={() => onSelect(ex)} className="w-full rounded-2xl p-4 text-left transition-all active:scale-95 flex justify-between items-center" style={{ background: C.bgCard }}>
+              <div className="flex-1">
+                <div className="text-sm font-medium text-white">{ex.name}</div>
+                <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>{ex.muscle} • {ex.equipment}</div>
+              </div>
+              <Check size={16} style={{ color: C.primary }} />
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
   const [exerciseIdx, setExerciseIdx] = useState(0);
   const [postponed, setPostponed] = useState([]);
@@ -907,17 +1625,13 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
     if (!set.reps) set.reps = ex.reps;
     set.done = true;
     setSets(newSets);
- onShowRest(() => {
-      // Marca o conjunto de exercícios já feitos (incluindo o atual)
+    onShowRest(() => {
       const doneIdxs = new Set();
-      newSets.forEach((exSets, i) => {
-        if (exSets.every(s => s.done)) doneIdxs.add(i);
-      });
+      newSets.forEach((exSets, i) => { if (exSets.every(s => s.done)) doneIdxs.add(i); });
       
       if (activeSetIdx < ex.sets - 1) {
         setActiveSetIdx(activeSetIdx + 1);
       } else {
-        // Procura próximo exercício não feito E não adiado (em ordem)
         let nextIdx = -1;
         for (let i = 0; i < workout.exercises.length; i++) {
           if (!doneIdxs.has(i) && !postponed.includes(i) && i !== exerciseIdx) {
@@ -929,7 +1643,6 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
           setExerciseIdx(nextIdx);
           setActiveSetIdx(0);
         } else if (postponed.length > 0) {
-          // Não tem mais não-feitos normais, volta pros adiados
           const next = postponed[0];
           setPostponed(postponed.slice(1));
           setExerciseIdx(next);
@@ -940,42 +1653,41 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
       }
     });
   };
+  
   const updateSet = (idx, field, value) => { const newSets = [...sets]; newSets[exerciseIdx][idx][field] = value; setSets(newSets); };
 
   const postponeExercise = () => {
     setPostponed([...postponed, exerciseIdx]);
     setShowSkipModal(false);
-    if (exerciseIdx < workout.exercises.length - 1) {
-      setExerciseIdx(exerciseIdx + 1);
-      setActiveSetIdx(0);
-    } else if (postponed.length > 0) {
-      // Volta pros adiados
-      const next = postponed[0];
-      setPostponed(postponed.slice(1));
-      setExerciseIdx(next);
+    // Procurar próximo não-feito, não-adiado e diferente do atual
+    let nextIdx = -1;
+    for (let i = 0; i < workout.exercises.length; i++) {
+      if (i !== exerciseIdx && !postponed.includes(i) && !sets[i].every(s => s.done)) {
+        nextIdx = i;
+        break;
+      }
+    }
+    if (nextIdx >= 0) {
+      setExerciseIdx(nextIdx);
       setActiveSetIdx(0);
     } else {
       onFinish(sets, workout, elapsed);
     }
   };
 
- const substituteExercise = (newEx) => {
-    const newWorkout = { ...workout };
-    newWorkout.exercises = [...workout.exercises];
-    newWorkout.exercises[exerciseIdx] = {
+  const substituteExercise = (newEx) => {
+    workout.exercises[exerciseIdx] = {
       name: newEx.name,
       sets: ex.sets,
       reps: ex.reps,
       fig: newEx.fig,
     };
-    workout.exercises = newWorkout.exercises;
     setShowSubstituteModal(false);
     setActiveSetIdx(0);
-    // Reseta as séries do exercício atual
     const newSetsArr = [...sets];
     newSetsArr[exerciseIdx] = Array(ex.sets).fill(null).map(() => ({ weight: '', reps: '', done: false }));
     setSets(newSetsArr);
-  }; 
+  };
 
   return (
     <div className="px-5 pt-6 pb-6" style={{ background: C.bg, minHeight: '100%' }}>
@@ -1047,96 +1759,6 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
   );
 };
 
-const SkipModal = ({ onPostpone, onSubstitute, onClose }) => {
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center modal-in" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-t-3xl p-5 pb-8" style={{ background: C.bgCard }}>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-medium text-white">Pular exercício</h2>
-          <button onClick={onClose} className="p-1 transition-all active:scale-95"><X size={20} color={C.textMuted} /></button>
-        </div>
-        <p className="text-xs mb-4" style={{ color: C.textMuted }}>Máquina ocupada? Escolha o que fazer:</p>
-        <div className="space-y-2">
-          <button onClick={onPostpone} className="w-full p-4 rounded-2xl text-left transition-all active:scale-95 flex items-center gap-3" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
-            <div style={{ fontSize: '24px' }}>🔄</div>
-            <div>
-              <div className="text-sm font-medium text-white">Adiar pro final</div>
-              <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>Faço esse depois, vou pro próximo</div>
-            </div>
-          </button>
-          <button onClick={onSubstitute} className="w-full p-4 rounded-2xl text-left transition-all active:scale-95 flex items-center gap-3" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
-            <div style={{ fontSize: '24px' }}>🔀</div>
-            <div>
-              <div className="text-sm font-medium text-white">Substituir por outro</div>
-              <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>Troco por exercício similar</div>
-            </div>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-const SubstituteModal = ({ currentMuscle, onSelect, onClose }) => {
-  const [filter, setFilter] = useState(currentMuscle || 'Todos');
-  const [search, setSearch] = useState('');
-
-  const filtered = exerciseLibrary.filter(ex => {
-    const matchFilter = filter === 'Todos' || ex.muscle === filter;
-    const matchSearch = search === '' || ex.name.toLowerCase().includes(search.toLowerCase());
-    return matchFilter && matchSearch;
-  });
-
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col modal-in" style={{ background: C.bg }}>
-      <div className="px-5 pt-6 flex items-center gap-3 mb-4">
-        <button onClick={onClose} className="p-2 -ml-2 transition-all active:scale-95">
-          <X size={20} color={C.text} />
-        </button>
-        <div className="flex-1">
-          <h1 className="text-xl font-medium text-white">Substituir por...</h1>
-          <p className="text-xs" style={{ color: C.textMuted }}>Sugestões de {currentMuscle || 'todos'} primeiro</p>
-        </div>
-      </div>
-      <div className="px-5 mb-4">
-        <div className="relative mb-3">
-          <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: C.textMuted }} />
-          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar exercício..."
-            className="w-full pl-10 pr-4 py-3 rounded-2xl text-white outline-none text-sm"
-            style={{ background: C.bgCard, border: `1px solid ${C.border}` }} autoFocus />
-        </div>
-        <div className="flex gap-2 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
-          {muscleGroups.map((g) => (
-            <button key={g} onClick={() => setFilter(g)}
-              className="px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-all active:scale-95"
-              style={{ background: filter === g ? C.primary : C.bgCard, color: filter === g ? C.bg : C.textMuted }}>
-              {g}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="flex-1 overflow-y-auto px-5 pb-6">
-        <div className="space-y-2">
-          {filtered.length === 0 ? (
-            <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
-              <div className="text-3xl mb-2">🔍</div>
-              <div className="text-sm">Nenhum exercício encontrado</div>
-            </div>
-          ) : filtered.map((ex) => (
-            <button key={ex.id} onClick={() => onSelect(ex)} className="w-full rounded-2xl p-4 text-left transition-all active:scale-95 flex justify-between items-center" style={{ background: C.bgCard }}>
-              <div className="flex-1">
-                <div className="text-sm font-medium text-white">{ex.name}</div>
-                <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>{ex.muscle} • {ex.equipment}</div>
-              </div>
-              <Check size={16} style={{ color: C.primary }} />
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-
 const RestTimer = ({ restTime, onSkip, onDone }) => {
   const [seconds, setSeconds] = useState(restTime);
   useEffect(() => {
@@ -1175,74 +1797,6 @@ const RestTimer = ({ restTime, onSkip, onDone }) => {
         <button onClick={() => setSeconds(s => s + 30)} className="p-4 rounded-2xl font-medium text-white transition-all active:scale-95" style={{ background: C.bgCard }}>+30s</button>
         <button onClick={onSkip} className="p-4 rounded-2xl font-medium transition-all active:scale-95" style={{ background: C.primary, color: C.bg }}>Pular</button>
       </div>
-    </div>
-  );
-};
-
-const Stats = ({ data }) => {
-  const streak = calculateStreak(data.history);
-  const prs = calculatePRs(data.history);
-  const today = new Date();
-  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-  const calendar = Array.from({ length: daysInMonth }, (_, i) => {
-    const dayDate = new Date(today.getFullYear(), today.getMonth(), i + 1);
-    return data.history.some(s => new Date(s.date).toDateString() === dayDate.toDateString());
-  });
-
-  return (
-    <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
-      <h1 className="text-2xl font-medium text-white mb-6">Sua jornada</h1>
-      <div className="rounded-2xl p-4 mb-4" style={{ background: C.bgCard }}>
-        <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Sequência atual</div>
-        <div className="flex items-center gap-3">
-          <div className="text-4xl">🔥</div>
-          <div>
-            <div className="text-3xl font-medium" style={{ color: C.primary }}>{streak} {streak === 1 ? 'dia' : 'dias'}</div>
-            <div className="text-xs" style={{ color: C.textMuted }}>total: {data.history.length} treinos</div>
-          </div>
-        </div>
-      </div>
-      <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>{today.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</div>
-      <div className="rounded-2xl p-4 mb-4" style={{ background: C.bgCard }}>
-        <div className="grid grid-cols-7 gap-1.5 mb-2">
-          {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, i) => (
-            <div key={i} className="text-center text-[10px]" style={{ color: C.textMuted }}>{d}</div>
-          ))}
-        </div>
-        <div className="grid grid-cols-7 gap-1.5">
-          {calendar.map((done, i) => (
-            <div key={i} className="aspect-square rounded-md flex items-center justify-center text-[10px] font-medium"
-              style={{ background: done ? C.primary : C.bg, color: done ? C.bg : C.textMuted, border: (i + 1) === today.getDate() ? `2px solid ${C.text}` : 'none' }}>
-              {i + 1}
-            </div>
-          ))}
-        </div>
-      </div>
-      {prs.length > 0 && (
-        <>
-          <div className="flex items-center gap-2 mb-2">
-            <Trophy size={14} style={{ color: C.primary }} />
-            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Recordes pessoais</div>
-          </div>
-          <div className="space-y-2 mb-6">
-            {prs.map((pr, i) => (
-              <div key={i} className="rounded-2xl p-3 flex justify-between items-center" style={{ background: C.bgCard }}>
-                <div>
-                  <div className="text-sm font-medium text-white">{pr.exercise}</div>
-                  <div className="text-[10px]" style={{ color: C.textMuted }}>{formatRelative(pr.date)}</div>
-                </div>
-                <div className="font-medium flex items-center gap-1" style={{ color: C.primary }}>{pr.weight}kg <span>🏆</span></div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-      {data.history.length === 0 && (
-        <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
-          <div className="text-4xl mb-2">🏋️</div>
-          <div className="text-sm">Comece seu primeiro treino<br/>pra ver suas estatísticas!</div>
-        </div>
-      )}
     </div>
   );
 };
@@ -1386,7 +1940,7 @@ const Profile = ({ data, onReset, onExport, onChangePhoto, onChangeRestTime, onC
           <div className="text-sm font-medium">Resetar dados (refazer onboarding)</div>
         </button>
       </div>
-      <div className="text-center mt-8 text-[10px]" style={{ color: C.textMuted }}>Dixx · v0.6 · {exerciseLibrary.length} exercícios · {customCount} treino{customCount !== 1 ? 's' : ''} custom 💾</div>
+      <div className="text-center mt-8 text-[10px]" style={{ color: C.textMuted }}>Dixx · v0.7 · {exerciseLibrary.length} exercícios · {customCount} treino{customCount !== 1 ? 's' : ''} custom 💾</div>
       {showRestPicker && <RestTimePicker currentValue={restTime} onSave={(v) => { onChangeRestTime(v); setShowRestPicker(false); }} onClose={() => setShowRestPicker(false)} />}
       {showDivisionPicker && <DivisionPicker currentValue={divisionCount} onSave={(v) => { onChangeDivision(v); setShowDivisionPicker(false); }} onClose={() => setShowDivisionPicker(false)} />}
     </div>
@@ -1448,6 +2002,7 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [showLibrary, setShowLibrary] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState(null);
+  const [evolutionExercise, setEvolutionExercise] = useState(null);
 
   const plans = getWorkoutPlans(data.customWorkouts).slice(0, data.divisionCount || 4);
 
@@ -1563,6 +2118,8 @@ export default function App() {
     }
   };
 
+  const showEvolution = !!evolutionExercise;
+
   return (
     <div
       className="w-full mx-auto relative overflow-hidden flex flex-col"
@@ -1587,8 +2144,10 @@ export default function App() {
         )}
         {view === 'main' && data.user && (
           <>
-            <div key={editingWorkout ? 'edit' : (showLibrary ? 'library' : activeTab)} className="tab-content">
-              {editingWorkout ? (
+            <div key={evolutionExercise || (editingWorkout ? 'edit' : (showLibrary ? 'library' : activeTab))} className="tab-content">
+              {showEvolution ? (
+                <ExerciseEvolution history={data.history} exerciseName={evolutionExercise} onClose={() => setEvolutionExercise(null)} />
+              ) : editingWorkout ? (
                 <WorkoutEditor workout={editingWorkout} onSave={handleSaveCustomWorkout} onClose={() => setEditingWorkout(null)} />
               ) : showLibrary ? (
                 <Library onClose={() => setShowLibrary(false)} />
@@ -1596,12 +2155,12 @@ export default function App() {
                 <>
                   {activeTab === 'home' && <Dashboard data={data} plans={plans} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} />}
                   {activeTab === 'workouts' && <WorkoutsList data={data} plans={plans} onSelectWorkout={handleStartWorkout} onOpenLibrary={() => setShowLibrary(true)} onEditWorkout={setEditingWorkout} onResetWorkout={handleResetWorkout} />}
-                  {activeTab === 'stats' && <Stats data={data} />}
+                  {activeTab === 'stats' && <Stats data={data} onSelectExercise={setEvolutionExercise} />}
                   {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} onChangePhoto={handleChangePhoto} onChangeRestTime={handleChangeRestTime} onChangeDivision={handleChangeDivision} />}
                 </>
               )}
             </div>
-            {!showLibrary && !editingWorkout && <BottomNav active={activeTab} onChange={setActiveTab} />}
+            {!showLibrary && !editingWorkout && !showEvolution && <BottomNav active={activeTab} onChange={setActiveTab} />}
           </>
         )}
         {view === 'workout' && activeWorkout && (
