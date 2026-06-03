@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft, Trash2, ArrowUp, ArrowDown, MoreVertical, RotateCcw, Camera, SkipForward, Activity, Flame, Target, Zap, Award, TrendingDown, Lightbulb, Rocket, AlertTriangle, ArrowRight, BarChart2, MapPin, Shuffle, RefreshCw, Save, Sparkles, PartyPopper } from 'lucide-react';
+import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft, Trash2, ArrowUp, ArrowDown, MoreVertical, RotateCcw, Camera, SkipForward, Activity, Flame, Target, BicepsFlexed, Award, TrendingDown, Lightbulb, Rocket, AlertTriangle, ArrowRight, BarChart2, MapPin, Shuffle, RefreshCw, Save, Sparkles, PartyPopper } from 'lucide-react';
 
 const STORAGE_KEY = 'dixx_data_v1';
 
@@ -1164,7 +1164,7 @@ const Dashboard = ({ data, plans, onStartWorkout, onNavigate }) => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <div className="text-xs" style={{ color: C.textMuted }}>{greeting},</div>
-          <div className="text-xl font-medium text-white flex items-center gap-2">{data.user.name} <Zap size={18} color={C.primary} /></div>
+          <div className="text-xl font-medium text-white flex items-center gap-2">{data.user.name} <BicepsFlexed size={18} color={C.primary} /></div>
         </div>
         <Avatar name={data.user.name} photo={data.photo} size={40} onClick={() => onNavigate('profile')} />
       </div>
