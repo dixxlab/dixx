@@ -916,20 +916,23 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
       
       if (activeSetIdx < ex.sets - 1) {
         setActiveSetIdx(activeSetIdx + 1);
-      } else if (postponed.length > 0) {
-        // Tem exercícios adiados, vai pro próximo adiado
-        const next = postponed[0];
-        setPostponed(postponed.slice(1));
-        setExerciseIdx(next);
-        setActiveSetIdx(0);
       } else {
-        // Procura próximo exercício não feito
+        // Procura próximo exercício não feito E não adiado (em ordem)
         let nextIdx = -1;
         for (let i = 0; i < workout.exercises.length; i++) {
-          if (!doneIdxs.has(i)) { nextIdx = i; break; }
+          if (!doneIdxs.has(i) && !postponed.includes(i) && i !== exerciseIdx) {
+            nextIdx = i;
+            break;
+          }
         }
         if (nextIdx >= 0) {
           setExerciseIdx(nextIdx);
+          setActiveSetIdx(0);
+        } else if (postponed.length > 0) {
+          // Não tem mais não-feitos normais, volta pros adiados
+          const next = postponed[0];
+          setPostponed(postponed.slice(1));
+          setExerciseIdx(next);
           setActiveSetIdx(0);
         } else {
           onFinish(sets, workout, elapsed);
