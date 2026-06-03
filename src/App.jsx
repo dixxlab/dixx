@@ -959,6 +959,24 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
     }
   };
 
+ const substituteExercise = (newEx) => {
+    const newWorkout = { ...workout };
+    newWorkout.exercises = [...workout.exercises];
+    newWorkout.exercises[exerciseIdx] = {
+      name: newEx.name,
+      sets: ex.sets,
+      reps: ex.reps,
+      fig: newEx.fig,
+    };
+    workout.exercises = newWorkout.exercises;
+    setShowSubstituteModal(false);
+    setActiveSetIdx(0);
+    // Reseta as séries do exercício atual
+    const newSetsArr = [...sets];
+    newSetsArr[exerciseIdx] = Array(ex.sets).fill(null).map(() => ({ weight: '', reps: '', done: false }));
+    setSets(newSetsArr);
+  }; 
+
   return (
     <div className="px-5 pt-6 pb-6" style={{ background: C.bg, minHeight: '100%' }}>
       <div className="flex justify-between items-center mb-4">
@@ -1024,6 +1042,7 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
         </button>
       </div>
       {showSkipModal && <SkipModal onPostpone={postponeExercise} onSubstitute={() => { setShowSkipModal(false); setShowSubstituteModal(true); }} onClose={() => setShowSkipModal(false)} />}
+      {showSubstituteModal && <SubstituteModal currentMuscle={null} onSelect={substituteExercise} onClose={() => setShowSubstituteModal(false)} />}
     </div>
   );
 };
