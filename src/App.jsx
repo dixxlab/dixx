@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft, Trash2, ArrowUp, ArrowDown, MoreVertical, RotateCcw, Camera, SkipForward, Activity, Flame, Target, Zap, Award, TrendingDown } from 'lucide-react';
+import { Home, Dumbbell, BarChart3, User, Play, Check, Plus, ChevronRight, Trophy, Clock, Settings, Calendar, TrendingUp, Edit3, X, BookOpen, Search, ArrowLeft, Trash2, ArrowUp, ArrowDown, MoreVertical, RotateCcw, Camera, SkipForward, Activity, Flame, Target, Zap, Award, TrendingDown, Lightbulb, Rocket, AlertTriangle, ArrowRight, BarChart2, MapPin, Shuffle, RefreshCw, Save, Sparkles, PartyPopper } from 'lucide-react';
 
 const STORAGE_KEY = 'dixx_data_v1';
 
@@ -536,11 +536,11 @@ const generateInsights = (chartData, exerciseName) => {
     const prev = chartData[chartData.length - 2];
     const diff = last.weight - prev.weight;
     if (diff > 0) {
-      insights.push({ type: 'success', icon: '📈', text: `+${diff}kg desde o último treino! Continua nessa pegada.` });
+      insights.push({ type: 'success', icon: 'up', text: `+${diff}kg desde o último treino! Continua nessa pegada.` });
     } else if (diff < 0) {
-      insights.push({ type: 'warning', icon: '📉', text: `Reduziu ${Math.abs(diff)}kg em relação ao último. Dia ruim ou de propósito?` });
+      insights.push({ type: 'warning', icon: 'down', text: `Reduziu ${Math.abs(diff)}kg em relação ao último. Dia ruim ou de propósito?` });
     } else {
-      insights.push({ type: 'info', icon: '➡️', text: `Mesmo peso do último treino. Tenta subir 2,5kg no próximo!` });
+      insights.push({ type: 'info', icon: 'right', text: `Mesmo peso do último treino. Tenta subir 2,5kg no próximo!` });
     }
   }
   
@@ -549,7 +549,7 @@ const generateInsights = (chartData, exerciseName) => {
     const lastThree = chartData.slice(-3);
     const allSameWeight = lastThree.every(p => p.weight === lastThree[0].weight);
     if (allSameWeight && lastThree[0].weight > 0) {
-      insights.push({ type: 'warning', icon: '⚠️', text: `Platô detectado: ${lastThree.length} treinos com ${lastThree[0].weight}kg. Variar reps ou descansar 1 semana pode ajudar.` });
+      insights.push({ type: 'warning', icon: 'alert', text: `Platô detectado: ${lastThree.length} treinos com ${lastThree[0].weight}kg. Variar reps ou descansar 1 semana pode ajudar.` });
     }
   }
   
@@ -560,7 +560,7 @@ const generateInsights = (chartData, exerciseName) => {
     const totalGain = last.weight - first.weight;
     if (totalGain > 0) {
       const pct = ((last.weight - first.weight) / first.weight * 100).toFixed(0);
-      insights.push({ type: 'success', icon: '🚀', text: `+${totalGain}kg (+${pct}%) desde o primeiro treino. Tá voando!` });
+      insights.push({ type: 'success', icon: 'rocket', text: `+${totalGain}kg (+${pct}%) desde o primeiro treino. Tá voando!` });
     }
   }
   
@@ -570,7 +570,7 @@ const generateInsights = (chartData, exerciseName) => {
     const trend = (recent[2].weight - recent[0].weight) / 2; // ganho médio por treino
     if (trend > 0) {
       const next = recent[2].weight + trend;
-      insights.push({ type: 'info', icon: '🎯', text: `Próximo treino: tenta ${Math.round(next * 2) / 2}kg (na tendência atual).` });
+      insights.push({ type: 'info', icon: 'target', text: `Próximo treino: tenta ${Math.round(next * 2) / 2}kg (na tendência atual).` });
     }
   }
   
@@ -621,7 +621,7 @@ const LineChart = ({ data, height = 180, dataKey = 'oneRM', label = '1RM', color
   if (data.length === 0) {
     return (
       <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
-        <div className="text-3xl mb-2">📊</div>
+        <div className="flex justify-center mb-2"><BarChart2 size={36} color={C.textMuted} /></div>
         <div className="text-sm">Sem dados ainda nesse período</div>
       </div>
     );
@@ -630,7 +630,7 @@ const LineChart = ({ data, height = 180, dataKey = 'oneRM', label = '1RM', color
   if (data.length === 1) {
     return (
       <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
-        <div className="text-3xl mb-2">📍</div>
+        <div className="flex justify-center mb-2"><MapPin size={36} color={C.textMuted} /></div>
         <div className="text-sm">Faz mais treinos pra ver evolução</div>
         <div className="text-xs mt-2" style={{ color: C.primary }}>Atual: {data[0][dataKey]}{dataKey === 'oneRM' || dataKey === 'weight' ? 'kg' : ''}</div>
       </div>
@@ -694,7 +694,12 @@ const LineChart = ({ data, height = 180, dataKey = 'oneRM', label = '1RM', color
           return (
             <g key={i}>
               <circle cx={getX(i)} cy={getY(d[dataKey])} r={isPR ? 5 : 3.5} fill={isPR ? C.warning : chartColor} stroke={C.bg} strokeWidth="2" />
-              {isPR && <text x={getX(i)} y={getY(d[dataKey]) - 10} textAnchor="middle" fontSize="11">🏆</text>}
+              {isPR && (
+                <g transform={`translate(${getX(i) - 7}, ${getY(d[dataKey]) - 22})`}>
+                  <rect x="0" y="0" width="14" height="14" rx="3" fill={C.warning} opacity="0.2" />
+                  <path d="M4 3h6M7 3v5M5 8c0 1.1.9 2 2 2s2-.9 2-2M4 3c0 1.5-.8 2.5-2 3M10 3c0 1.5.8 2.5 2 3M5.5 10.5h3M7 10.5v1.5" stroke={C.warning} strokeWidth="1.2" strokeLinecap="round" fill="none" />
+                </g>
+              )}
             </g>
           );
         })}
@@ -761,6 +766,15 @@ const Heatmap = ({ history }) => {
 
 // =========== INSIGHTS CARD ===========
 
+const insightIconMap = {
+  up:     <TrendingUp size={16} />,
+  down:   <TrendingDown size={16} />,
+  right:  <ArrowRight size={16} />,
+  alert:  <AlertTriangle size={16} />,
+  rocket: <Rocket size={16} />,
+  target: <Target size={16} />,
+};
+
 const InsightCard = ({ insights }) => {
   if (insights.length === 0) return null;
   return (
@@ -768,9 +782,11 @@ const InsightCard = ({ insights }) => {
       {insights.map((ins, i) => {
         const bgColor = ins.type === 'success' ? 'rgba(16,185,129,0.1)' : ins.type === 'warning' ? 'rgba(245,158,11,0.1)' : 'rgba(59,130,246,0.1)';
         const borderColor = ins.type === 'success' ? C.primary : ins.type === 'warning' ? C.warning : C.info;
+        const iconColor = ins.type === 'success' ? C.primary : ins.type === 'warning' ? C.warning : C.info;
+        const iconEl = insightIconMap[ins.icon];
         return (
           <div key={i} className="rounded-2xl p-3 flex items-start gap-2 fade-up" style={{ background: bgColor, border: `1px solid ${borderColor}` }}>
-            <div className="text-lg flex-shrink-0">{ins.icon}</div>
+            <div className="flex-shrink-0 mt-0.5" style={{ color: iconColor }}>{iconEl}</div>
             <div className="text-xs text-white leading-relaxed">{ins.text}</div>
           </div>
         );
@@ -854,7 +870,7 @@ const ExerciseEvolution = ({ history, exerciseName, onClose }) => {
           </div>
           <div className="rounded-2xl p-3" style={{ background: C.bgCard }}>
             <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>PR de peso</div>
-            <div className="text-xl font-medium flex items-center gap-1" style={{ color: C.warning }}>{stats.maxWeight}kg <span className="text-sm">🏆</span></div>
+            <div className="text-xl font-medium flex items-center gap-1" style={{ color: C.warning }}>{stats.maxWeight}kg <Trophy size={16} color={C.warning} /></div>
             <div className="text-[10px]" style={{ color: C.textMuted }}>recorde absoluto</div>
           </div>
           <div className="rounded-2xl p-3" style={{ background: C.bgCard }}>
@@ -1029,7 +1045,7 @@ const Stats = ({ data, onSelectExercise }) => {
                   <div className="text-[10px]" style={{ color: C.textMuted }}>{formatRelative(pr.date)}</div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="font-medium flex items-center gap-1" style={{ color: C.primary }}>{pr.weight}kg <span>🏆</span></div>
+                  <div className="font-medium flex items-center gap-1" style={{ color: C.primary }}>{pr.weight}kg <Trophy size={14} color={C.warning} /></div>
                   <ChevronRight size={16} style={{ color: C.textMuted }} />
                 </div>
               </button>
@@ -1064,7 +1080,7 @@ const Stats = ({ data, onSelectExercise }) => {
       
       {data.history.length === 0 && (
         <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
-          <div className="text-4xl mb-2">🏋️</div>
+          <div className="flex justify-center mb-2"><Dumbbell size={40} color={C.textMuted} /></div>
           <div className="text-sm">Comece seu primeiro treino<br/>pra ver suas estatísticas evoluindo!</div>
         </div>
       )}
@@ -1122,10 +1138,10 @@ const Onboarding = ({ onComplete }) => {
   );
 };
 
-const StatCard = ({ value, label, icon }) => (
+const StatCard = ({ value, label, icon: Icon }) => (
   <div className="rounded-2xl p-3 text-center" style={{ background: C.bgCard }}>
     <div className="text-xl font-medium flex items-center justify-center gap-1" style={{ color: C.primary }}>
-      {icon && <span className="text-base">{icon}</span>}{value}
+      {Icon && <Icon size={16} color={C.warning} />}{value}
     </div>
     <div className="text-[10px] mt-1" style={{ color: C.textMuted }}>{label}</div>
   </div>
@@ -1148,7 +1164,7 @@ const Dashboard = ({ data, plans, onStartWorkout, onNavigate }) => {
       <div className="flex justify-between items-center mb-6">
         <div>
           <div className="text-xs" style={{ color: C.textMuted }}>{greeting},</div>
-          <div className="text-xl font-medium text-white flex items-center gap-2">{data.user.name} <span>💪</span></div>
+          <div className="text-xl font-medium text-white flex items-center gap-2">{data.user.name} <Zap size={18} color={C.primary} /></div>
         </div>
         <Avatar name={data.user.name} photo={data.photo} size={40} onClick={() => onNavigate('profile')} />
       </div>
@@ -1157,7 +1173,7 @@ const Dashboard = ({ data, plans, onStartWorkout, onNavigate }) => {
         <div className="text-xl font-medium text-white mb-1">{todayWorkout.name}</div>
         <div className="text-sm mb-4" style={{ color: C.textMuted }}>{todayWorkout.muscle} • {todayWorkout.exercises.length} exercícios • ~{todayWorkout.duration}min</div>
         <div className="rounded-xl p-3 mb-4 text-xs flex items-start gap-2" style={{ background: C.bg, color: C.textMuted }}>
-          <span style={{ color: C.primary }}>💡</span>
+          <span style={{ color: C.primary }}><Lightbulb size={14} /></span>
           <span>Iniciante? Faça 5min de esteira ou bike antes pra aquecer.</span>
         </div>
         <button onClick={() => onStartWorkout(todayWorkout)} className="w-full p-3 rounded-2xl font-medium flex items-center justify-center gap-2 transition-all active:scale-95" style={{ background: C.primary, color: C.bg }}>
@@ -1167,7 +1183,7 @@ const Dashboard = ({ data, plans, onStartWorkout, onNavigate }) => {
       <div className="text-[10px] uppercase tracking-wider mb-2 mt-6" style={{ color: C.textMuted }}>Esta semana</div>
       <div className="grid grid-cols-3 gap-2 mb-6">
         <StatCard value={weekWorkouts} label="treinos" />
-        <StatCard value={streak} label="dias" icon="🔥" />
+        <StatCard value={streak} label="dias" icon={Flame} />
         <StatCard value={`${(weekVolume / 1000).toFixed(1)}t`} label="volume" />
       </div>
       <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Próximos treinos</div>
@@ -1314,7 +1330,7 @@ const Library = ({ onClose }) => {
       <div className="space-y-2">
         {filtered.length === 0 ? (
           <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
-            <div className="text-3xl mb-2">🔍</div>
+            <div className="flex justify-center mb-2"><Search size={32} color={C.textMuted} /></div>
             <div className="text-sm">Nenhum exercício encontrado</div>
           </div>
         ) : filtered.map((ex) => (
@@ -1370,7 +1386,7 @@ const AddExerciseModal = ({ onAdd, onClose }) => {
         <div className="space-y-2">
           {filtered.length === 0 ? (
             <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
-              <div className="text-3xl mb-2">🔍</div>
+              <div className="flex justify-center mb-2"><Search size={32} color={C.textMuted} /></div>
               <div className="text-sm">Nenhum exercício encontrado</div>
             </div>
           ) : filtered.map((ex) => (
@@ -1519,14 +1535,14 @@ const SkipModal = ({ onPostpone, onSubstitute, onClose }) => {
         <p className="text-xs mb-4" style={{ color: C.textMuted }}>Máquina ocupada? Escolha o que fazer:</p>
         <div className="space-y-2">
           <button onClick={onPostpone} className="w-full p-4 rounded-2xl text-left transition-all active:scale-95 flex items-center gap-3" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
-            <div style={{ fontSize: '24px' }}>🔄</div>
+            <div style={{ color: C.primary }}><RefreshCw size={24} /></div>
             <div>
               <div className="text-sm font-medium text-white">Adiar pro final</div>
               <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>Faço esse depois, vou pro próximo</div>
             </div>
           </button>
           <button onClick={onSubstitute} className="w-full p-4 rounded-2xl text-left transition-all active:scale-95 flex items-center gap-3" style={{ background: C.bg, border: `1px solid ${C.border}` }}>
-            <div style={{ fontSize: '24px' }}>🔀</div>
+            <div style={{ color: C.info }}><Shuffle size={24} /></div>
             <div>
               <div className="text-sm font-medium text-white">Substituir por outro</div>
               <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>Troco por exercício similar</div>
@@ -1580,7 +1596,7 @@ const SubstituteModal = ({ currentMuscle, onSelect, onClose }) => {
         <div className="space-y-2">
           {filtered.length === 0 ? (
             <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted }}>
-              <div className="text-3xl mb-2">🔍</div>
+              <div className="flex justify-center mb-2"><Search size={32} color={C.textMuted} /></div>
               <div className="text-sm">Nenhum exercício encontrado</div>
             </div>
           ) : filtered.map((ex) => (
@@ -1703,7 +1719,7 @@ const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
       <div className="mb-1">
         <h2 className="text-xl font-medium text-white">{ex.name}</h2>
         <div className="text-xs mt-1" style={{ color: C.textMuted }}>
-          {last.weight > 0 ? `Última vez: ${last.weight}kg × ${last.reps} reps` : '🆕 Primeira vez! Comece leve pra aprender execução'}
+          {last.weight > 0 ? `Última vez: ${last.weight}kg × ${last.reps} reps` : '✦ Primeira vez! Comece leve pra aprender execução'}
         </div>
       </div>
       <button onClick={() => setShowNote(!showNote)} className="text-xs mt-2 mb-4 flex items-center gap-1 transition-all" style={{ color: C.primary }}>
@@ -1940,7 +1956,7 @@ const Profile = ({ data, onReset, onExport, onChangePhoto, onChangeRestTime, onC
           <div className="text-sm font-medium">Resetar dados (refazer onboarding)</div>
         </button>
       </div>
-      <div className="text-center mt-8 text-[10px]" style={{ color: C.textMuted }}>Dixx · v0.7 · {exerciseLibrary.length} exercícios · {customCount} treino{customCount !== 1 ? 's' : ''} custom 💾</div>
+      <div className="text-center mt-8 text-[10px] flex items-center justify-center gap-1" style={{ color: C.textMuted }}>Dixx · v0.7 · {exerciseLibrary.length} exercícios · {customCount} treino{customCount !== 1 ? 's' : ''} custom <Save size={10} /></div>
       {showRestPicker && <RestTimePicker currentValue={restTime} onSave={(v) => { onChangeRestTime(v); setShowRestPicker(false); }} onClose={() => setShowRestPicker(false)} />}
       {showDivisionPicker && <DivisionPicker currentValue={divisionCount} onSave={(v) => { onChangeDivision(v); setShowDivisionPicker(false); }} onClose={() => setShowDivisionPicker(false)} />}
     </div>
@@ -1949,7 +1965,7 @@ const Profile = ({ data, onReset, onExport, onChangePhoto, onChangeRestTime, onC
 
 const WorkoutFinished = ({ summary, onClose }) => (
   <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-6" style={{ background: C.bg }}>
-    <div className="text-7xl mb-4">🎉</div>
+    <div className="mb-6 flex justify-center"><Award size={80} color={C.primary} strokeWidth={1} /></div>
     <h1 className="text-3xl font-medium text-white mb-2">Treino concluído!</h1>
     <p className="text-sm text-center mb-8" style={{ color: C.textMuted }}>Mais um dia somado na sua jornada.</p>
     <div className="w-full max-w-md rounded-2xl p-5 mb-8" style={{ background: C.bgCard }}>
