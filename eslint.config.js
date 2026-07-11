@@ -17,5 +17,11 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
+    rules: {
+      // Context + hook (ThemeContext, ConfirmProvider) e componente + factory de componentes
+      // (Figures) no mesmo arquivo são padrões intencionais aqui — só afeta a granularidade
+      // do Fast Refresh em dev, não é um bug.
+      'react-refresh/only-export-components': 'off',
+    },
   },
 ])
