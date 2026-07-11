@@ -2,20 +2,35 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/dixx-icon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-    
+
     <!-- PWA básico -->
-    <meta name="theme-color" content="#10b981" />
+    <meta name="theme-color" content="#08090b" />
     <meta name="description" content="Dixx - Seu app de treino. Acompanhe progresso, registre treinos e evolua." />
-    
+
     <!-- iOS / Safari específico -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Dixx" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    
+
     <title>Dixx - Treino de Academia</title>
+
+    <!-- Anti-FOUC: aplica o tema salvo antes do primeiro paint -->
+    <script>
+      (function () {
+        var THEME_COLORS = { midnight: '#08090b', ember: '#0a0908', daylight: '#f7f7f8' };
+        var theme = 'midnight';
+        try {
+          var stored = localStorage.getItem('dixx_theme_v1');
+          if (stored && THEME_COLORS[stored]) theme = stored;
+        } catch (e) {}
+        document.documentElement.setAttribute('data-theme', theme);
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', THEME_COLORS[theme]);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

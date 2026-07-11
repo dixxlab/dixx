@@ -1,14 +1,44 @@
+@import './theme/tokens.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+html {
+  color-scheme: var(--color-scheme, dark);
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-  background: #0a0a0a;
+  font-family: var(--font-ui);
+  background: var(--bg);
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* Evita zoom automático do iOS Safari ao focar em inputs (mínimo 16px).
+   !important necessário: classes utilitárias do Tailwind (ex: text-sm) têm
+   especificidade maior que o seletor de elemento e venceriam sem isso. */
+input,
+select,
+textarea {
+  font-size: 16px !important;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

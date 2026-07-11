@@ -1,0 +1,87 @@
+/* ===========================================================
+   DIXX — Design tokens
+   Cada tema define o mesmo conjunto de custom properties;
+   trocar [data-theme] no <html> re-tema o app inteiro via cascade,
+   sem precisar de re-render do React.
+   =========================================================== */
+
+:root {
+  /* raio de borda */
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+
+  /* sombras (dark por padrão, ajustado por tema abaixo quando necessário) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
+
+  /* tipografia numérica (peso, PR, cronômetro) */
+  --font-data: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+/* ---------- Meia-noite (dark padrão — preto + azul gelo) ---------- */
+[data-theme="midnight"] {
+  --bg: #08090b;
+  --bg-elevated: #16171b;
+  --bg-inset: #000000;
+  --bg-overlay: rgba(4, 5, 7, 0.72);
+  --text: #f5f6f7;
+  --text-muted: #8b8d97;
+  --border: #232530;
+  --accent: #45c1ff;
+  --accent-strong: #0ea5e9;
+  --accent-soft: rgba(69, 193, 255, 0.14);
+  --accent-on: #04121a;
+  --danger: #fb5a5a;
+  --warning: #f5b942;
+  --info: #45c1ff;
+  --success: #34d399;
+  --color-scheme: dark;
+}
+
+/* ---------- Brasa (dark alternativo — preto + vermelho/coral) ---------- */
+[data-theme="ember"] {
+  --bg: #0a0908;
+  --bg-elevated: #1c1414;
+  --bg-inset: #000000;
+  --bg-overlay: rgba(8, 5, 5, 0.72);
+  --text: #f7f5f5;
+  --text-muted: #9c8b8b;
+  --border: #2c1e1e;
+  --accent: #fb4d4d;
+  --accent-strong: #dc2626;
+  --accent-soft: rgba(251, 77, 77, 0.14);
+  --accent-on: #200606;
+  --danger: #fb4d4d;
+  --warning: #f5b942;
+  --info: #5eb8ff;
+  --success: #34d399;
+  --color-scheme: dark;
+}
+
+/* ---------- Claro ---------- */
+[data-theme="daylight"] {
+  --bg: #f7f7f8;
+  --bg-elevated: #ffffff;
+  --bg-inset: #eeeef0;
+  --bg-overlay: rgba(24, 24, 27, 0.4);
+  --text: #18181b;
+  --text-muted: #6f707a;
+  --border: #e4e4e8;
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+  --accent-soft: rgba(37, 99, 235, 0.1);
+  --accent-on: #ffffff;
+  --danger: #dc2626;
+  --warning: #b45309;
+  --info: #2563eb;
+  --success: #15803d;
+  --color-scheme: light;
+
+  --shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.06);
+  --shadow-md: 0 4px 16px rgba(24, 24, 27, 0.08);
+  --shadow-lg: 0 12px 32px rgba(24, 24, 27, 0.12);
+}
