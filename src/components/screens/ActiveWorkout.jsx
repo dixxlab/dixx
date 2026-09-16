@@ -6,30 +6,19 @@ import { initAudio } from '../../lib/audio';
 import { getLastSession } from '../../lib/workouts';
 import { getMaxWeightEver } from '../../lib/stats';
 import { findExerciseByName } from '../../lib/exercises';
-import { ExerciseCard } from '../ui/Figures';
 import { ExerciseDemo } from '../ui/ExerciseDemo';
 import { Confetti } from '../ui/Celebration';
 import { SkipModal } from './SkipModal';
 import { SubstituteModal } from './SubstituteModal';
 
-// Isolado num componente próprio, montado com key={ex.name}: ao trocar de exercício o React
-// remonta com estado zerado (sem precisar de um efeito pra "resetar" showNote/noteText).
-const NoteEditor = ({ initialNote, onSave }) => {
-  const [showNote, setShowNote] = useState(false);
-  const [noteText, setNoteText] = useState(initialNote);
+// Montado com key={ex.name}: ao trocar de exercício o React remonta com o
+// texto do exercício novo, sem efeito pra sincronizar.
+const NoteField = ({ initialNote, onSave }) => {
+  const [text, setText] = useState(initialNote);
   return (
-    <>
-      <button onClick={() => setShowNote(!showNote)} className="text-xs mt-2 mb-4 flex items-center gap-1 transition-all" style={{ color: C.primary, minHeight: 32 }}>
-        <Edit3 size={12} /> {initialNote ? 'Editar nota' : 'Adicionar nota'}
-      </button>
-      {showNote && (
-        <div className="mb-4">
-          <textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} onBlur={() => onSave(noteText)} placeholder="Ex: subir 2kg semana que vem"
-            className="w-full p-3 text-sm outline-none resize-none"
-            style={{ background: C.bgCard, border: `1px solid ${C.border}`, color: C.text, borderRadius: C.radiusMd }} rows={2} />
-        </div>
-      )}
-    </>
+    <textarea value={text} onChange={(e) => setText(e.target.value)} onBlur={() => onSave(text)} placeholder="Ex: subir 2kg semana que vem"
+      className="w-full p-3 text-sm outline-none resize-none mb-3"
+      style={{ background: C.bg, border: `1px solid ${C.border}`, color: C.text, borderRadius: C.radiusMd }} rows={2} autoFocus />
   );
 };
 
@@ -43,15 +32,18 @@ export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote 
   const [activeSetIdx, setActiveSetIdx] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [celebration, setCelebration] = useState({ key: 0, isPR: false });
+  const [noteOpenFor, setNoteOpenFor] = useState(null);
   const ex = exercises[exerciseIdx];
   const currentSets = sets[exerciseIdx];
   const last = getLastSession(data.history, ex.name);
   const note = data.notes[ex.name] || '';
   const libEx = findExerciseByName(ex.name);
+  const showNote = noteOpenFor === ex.name;
   const currentMuscle = libEx?.muscle || null;
 
   const formatTime = (s) => { const m = Math.floor(s / 60); const sec = s % 60; return `${m}:${sec.toString().padStart(2, '0')}`; };
   useEffect(() => { const t = setInterval(() => setElapsed(e => e + 1), 1000); return () => clearInterval(t); }, []);
+
 
   const completeSet = () => {
     initAudio();
@@ -128,63 +120,100 @@ export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote 
   };
 
   return (
-    <div className="px-5 pt-6 pb-6" style={{ background: C.bg, minHeight: '100%' }}>
-      <div className="flex justify-between items-center mb-4">
-        <button onClick={() => onFinish(sets, { ...workout, exercises }, elapsed)} className="p-2 -ml-2" style={{ minWidth: 44, minHeight: 44 }} aria-label="Sair do treino"><X size={20} color={C.textMuted} /></button>
-        <div className="text-xs" style={{ color: C.textMuted }}>Exercício {exerciseIdx + 1} de {exercises.length}</div>
-        <div className="flex items-center gap-1.5" style={{ color: C.primary }}><Clock size={13} /><span className="tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 19, lineHeight: 1 }}>{formatTime(elapsed)}</span></div>
-      </div>
-      <div className="h-1 rounded-full mb-6" style={{ background: C.bgCard }}>
-        <motion.div className="h-full rounded-full" style={{ background: C.primary }}
-          animate={{ width: `${((exerciseIdx + activeSetIdx / ex.sets) / exercises.length) * 100}%` }}
-          transition={{ duration: 0.4, ease: 'easeOut' }} />
-      </div>
-      <div className="mb-4"><ExerciseCard figKey={ex.fig} size={110} live /></div>
-      <div className="mb-1">
-        <h2 className="text-xl font-medium" style={{ color: C.text }}>{ex.name}</h2>
-        <div className="text-xs mt-1" style={{ color: C.textMuted }}>
+    <div className="px-5 pt-4 pb-6" style={{ background: C.bg, minHeight: '100%' }}>
+      {/* Um bloco só no topo: cabeçalho, progresso, nome e demonstração. Antes
+          eram peças empilhadas soltas, e a demonstração aparecia duas vezes —
+          o desenho abstrato sempre visível e a foto escondida atrás de um link. */}
+      <section className="-mx-5 px-5 pb-3" style={{ background: C.bgCard, borderBottom: `1px solid ${C.border}` }}>
+        <div className="flex justify-between items-center">
+          <button onClick={() => onFinish(sets, { ...workout, exercises }, elapsed)} className="p-2 -ml-2" style={{ minWidth: 44, minHeight: 44 }} aria-label="Sair do treino"><X size={20} color={C.textMuted} /></button>
+          <div className="text-xs tabular-nums" style={{ color: C.textMuted }}>Exercício {exerciseIdx + 1} de {exercises.length}</div>
+          <div className="flex items-center gap-1.5" style={{ color: C.primary }}><Clock size={13} /><span className="tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 19, lineHeight: 1 }}>{formatTime(elapsed)}</span></div>
+        </div>
+
+        <div className="h-0.5 rounded-full mb-4" style={{ background: C.bg }}>
+          <motion.div className="h-full rounded-full" style={{ background: C.primary }}
+            animate={{ width: `${((exerciseIdx + activeSetIdx / ex.sets) / exercises.length) * 100}%` }}
+            transition={{ duration: 0.4, ease: 'easeOut' }} />
+        </div>
+
+        <div className="flex items-start justify-between gap-3">
+          <h2 style={{ fontFamily: C.fontData, fontWeight: 700, fontSize: 32, lineHeight: 1.05, letterSpacing: '-0.01em', textTransform: 'uppercase', color: C.text }}>
+            {ex.name}
+          </h2>
+          <button onClick={() => setNoteOpenFor(showNote ? null : ex.name)} className="p-2 -mr-2 flex-shrink-0 transition-opacity active:opacity-60"
+            style={{ color: note || showNote ? C.primary : C.textMuted, minWidth: 44, minHeight: 44 }}
+            aria-label={note ? 'Editar nota' : 'Adicionar nota'}>
+            <Edit3 size={16} />
+          </button>
+        </div>
+        <div className="text-xs mb-3" style={{ color: C.textMuted }}>
           {last.weight > 0 ? `Última vez: ${last.weight}kg × ${last.reps} reps` : 'Primeira vez! Comece leve pra aprender execução'}
         </div>
-      </div>
-      {/* O stick figure acima continua sendo o visual padrão: carrega na hora e
-          não depende de rede. A demonstração fotográfica é sob demanda. */}
-      <div className="mt-4"><ExerciseDemo key={ex.name} gifUrl={libEx?.gifUrl} muscle={currentMuscle} /></div>
-      <NoteEditor key={ex.name} initialNote={note} onSave={(text) => onSaveNote(ex.name, text)} />
-      <div className="space-y-2 mb-4">
+
+        {showNote && <NoteField key={ex.name} initialNote={note} onSave={(text) => onSaveNote(ex.name, text)} />}
+
+        <ExerciseDemo key={ex.name} gifUrl={libEx?.gifUrl} muscle={currentMuscle} compact />
+      </section>
+
+      {/* A série em andamento domina; concluídas e pendentes recuam pra linha. */}
+      <div className="mt-4 mb-4">
         {currentSets.map((set, idx) => {
           const isActive = idx === activeSetIdx;
           const isDone = set.done;
-          const isPending = idx > activeSetIdx;
+
+          if (isActive) {
+            return (
+              <div key={idx} className="p-4 flex items-center gap-4 mb-2"
+                style={{ background: C.primarySoft, border: `1px solid ${C.primary}`, borderRadius: C.radiusMd }}>
+                <span className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 tabular-nums"
+                  style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 18, background: C.primary, color: C.primaryOn }}>
+                  {idx + 1}
+                </span>
+                <div className="flex-1 grid grid-cols-2 gap-3">
+                  <div>
+                    <input type="number" value={set.weight} onChange={(e) => updateSet(idx, 'weight', e.target.value)}
+                      placeholder={last.weight > 0 ? last.weight.toString() : '0'}
+                      className="w-full bg-transparent outline-none tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 700, fontSize: 30, lineHeight: 1.05, color: C.text }} />
+                    <div className="text-[10px]" style={{ color: C.textMuted }}>kg</div>
+                  </div>
+                  <div>
+                    <input type="number" value={set.reps} onChange={(e) => updateSet(idx, 'reps', e.target.value)} placeholder={ex.reps}
+                      className="w-full bg-transparent outline-none tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 700, fontSize: 30, lineHeight: 1.05, color: C.text }} />
+                    <div className="text-[10px]" style={{ color: C.textMuted }}>reps</div>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
           return (
-            <div key={idx} className="p-3 flex items-center gap-3 transition-all"
-              style={{ background: C.bgCard, border: isActive ? `1px solid ${C.primary}` : 'none', opacity: isPending ? 0.5 : 1, borderRadius: C.radiusMd }}>
-              <motion.div
+            <div key={idx} className="flex items-center gap-3 py-2.5"
+              style={{ borderBottom: `1px solid ${C.border}`, opacity: isDone ? 1 : 0.45 }}>
+              <motion.span
                 key={`${idx}-${isDone}`}
-                className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 tabular-nums"
-                style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 15, background: isDone ? C.primary : C.bg, color: isDone ? C.primaryOn : isActive ? C.primary : C.textMuted, border: !isDone ? `1px solid ${isActive ? C.primary : C.border}` : 'none' }}
+                className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 tabular-nums"
+                style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 12, background: isDone ? C.primary : 'transparent', color: isDone ? C.primaryOn : C.textMuted, border: isDone ? 'none' : `1px solid ${C.border}` }}
                 initial={isDone ? { scale: 0.4 } : false}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 20 }}
               >
-                {isDone ? <Check size={14} strokeWidth={3} /> : idx + 1}
-              </motion.div>
-              <div className="flex-1 grid grid-cols-2 gap-2">
-                <div>
-                  <input type="number" value={set.weight} onChange={(e) => updateSet(idx, 'weight', e.target.value)} disabled={!isActive || isDone}
-                    placeholder={last.weight > 0 ? last.weight.toString() : '0'}
-                    className="w-full bg-transparent outline-none tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 22, lineHeight: 1.1, color: isDone ? C.primary : C.text }} />
-                  <div className="text-[9px]" style={{ color: C.textMuted }}>kg</div>
-                </div>
-                <div>
-                  <input type="number" value={set.reps} onChange={(e) => updateSet(idx, 'reps', e.target.value)} disabled={!isActive || isDone} placeholder={ex.reps}
-                    className="w-full bg-transparent outline-none tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 22, lineHeight: 1.1, color: isDone ? C.primary : C.text }} />
-                  <div className="text-[9px]" style={{ color: C.textMuted }}>reps</div>
-                </div>
-              </div>
+                {isDone ? <Check size={12} strokeWidth={3} /> : idx + 1}
+              </motion.span>
+              {isDone ? (
+                <span className="text-sm tabular-nums" style={{ color: C.textMuted }}>
+                  <span style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 17, color: C.text }}>{set.weight}</span> kg
+                  <span className="mx-1">×</span>
+                  <span style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 17, color: C.text }}>{set.reps}</span> reps
+                </span>
+              ) : (
+                <span className="text-sm" style={{ color: C.textMuted }}>a fazer</span>
+              )}
             </div>
           );
         })}
       </div>
+
       <div className="relative flex gap-2">
         {celebration.key > 0 && (
           <div className="absolute inset-0 pointer-events-none">
