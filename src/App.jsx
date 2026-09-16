@@ -31,7 +31,7 @@ const AppShell = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [activeWorkout, setActiveWorkout] = useState(null);
   const [showRest, setShowRest] = useState(false);
-  const [restFig, setRestFig] = useState(null);
+  const [restExercise, setRestExercise] = useState(null);
   const [restCallback, setRestCallback] = useState(null);
   const [finishedSummary, setFinishedSummary] = useState(null);
   const [showSplash, setShowSplash] = useState(true);
@@ -87,7 +87,7 @@ const AppShell = () => {
     setActiveWorkout(null);
   };
 
-  const handleShowRest = (cb, fig) => { setRestCallback(() => cb); setRestFig(fig); setShowRest(true); };
+  const handleShowRest = (cb, exercise) => { setRestCallback(() => cb); setRestExercise(exercise); setShowRest(true); };
   const handleRestDone = () => { setShowRest(false); if (restCallback) restCallback(); };
 
   const handleReset = () => {
@@ -202,7 +202,7 @@ const AppShell = () => {
           </div>
         )}
         {view === 'finished' && finishedSummary && <WorkoutFinished summary={finishedSummary} onClose={() => { setView('main'); setActiveTab('home'); setFinishedSummary(null); }} />}
-        {showRest && <RestTimer restTime={data.restTime || 90} figKey={restFig} onSkip={handleRestDone} onDone={handleRestDone} />}
+        {showRest && <RestTimer restTime={data.restTime || 90} figKey={restExercise?.fig} gifUrl={restExercise?.gifUrl} onSkip={handleRestDone} onDone={handleRestDone} />}
       </div>
     </div>
   );

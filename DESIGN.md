@@ -63,6 +63,22 @@ sempre que couber:
 O selo "LIVE" do `ExerciseCard` é opt-in (`live`, padrão `false`): só faz
 sentido onde algo acontece agora, ou seja, na série em execução.
 
+**Tamanho mínimo: o desenho de linha precisa de ~80px pra funcionar.** Abaixo
+disso a silhueta some e o stick figure deixa de ler como "pessoa executando o
+movimento" — vira forma abstrata. Isso é legibilidade de ícone, não gosto.
+
+- **≥ 80px** — `FigGlyph` ou `ExerciseCard`. Tem espaço pra silhueta ler.
+- **< 80px, com o exercício identificado** — `<ExerciseThumb>`, miniatura
+  circular recortada da foto real. Uma foto reconhece na hora, sem depender de
+  execução de ícone em tamanho pequeno.
+- **< 80px, sem foto ou offline** — o `ExerciseThumb` cai de volta pro
+  `FigGlyph` sozinho. Não é consolo: o desenho é local, instantâneo e funciona
+  sem rede.
+
+A exceção são as marcas d'água e os glifos da navegação, que não precisam
+identificar um exercício específico — ali o desenho pode ser pequeno porque só
+carrega a assinatura visual, não informação.
+
 ## 6. Motion só quando comunica
 
 Um momento proposital por interação. Vale manter:

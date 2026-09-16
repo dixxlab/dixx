@@ -93,7 +93,7 @@ export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote 
           onFinish(sets, { ...workout, exercises }, elapsed);
         }
       }
-    }, ex.fig);
+    }, { fig: ex.fig, gifUrl: libEx?.gifUrl });
   };
 
   const updateSet = (idx, field, value) => { const newSets = [...sets]; newSets[exerciseIdx][idx][field] = value; setSets(newSets); };
