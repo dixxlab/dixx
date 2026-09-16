@@ -5,6 +5,25 @@
    sem precisar de re-render do React.
    =========================================================== */
 
+/* Barlow Condensed — grotesca condensada usada só nos números (peso, PR, cronômetro,
+   streak, contadores). Self-hosted em vez de CDN: o app é PWA e precisa abrir offline
+   na academia; o subset latin (22KB por peso) entra no precache do service worker. */
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/barlow-condensed-600.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Barlow Condensed';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/barlow-condensed-700.woff2') format('woff2');
+}
+
 :root {
   /* raio de borda */
   --radius-sm: 10px;
@@ -18,7 +37,7 @@
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
 
   /* tipografia numérica (peso, PR, cronômetro) */
-  --font-data: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  --font-data: 'Barlow Condensed', "Haettenschweiler", "Arial Narrow", sans-serif;
   --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
 }
 

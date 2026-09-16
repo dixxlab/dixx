@@ -22,7 +22,7 @@ export const RestTimePicker = ({ open, currentValue, onSave, onClose }) => {
           </button>
         ))}
       </div>
-      <div className="text-xs uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Customizado</div>
+      <div className="text-xs mb-2" style={{ color: C.textMuted }}>Customizado</div>
       <div className="flex gap-2">
         <input type="number" value={custom} onChange={(e) => setCustom(e.target.value)} placeholder="Ex: 75"
           className="flex-1 p-3 rounded-xl outline-none text-sm"

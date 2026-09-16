@@ -13,9 +13,9 @@ export const Heatmap = ({ history }) => {
   };
 
   return (
-    <div className="p-4" style={{ background: C.bgCard, borderRadius: C.radiusLg, border: `1px solid ${C.border}` }}>
+    <div className="pb-5" style={{ borderBottom: `1px solid ${C.border}` }}>
       <div className="flex justify-between items-center mb-3">
-        <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Últimas 12 semanas</div>
+        <div className="text-xs" style={{ color: C.textMuted }}>Últimas 12 semanas</div>
         <div className="flex items-center gap-1 text-[9px]" style={{ color: C.textMuted }}>
           <span>Menos</span>
           <div className="w-2 h-2 rounded-sm" style={{ background: C.bgInset }} />

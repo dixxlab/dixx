@@ -3,6 +3,8 @@ import { Clock, Dumbbell, Palette, Camera, ChevronRight } from 'lucide-react';
 import { T as C } from '../../theme/tokens';
 import { Avatar } from '../ui/Avatar';
 import { SettingRow } from '../ui/SettingRow';
+import { SectionTitle } from '../ui/SectionTitle';
+import { StatRow } from '../ui/Stat';
 import { calculateStreak } from '../../lib/workouts';
 import { exerciseLibrary } from '../../lib/exercises';
 import { RestTimePicker } from './RestTimePicker';
@@ -36,47 +38,60 @@ export const Profile = ({ data, onReset, onExport, onChangePhoto, onChangeRestTi
 
   return (
     <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
-      <h1 className="text-2xl font-medium mb-6" style={{ color: C.text }}>Perfil</h1>
-      <div className="p-5 mb-6 text-center" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-        <div className="mx-auto mb-3 relative" style={{ width: 80, height: 80 }}>
-          <Avatar name={data.user.name} photo={data.photo} size={80} onClick={onChangePhoto} />
-          <div className="absolute bottom-0 right-0 rounded-full flex items-center justify-center" style={{ width: 28, height: 28, background: C.primary, border: `2px solid ${C.bgCard}` }}>
-            <Camera size={14} color={C.primaryOn} />
+      <h1 className="text-2xl font-medium mb-5" style={{ color: C.text }}>Perfil</h1>
+
+      {/* Mesma faixa sangrada do herói das outras telas: identidade + os dois
+          números que resumem a conta, sem moldura de card. */}
+      <section
+        className="-mx-5 px-5 py-5"
+        style={{ background: C.bgCard, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}
+      >
+        <div className="flex items-center gap-4 mb-5">
+          <div className="relative flex-shrink-0" style={{ width: 64, height: 64 }}>
+            <Avatar name={data.user.name} photo={data.photo} size={64} onClick={onChangePhoto} />
+            <div className="absolute bottom-0 right-0 rounded-full flex items-center justify-center" style={{ width: 24, height: 24, background: C.primary, border: `2px solid ${C.bgCard}` }}>
+              <Camera size={12} color={C.primaryOn} />
+            </div>
+          </div>
+          <div className="min-w-0">
+            <div className="text-lg font-medium truncate" style={{ color: C.text }}>{data.user.name}</div>
+            <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>{data.user.experience}</div>
           </div>
         </div>
-        <div className="text-lg font-medium" style={{ color: C.text }}>{data.user.name}</div>
-        <div className="text-xs" style={{ color: C.textMuted }}>{data.user.experience} • {divisionLabels[divisionCount]}</div>
-        <div className="grid grid-cols-2 gap-3 mt-4 pt-4" style={{ borderTop: `1px solid ${C.border}` }}>
-          <div>
-            <div className="text-xl font-medium tabular-nums" style={{ color: C.primary, fontFamily: C.fontData }}>{data.history.length}</div>
-            <div className="text-[10px]" style={{ color: C.textMuted }}>treinos totais</div>
-          </div>
-          <div>
-            <div className="text-xl font-medium tabular-nums" style={{ color: C.primary, fontFamily: C.fontData }}>{streak}</div>
-            <div className="text-[10px]" style={{ color: C.textMuted }}>streak atual</div>
-          </div>
-        </div>
-      </div>
-      <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Configurações</div>
-      <div className="space-y-1 mb-6">
+        <StatRow
+          gap={28}
+          items={[
+            { value: data.history.length, label: 'treinos totais' },
+            { value: streak, label: 'streak atual' },
+            { value: divisionLabels[divisionCount], label: 'divisão' },
+          ]}
+        />
+      </section>
+
+      <SectionTitle className="mt-7 mb-1">Configurações</SectionTitle>
+      <div className="mb-6">
         <SettingRow icon={Clock} label="Tempo de descanso" value={`${restTime}s`} onClick={() => setShowRestPicker(true)} />
         <SettingRow icon={Dumbbell} label="Divisão" value={divisionLabels[divisionCount]} onClick={() => setShowDivisionPicker(true)} />
         <SettingRow icon={Palette} label="Tema" value={currentThemeLabel} onClick={() => setShowThemePicker(true)} />
       </div>
-      <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Dados</div>
-      <div className="space-y-1">
-        <button onClick={onExport} className="w-full p-4 text-left transition-all active:scale-[0.98] flex justify-between items-center" style={{ background: C.bgCard, borderRadius: C.radiusLg, minHeight: 44 }}>
+
+      <SectionTitle className="mb-1">Dados</SectionTitle>
+      <div>
+        <button onClick={onExport} className="w-full py-3.5 text-left transition-opacity active:opacity-60 flex justify-between items-center" style={{ borderBottom: `1px solid ${C.border}`, minHeight: 44 }}>
           <div>
-            <div className="text-sm font-medium" style={{ color: C.text }}>Exportar dados</div>
-            <div className="text-[10px]" style={{ color: C.textMuted }}>backup JSON</div>
+            <div className="text-sm" style={{ color: C.text }}>Exportar dados</div>
+            <div className="text-xs mt-0.5" style={{ color: C.textMuted }}>backup JSON</div>
           </div>
-          <ChevronRight size={16} style={{ color: C.textMuted }} />
+          <ChevronRight size={14} style={{ color: C.textMuted }} />
         </button>
-        <button onClick={handleReset} className="w-full p-4 text-left transition-all active:scale-[0.98]" style={{ background: C.bgCard, color: C.danger, borderRadius: C.radiusLg, minHeight: 44 }}>
-          <div className="text-sm font-medium">Resetar dados (refazer onboarding)</div>
+        <button onClick={handleReset} className="w-full py-3.5 text-left transition-opacity active:opacity-60" style={{ color: C.danger, borderBottom: `1px solid ${C.border}`, minHeight: 44 }}>
+          <div className="text-sm">Resetar dados (refazer onboarding)</div>
         </button>
       </div>
-      <div className="text-center mt-8 text-[10px]" style={{ color: C.textMuted }}>Dixx · v1.0 · {exerciseLibrary.length} exercícios · {customCount} treino{customCount !== 1 ? 's' : ''} custom</div>
+
+      <div className="text-center mt-8 text-xs" style={{ color: C.textMuted }}>
+        Dixx · v1.0 · {exerciseLibrary.length} exercícios · {customCount} treino{customCount !== 1 ? 's' : ''} custom
+      </div>
       <RestTimePicker open={showRestPicker} currentValue={restTime} onSave={(v) => { onChangeRestTime(v); setShowRestPicker(false); }} onClose={() => setShowRestPicker(false)} />
       <DivisionPicker open={showDivisionPicker} currentValue={divisionCount} onSave={(v) => { onChangeDivision(v); setShowDivisionPicker(false); }} onClose={() => setShowDivisionPicker(false)} />
       <ThemePicker open={showThemePicker} onClose={() => setShowThemePicker(false)} />

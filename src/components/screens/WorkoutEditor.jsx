@@ -60,16 +60,16 @@ export const WorkoutEditor = ({ workout, onSave, onClose }) => {
       </div>
       <h1 className="text-2xl font-medium mb-1" style={{ color: C.text }}>Editar treino</h1>
       <p className="text-sm mb-6" style={{ color: C.textMuted }}>Substitui o {workout.id} padrão</p>
-      <label className="text-xs uppercase tracking-wider mb-2 block" style={{ color: C.textMuted }}>Nome do treino</label>
+      <label className="text-xs mb-2 block" style={{ color: C.textMuted }}>Nome do treino</label>
       <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ex: Peito Pesado"
         className="w-full p-3 outline-none text-sm mb-4"
         style={{ background: C.bgCard, border: `1px solid ${C.border}`, color: C.text, borderRadius: C.radiusLg }} />
-      <label className="text-xs uppercase tracking-wider mb-2 block" style={{ color: C.textMuted }}>Grupo muscular</label>
+      <label className="text-xs mb-2 block" style={{ color: C.textMuted }}>Grupo muscular</label>
       <input type="text" value={muscle} onChange={(e) => setMuscle(e.target.value)} placeholder="Ex: Peito + Tríceps"
         className="w-full p-3 outline-none text-sm mb-6"
         style={{ background: C.bgCard, border: `1px solid ${C.border}`, color: C.text, borderRadius: C.radiusLg }} />
       <div className="flex items-center justify-between mb-3">
-        <div className="text-xs uppercase tracking-wider" style={{ color: C.textMuted }}>Exercícios ({exercises.length})</div>
+        <div className="text-xs" style={{ color: C.textMuted }}>Exercícios ({exercises.length})</div>
       </div>
       <div className="space-y-2 mb-3">
         {exercises.map((ex, idx) => (

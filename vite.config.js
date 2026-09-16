@@ -8,6 +8,11 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      // globPatterns default do workbox não inclui woff2; sem isso a fonte de display
+      // não entra no precache e o app abre offline sem ela.
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+      },
       manifest: {
         name: 'Dixx - Treino de Academia',
         short_name: 'Dixx',

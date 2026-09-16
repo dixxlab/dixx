@@ -1,9 +1,13 @@
 import { useMemo } from 'react';
-import { Flame, Activity, Trophy, TrendingUp, Calendar, Award, BarChart3, Dumbbell } from 'lucide-react';
+import { Flame, TrendingUp, Trophy, Dumbbell } from 'lucide-react';
 import { T as C } from '../../theme/tokens';
 import { exerciseLibrary } from '../../lib/exercises';
 import { calculateStreak, calculatePRs, formatRelative } from '../../lib/workouts';
 import { Heatmap } from '../charts/Heatmap';
+import { StatRow } from '../ui/Stat';
+import { SectionTitle } from '../ui/SectionTitle';
+import { ListRow, RowValue } from '../ui/ListRow';
+import { FigGlyph } from '../ui/Figures';
 
 export const Stats = ({ data, onSelectExercise }) => {
   const streak = calculateStreak(data.history);
@@ -46,51 +50,43 @@ export const Stats = ({ data, onSelectExercise }) => {
   return (
     <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
       <h1 className="text-2xl font-medium mb-1" style={{ color: C.text }}>Sua evolução</h1>
-      <p className="text-sm mb-6" style={{ color: C.textMuted }}>Análise completa do progresso</p>
+      <p className="text-sm mb-5" style={{ color: C.textMuted }}>Análise completa do progresso</p>
 
-      <div className="grid grid-cols-2 gap-2 mb-4">
-        <div className="p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-          <div className="flex items-center gap-2 mb-1">
-            <Flame size={14} style={{ color: C.warning }} />
-            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Streak</div>
-          </div>
-          <div className="text-2xl font-medium tabular-nums" style={{ color: C.text, fontFamily: C.fontData }}>{streak} {streak === 1 ? 'dia' : 'dias'}</div>
+      {/* Herói da tela: o volume acumulado é o número que cresce a cada treino,
+          então ele carrega a escala e os demais viram apoio. */}
+      <section
+        className="-mx-5 px-5 py-5"
+        style={{ background: C.bgCard, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}
+      >
+        <div className="text-xs" style={{ color: C.textMuted }}>Volume total levantado</div>
+        <div
+          className="flex items-baseline gap-1 tabular-nums mt-1 mb-5"
+          style={{ fontFamily: C.fontData, fontWeight: 700, fontSize: 52, lineHeight: 1, color: C.text }}
+        >
+          {(totalVolume / 1000).toFixed(1)}
+          <span style={{ fontSize: 26, color: C.textMuted }}>toneladas</span>
         </div>
-        <div className="p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-          <div className="flex items-center gap-2 mb-1">
-            <Activity size={14} style={{ color: C.info }} />
-            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Treinos/sem</div>
-          </div>
-          <div className="text-2xl font-medium tabular-nums" style={{ color: C.text, fontFamily: C.fontData }}>{avgPerWeek}</div>
-        </div>
-        <div className="p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-          <div className="flex items-center gap-2 mb-1">
-            <Trophy size={14} style={{ color: C.warning }} />
-            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Total treinos</div>
-          </div>
-          <div className="text-2xl font-medium tabular-nums" style={{ color: C.text, fontFamily: C.fontData }}>{totalSessions}</div>
-        </div>
-        <div className="p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingUp size={14} style={{ color: C.info }} />
-            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Volume total</div>
-          </div>
-          <div className="text-2xl font-medium tabular-nums" style={{ color: C.text, fontFamily: C.fontData }}>{(totalVolume / 1000).toFixed(1)}t</div>
-        </div>
-      </div>
+        <StatRow
+          gap={28}
+          items={[
+            { value: streak, label: streak === 1 ? 'dia seguido' : 'dias seguidos', icon: Flame },
+            { value: totalSessions, label: 'treinos' },
+            { value: avgPerWeek, label: 'por semana' },
+          ]}
+        />
+      </section>
 
       {data.history.length > 0 && (
         <>
-          <div className="flex items-center gap-2 mb-2 mt-4">
-            <Calendar size={14} style={{ color: C.primary }} />
-            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Consistência</div>
-          </div>
+          <SectionTitle className="mt-7 mb-3">Consistência</SectionTitle>
           <Heatmap history={data.history} />
         </>
       )}
 
-      <div className="text-[10px] uppercase tracking-wider mb-2 mt-4" style={{ color: C.textMuted }}>{today.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}</div>
-      <div className="p-4 mb-4" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
+      <SectionTitle className="mt-7 mb-3">
+        {today.toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}
+      </SectionTitle>
+      <div className="pb-5" style={{ borderBottom: `1px solid ${C.border}` }}>
         <div className="grid grid-cols-7 gap-1.5 mb-2">
           {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, i) => (
             <div key={i} className="text-center text-[10px]" style={{ color: C.textMuted }}>{d}</div>
@@ -98,8 +94,8 @@ export const Stats = ({ data, onSelectExercise }) => {
         </div>
         <div className="grid grid-cols-7 gap-1.5">
           {calendar.map((done, i) => (
-            <div key={i} className="aspect-square rounded-md flex items-center justify-center text-[10px] font-medium tabular-nums"
-              style={{ background: done ? C.primary : C.bg, color: done ? C.primaryOn : C.textMuted, border: (i + 1) === today.getDate() ? `2px solid ${C.text}` : 'none' }}>
+            <div key={i} className="aspect-square rounded-md flex items-center justify-center text-[11px] tabular-nums"
+              style={{ fontFamily: C.fontData, fontWeight: 600, background: done ? C.primary : C.bgCard, color: done ? C.primaryOn : C.textMuted, border: (i + 1) === today.getDate() ? `2px solid ${C.text}` : 'none' }}>
               {i + 1}
             </div>
           ))}
@@ -108,21 +104,17 @@ export const Stats = ({ data, onSelectExercise }) => {
 
       {prs.length > 0 && (
         <>
-          <div className="flex items-center gap-2 mb-2 mt-4">
-            <Award size={14} style={{ color: C.warning }} />
-            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Recordes pessoais</div>
-          </div>
-          <div className="space-y-2 mb-4">
+          <SectionTitle className="mt-6 mb-1">Recordes pessoais</SectionTitle>
+          <div>
             {prs.map((pr, i) => (
-              <button key={i} onClick={() => onSelectExercise(pr.exercise)} className="w-full p-3 flex justify-between items-center transition-all active:scale-[0.98]" style={{ background: C.bgCard, borderRadius: C.radiusLg, minHeight: 44 }}>
-                <div className="text-left">
-                  <div className="text-sm font-medium" style={{ color: C.text }}>{pr.exercise}</div>
-                  <div className="text-[10px]" style={{ color: C.textMuted }}>{formatRelative(pr.date)}</div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="font-medium flex items-center gap-1 tabular-nums" style={{ color: C.primary }}>{pr.weight}kg <Trophy size={14} color={C.warning} /></div>
-                </div>
-              </button>
+              <ListRow
+                key={i}
+                onClick={() => onSelectExercise(pr.exercise)}
+                leading={<Trophy size={16} style={{ color: C.warning }} />}
+                title={pr.exercise}
+                subtitle={formatRelative(pr.date)}
+                trailing={<RowValue color={C.primary}>{pr.weight}<span style={{ fontSize: 11 }}>kg</span></RowValue>}
+              />
             ))}
           </div>
         </>
@@ -130,27 +122,30 @@ export const Stats = ({ data, onSelectExercise }) => {
 
       {allExercises.length > 0 && (
         <>
-          <div className="flex items-center gap-2 mb-2 mt-4">
-            <BarChart3 size={14} style={{ color: C.primary }} />
-            <div className="text-[10px] uppercase tracking-wider" style={{ color: C.textMuted }}>Evolução por exercício</div>
-          </div>
-          <div className="space-y-2">
+          <SectionTitle className="mt-6 mb-1">Evolução por exercício</SectionTitle>
+          <div>
             {allExercises.map((ex, i) => (
-              <button key={i} onClick={() => onSelectExercise(ex.name)} className="w-full p-3 flex justify-between items-center transition-all active:scale-[0.98]" style={{ background: C.bgCard, borderRadius: C.radiusLg, minHeight: 44 }}>
-                <div className="text-left flex-1">
-                  <div className="text-sm font-medium" style={{ color: C.text }}>{ex.name}</div>
-                  <div className="text-[10px]" style={{ color: C.textMuted }}>{ex.count} treino(s) • último {formatRelative(ex.lastDate)}</div>
-                </div>
-                <TrendingUp size={14} style={{ color: C.primary }} />
-              </button>
+              <ListRow
+                key={i}
+                onClick={() => onSelectExercise(ex.name)}
+                leading={<FigGlyph figKey={ex.fig} size={26} opacity={0.75} />}
+                title={ex.name}
+                subtitle={`último ${formatRelative(ex.lastDate)}`}
+                trailing={
+                  <>
+                    <RowValue>{ex.count}</RowValue>
+                    <TrendingUp size={14} style={{ color: C.primary }} />
+                  </>
+                }
+              />
             ))}
           </div>
         </>
       )}
 
       {data.history.length === 0 && (
-        <div className="p-6 text-center" style={{ background: C.bgCard, color: C.textMuted, borderRadius: C.radiusLg }}>
-          <div className="flex justify-center mb-2"><Dumbbell size={40} color={C.textMuted} /></div>
+        <div className="py-10 text-center" style={{ color: C.textMuted }}>
+          <div className="flex justify-center mb-3"><Dumbbell size={40} color={C.textMuted} /></div>
           <div className="text-sm">Comece seu primeiro treino<br />pra ver suas estatísticas evoluindo!</div>
         </div>
       )}

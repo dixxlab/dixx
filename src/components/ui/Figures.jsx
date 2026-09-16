@@ -19,6 +19,7 @@ export const ExerciseAnimStyles = () => (
     @keyframes chart-draw { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
     @keyframes fade-up { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
     .ex-anim { animation-duration: 2.4s; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+    .fig-static .ex-anim { animation: none; }
     .chart-line { stroke-dasharray: 1000; animation: chart-draw 1.5s ease-out forwards; }
     .fade-up { animation: fade-up 0.4s ease-out; }
   `}</style>
@@ -167,6 +168,26 @@ export const GenericFig = ({ size = 90 }) => (
 export const getExerciseFig = (key) => {
   const map = { supino: SupinoFig, rosca: RoscaFig, agacha: AgachaFig, puxada: PuxadaFig, desen: DesenFig, abdo: AbdoFig };
   return map[key] || GenericFig;
+};
+
+/* Movimento dominante de um treino: o fig que mais se repete na lista de exercícios.
+   Serve pro treino ganhar uma assinatura visual própria fora da tela de execução. */
+export const getDominantFig = (exercises = []) => {
+  const tally = {};
+  exercises.forEach((e) => { if (e.fig) tally[e.fig] = (tally[e.fig] || 0) + 1; });
+  return Object.keys(tally).sort((a, b) => tally[b] - tally[a])[0] || 'desen';
+};
+
+/* Glifo estático, sem moldura — leva os stick figures pras listas e pro herói
+   da Dashboard, não só pro card do exercício em execução. */
+export const FigGlyph = ({ figKey, size = 26, opacity = 1 }) => {
+  const Fig = getExerciseFig(figKey);
+  return (
+    <span className="fig-static inline-flex" style={{ opacity }}>
+      {/* eslint-disable-next-line react-hooks/static-components -- getExerciseFig só faz lookup num mapa estático de componentes já declarados no módulo, nunca cria um novo */}
+      <Fig size={size} />
+    </span>
+  );
 };
 
 export const ExerciseCard = ({ figKey, size = 110 }) => {

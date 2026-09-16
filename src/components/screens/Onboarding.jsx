@@ -32,7 +32,7 @@ export const Onboarding = ({ onComplete }) => {
         >
           <h1 className="text-3xl font-medium mb-2 text-center" style={{ color: C.text }}>{current.title}</h1>
           <p className="text-sm text-center mb-10" style={{ color: C.textMuted }}>{current.subtitle}</p>
-          <label className="text-xs uppercase tracking-wider mb-3 block" style={{ color: C.textMuted }}>{current.label}</label>
+          <label className="text-xs mb-3 block" style={{ color: C.textMuted }}>{current.label}</label>
           {current.type === 'input' && (
             <input type="text" value={data[current.field]} onChange={(e) => setData({ ...data, [current.field]: e.target.value })} placeholder="Digite seu nome"
               className="w-full p-4 rounded-2xl outline-none transition-all"

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ArrowLeft, Trophy } from 'lucide-react';
 import { T as C } from '../../theme/tokens';
+import { SectionTitle } from '../ui/SectionTitle';
 import { buildChartData, generateInsights } from '../../lib/stats';
 import { formatRelative } from '../../lib/workouts';
 import { LineChart } from '../charts/LineChart';
@@ -65,22 +66,22 @@ export const ExerciseEvolution = ({ history, exerciseName, onClose }) => {
       {stats && (
         <div className="grid grid-cols-2 gap-2 mb-4">
           <div className="p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-            <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Peso atual</div>
+            <div className="text-xs mb-1" style={{ color: C.textMuted }}>Peso atual</div>
             <div className="text-xl font-medium tabular-nums" style={{ color: C.text, fontFamily: C.fontData }}>{stats.lastP.weight}kg</div>
             <div className="text-[10px]" style={{ color: C.textMuted }}>× {stats.lastP.reps} reps</div>
           </div>
           <div className="p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-            <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>1RM estimado</div>
+            <div className="text-xs mb-1" style={{ color: C.textMuted }}>1RM estimado</div>
             <div className="text-xl font-medium tabular-nums" style={{ color: C.warning, fontFamily: C.fontData }}>{stats.max1RM.toFixed(1)}kg</div>
             <div className="text-[10px]" style={{ color: C.textMuted }}>máximo teórico</div>
           </div>
           <div className="p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-            <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>PR de peso</div>
+            <div className="text-xs mb-1" style={{ color: C.textMuted }}>PR de peso</div>
             <div className="text-xl font-medium flex items-center gap-1 tabular-nums" style={{ color: C.warning, fontFamily: C.fontData }}>{stats.maxWeight}kg <Trophy size={16} color={C.warning} /></div>
             <div className="text-[10px]" style={{ color: C.textMuted }}>recorde absoluto</div>
           </div>
           <div className="p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-            <div className="text-[9px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Volume total</div>
+            <div className="text-xs mb-1" style={{ color: C.textMuted }}>Volume total</div>
             <div className="text-xl font-medium tabular-nums" style={{ color: C.info, fontFamily: C.fontData }}>{(stats.totalVolume / 1000).toFixed(1)}t</div>
             <div className="text-[10px]" style={{ color: C.textMuted }}>no período</div>
           </div>
@@ -89,7 +90,7 @@ export const ExerciseEvolution = ({ history, exerciseName, onClose }) => {
 
       <InsightCard insights={insights} />
 
-      <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Gráfico de evolução</div>
+      <SectionTitle className="mb-3">Gráfico de evolução</SectionTitle>
       <div className="flex gap-2 overflow-x-auto mb-3 pb-2" style={{ scrollbarWidth: 'none' }}>
         {metrics.map((m) => (
           <button key={m.val} onClick={() => setMetric(m.val)}
@@ -104,7 +105,7 @@ export const ExerciseEvolution = ({ history, exerciseName, onClose }) => {
 
       {chartData.length > 0 && (
         <>
-          <div className="text-[10px] uppercase tracking-wider mb-2 mt-6" style={{ color: C.textMuted }}>Últimos treinos</div>
+          <SectionTitle className="mb-3 mt-6">Últimos treinos</SectionTitle>
           <div className="space-y-2">
             {[...chartData].reverse().slice(0, 5).map((p, i) => (
               <div key={i} className="p-3 flex justify-between items-center" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>

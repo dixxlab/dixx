@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, ChevronRight } from 'lucide-react';
 import { T as C } from '../../theme/tokens';
+import { SectionTitle } from '../ui/SectionTitle';
 import { ExerciseCard } from '../ui/Figures';
 import { ExerciseSearchList } from './ExerciseSearchList';
 import { exerciseLibrary } from '../../lib/exercises';
@@ -21,25 +22,25 @@ export const Library = ({ onClose }) => {
         <div className="rounded-2xl p-4 mb-4" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div>
-              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Músculo</div>
+              <div className="text-xs mb-1" style={{ color: C.textMuted }}>Músculo</div>
               <div className="text-sm font-medium" style={{ color: C.primary }}>{selectedExercise.muscle}</div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Equipamento</div>
+              <div className="text-xs mb-1" style={{ color: C.textMuted }}>Equipamento</div>
               <div className="text-sm" style={{ color: C.text }}>{selectedExercise.equipment}</div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Séries</div>
+              <div className="text-xs mb-1" style={{ color: C.textMuted }}>Séries</div>
               <div className="text-sm" style={{ color: C.text }}>{selectedExercise.defaultSets}</div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wider mb-1" style={{ color: C.textMuted }}>Repetições</div>
+              <div className="text-xs mb-1" style={{ color: C.textMuted }}>Repetições</div>
               <div className="text-sm" style={{ color: C.text }}>{selectedExercise.defaultReps}</div>
             </div>
           </div>
         </div>
         <div className="rounded-2xl p-4" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-          <div className="text-[10px] uppercase tracking-wider mb-2" style={{ color: C.textMuted }}>Como executar</div>
+          <SectionTitle className="mb-2">Como executar</SectionTitle>
           <div className="text-sm leading-relaxed" style={{ color: C.text }}>{selectedExercise.description}</div>
         </div>
       </div>

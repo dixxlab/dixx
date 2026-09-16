@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { ThemeProvider } from './theme/ThemeContext';
 import { ConfirmProvider } from './components/ui/ConfirmProvider';
 import { ExerciseAnimStyles } from './components/ui/Figures';
@@ -177,12 +176,7 @@ const AppShell = () => {
         )}
         {view === 'main' && data.user && (
           <>
-            <motion.div
-              key={contentKey}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-            >
+            <div key={contentKey}>
               {showEvolution ? (
                 <ExerciseEvolution history={data.history} exerciseName={evolutionExercise} onClose={() => setEvolutionExercise(null)} />
               ) : editingWorkout ? (
@@ -197,7 +191,7 @@ const AppShell = () => {
                   {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} onChangePhoto={handleChangePhoto} onChangeRestTime={handleChangeRestTime} onChangeDivision={handleChangeDivision} />}
                 </>
               )}
-            </motion.div>
+            </div>
             {!showLibrary && !editingWorkout && !showEvolution && <BottomNav active={activeTab} onChange={setActiveTab} />}
           </>
         )}

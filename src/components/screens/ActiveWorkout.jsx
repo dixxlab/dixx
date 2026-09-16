@@ -130,7 +130,7 @@ export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote 
       <div className="flex justify-between items-center mb-4">
         <button onClick={() => onFinish(sets, { ...workout, exercises }, elapsed)} className="p-2 -ml-2" style={{ minWidth: 44, minHeight: 44 }} aria-label="Sair do treino"><X size={20} color={C.textMuted} /></button>
         <div className="text-xs" style={{ color: C.textMuted }}>Exercício {exerciseIdx + 1} de {exercises.length}</div>
-        <div className="flex items-center gap-1 text-xs font-medium tabular-nums" style={{ color: C.primary }}><Clock size={12} /> {formatTime(elapsed)}</div>
+        <div className="flex items-center gap-1.5" style={{ color: C.primary }}><Clock size={13} /><span className="tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 19, lineHeight: 1 }}>{formatTime(elapsed)}</span></div>
       </div>
       <div className="h-1 rounded-full mb-6" style={{ background: C.bgCard }}>
         <motion.div className="h-full rounded-full" style={{ background: C.primary }}
@@ -155,8 +155,8 @@ export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote 
               style={{ background: C.bgCard, border: isActive ? `1px solid ${C.primary}` : 'none', opacity: isPending ? 0.5 : 1, borderRadius: C.radiusMd }}>
               <motion.div
                 key={`${idx}-${isDone}`}
-                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0 tabular-nums"
-                style={{ background: isDone ? C.primary : C.bg, color: isDone ? C.primaryOn : isActive ? C.primary : C.textMuted, border: !isDone ? `1px solid ${isActive ? C.primary : C.border}` : 'none' }}
+                className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 tabular-nums"
+                style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 15, background: isDone ? C.primary : C.bg, color: isDone ? C.primaryOn : isActive ? C.primary : C.textMuted, border: !isDone ? `1px solid ${isActive ? C.primary : C.border}` : 'none' }}
                 initial={isDone ? { scale: 0.4 } : false}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 20 }}
@@ -167,12 +167,12 @@ export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote 
                 <div>
                   <input type="number" value={set.weight} onChange={(e) => updateSet(idx, 'weight', e.target.value)} disabled={!isActive || isDone}
                     placeholder={last.weight > 0 ? last.weight.toString() : '0'}
-                    className="w-full bg-transparent text-sm outline-none font-medium" style={{ color: isDone ? C.primary : C.text }} />
+                    className="w-full bg-transparent outline-none tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 22, lineHeight: 1.1, color: isDone ? C.primary : C.text }} />
                   <div className="text-[9px]" style={{ color: C.textMuted }}>kg</div>
                 </div>
                 <div>
                   <input type="number" value={set.reps} onChange={(e) => updateSet(idx, 'reps', e.target.value)} disabled={!isActive || isDone} placeholder={ex.reps}
-                    className="w-full bg-transparent text-sm outline-none font-medium" style={{ color: isDone ? C.primary : C.text }} />
+                    className="w-full bg-transparent outline-none tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 22, lineHeight: 1.1, color: isDone ? C.primary : C.text }} />
                   <div className="text-[9px]" style={{ color: C.textMuted }}>reps</div>
                 </div>
               </div>
