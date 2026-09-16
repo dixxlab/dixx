@@ -6,6 +6,7 @@ import { SplashScreen } from './components/ui/Splash';
 import { BottomNav } from './components/ui/BottomNav';
 import { loadData, saveData, resetData, initialData } from './lib/storage';
 import { getWorkoutPlans, divisionLabelToCount } from './lib/workouts';
+import { watchServiceWorkerUpdate, setPodeRecarregar } from './lib/swUpdate';
 
 import { Onboarding } from './components/screens/Onboarding';
 import { Dashboard } from './components/screens/Dashboard';
@@ -47,6 +48,11 @@ const AppShell = () => {
   }, []);
 
   useEffect(() => { saveData(data); }, [data]);
+
+  // Versão nova do app entra na mesma abertura, mas nunca no meio de um treino
+  // ou do onboarding — recarregar ali apagaria séries ou respostas em memória.
+  useEffect(() => { watchServiceWorkerUpdate(); }, []);
+  useEffect(() => { setPodeRecarregar(() => view === 'main' && !showRest); }, [view, showRest]);
 
   const handleOnboardingComplete = (userData) => {
     // A divisão escolhida no onboarding precisa virar divisionCount de fato,

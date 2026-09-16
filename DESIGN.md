@@ -137,3 +137,24 @@ partir da primeira abertura — ver `vite.config.js`.
 
 Se adicionar asset novo que precise funcionar offline, lembrar que o
 `globPatterns` padrão do workbox **não inclui woff2**.
+
+## 11. Publicar não é o mesmo que chegar no usuário
+
+O service worker serve o cache antes de buscar a versão nova. Sem ninguém
+reagindo a isso, o app abre sempre **uma versão atrasada**: você publica, abre,
+não vê mudança e conclui que o deploy falhou. Isso custou duas rodadas de
+investigação.
+
+`lib/swUpdate.js` resolve: quando o worker novo assume, a página recarrega e a
+versão nova entra na mesma abertura. Com uma trava — **nunca recarregar durante
+um treino ou o onboarding**, porque séries e respostas vivem em memória e um
+reload apagaria tudo. A troca fica pendente e acontece quando o treino termina.
+
+Ao depurar "não atualizou", checar nesta ordem antes de mexer em código:
+
+1. `git ls-remote origin refs/heads/main` bate com o commit local? Sem push não
+   há deploy.
+2. O hash em `dist/assets/` bate com o que o `sw.js` publicado referencia? Se
+   não, a Vercel ainda está construindo.
+3. Se os dois baterem, é cache de cliente — não é falha de implementação e não
+   se conserta refazendo o trabalho.
