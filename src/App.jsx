@@ -192,7 +192,7 @@ const AppShell = () => {
                 </>
               )}
             </div>
-            {!showLibrary && !editingWorkout && !showEvolution && <BottomNav active={activeTab} onChange={setActiveTab} />}
+            {!showLibrary && !editingWorkout && !showEvolution && <BottomNav active={activeTab} onChange={setActiveTab} userName={data.user.name} photo={data.photo} />}
           </>
         )}
         {view === 'workout' && activeWorkout && (

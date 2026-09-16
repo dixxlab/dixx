@@ -172,6 +172,51 @@ export const getExerciseFig = (key) => {
   return map[key] || GenericFig;
 };
 
+/* Glifos da navegação, desenhados nas mesmas primitivas dos stick figures —
+   retângulo arredondado e elipse, preenchidos sólidos — em vez do traço vazado
+   fino de biblioteca de ícones. É essa diferença de peso que faz o conjunto
+   parecer desenhado pela mesma mão que as figuras.
+
+   Vocabulário: tudo é ferro de academia. Barra com anilhas (hoje), fichas
+   empilhadas (treinos), anilhas crescendo (evolução), anilha vista de frente
+   (perfil). Nenhuma silhueta humana — essa é a linguagem das figuras, não a
+   dos ícones. */
+const NAV_GLYPHS = {
+  hoje: (
+    <>
+      <rect x="5" y="10.8" width="14" height="2.4" rx="1.2" />
+      <rect x="2" y="7.5" width="3.2" height="9" rx="1.3" />
+      <rect x="18.8" y="7.5" width="3.2" height="9" rx="1.3" />
+    </>
+  ),
+  treinos: (
+    <>
+      <rect x="3" y="4.5" width="18" height="3.2" rx="1.6" />
+      <rect x="3" y="10.4" width="12" height="3.2" rx="1.6" />
+      <rect x="3" y="16.3" width="15.5" height="3.2" rx="1.6" />
+    </>
+  ),
+  evolucao: (
+    <>
+      <rect x="3.5" y="13.5" width="4.2" height="7" rx="1.7" />
+      <rect x="9.9" y="9" width="4.2" height="11.5" rx="1.7" />
+      <rect x="16.3" y="4" width="4.2" height="16.5" rx="1.7" />
+    </>
+  ),
+  perfil: (
+    <path
+      fillRule="evenodd"
+      d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 4.2a4.8 4.8 0 1 1 0 9.6 4.8 4.8 0 0 1 0-9.6Z"
+    />
+  ),
+};
+
+export const NavGlyph = ({ name, size = 21, color }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={color} aria-hidden="true">
+    {NAV_GLYPHS[name]}
+  </svg>
+);
+
 /* Movimento dominante de um treino: o fig que mais se repete na lista de exercícios.
    Serve pro treino ganhar uma assinatura visual própria fora da tela de execução. */
 export const getDominantFig = (exercises = []) => {
