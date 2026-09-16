@@ -1,3 +1,5 @@
+import { findExerciseByName } from './exercises';
+
 /* Demonstrações vêm do free-exercise-db (github.com/yuhonas/free-exercise-db),
    publicado sob a Unlicense — domínio público, sem exigência de atribuição ou
    licença viral. Foi essa a razão de não usar os forks do ExerciseDB: a licença
@@ -12,3 +14,12 @@
    abre a demonstração e o <img> entra no DOM. */
 export const getDemoFrames = (gifUrl) =>
   (gifUrl ? [`${gifUrl}/0.jpg`, `${gifUrl}/1.jpg`] : []);
+
+/* A foto que representa um treino numa lista é a do primeiro exercício dele.
+   Os treinos guardam só nome/séries/reps, então o gifUrl vem do catálogo. */
+export const getWorkoutThumb = (exercises = []) => {
+  const primeiro = exercises[0];
+  if (!primeiro) return {};
+  const doCatalogo = findExerciseByName(primeiro.name);
+  return { gifUrl: doCatalogo?.gifUrl, figKey: primeiro.fig };
+};

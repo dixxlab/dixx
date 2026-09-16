@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Flame, TrendingUp, Trophy, Play } from 'lucide-react';
 import { T as C } from '../../theme/tokens';
-import { exerciseLibrary } from '../../lib/exercises';
+import { findExerciseByName } from '../../lib/exercises';
 import { calculateStreak, calculatePRs, formatRelative } from '../../lib/workouts';
 import { Heatmap } from '../charts/Heatmap';
 import { StatRow } from '../ui/Stat';
@@ -25,7 +25,7 @@ export const Stats = ({ data, onSelectExercise, onNavigate }) => {
       s.exercises.forEach(ex => {
         if (!map[ex.name]) {
           map[ex.name] = { name: ex.name, count: 0, lastDate: s.date };
-          const libEx = exerciseLibrary.find(e => e.name === ex.name);
+          const libEx = findExerciseByName(ex.name);
           map[ex.name].fig = libEx ? libEx.fig : 'desen';
         }
         map[ex.name].count++;

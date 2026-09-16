@@ -5,7 +5,7 @@ import { T as C } from '../../theme/tokens';
 import { initAudio } from '../../lib/audio';
 import { getLastSession } from '../../lib/workouts';
 import { getMaxWeightEver } from '../../lib/stats';
-import { exerciseLibrary } from '../../lib/exercises';
+import { findExerciseByName } from '../../lib/exercises';
 import { ExerciseCard } from '../ui/Figures';
 import { ExerciseDemo } from '../ui/ExerciseDemo';
 import { Confetti } from '../ui/Celebration';
@@ -47,7 +47,7 @@ export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote 
   const currentSets = sets[exerciseIdx];
   const last = getLastSession(data.history, ex.name);
   const note = data.notes[ex.name] || '';
-  const libEx = exerciseLibrary.find(e => e.name === ex.name);
+  const libEx = findExerciseByName(ex.name);
   const currentMuscle = libEx?.muscle || null;
 
   const formatTime = (s) => { const m = Math.floor(s / 60); const sec = s % 60; return `${m}:${sec.toString().padStart(2, '0')}`; };

@@ -5,6 +5,8 @@ import { StatRow } from '../ui/Stat';
 import { SectionTitle } from '../ui/SectionTitle';
 import { ListRow, RowValue } from '../ui/ListRow';
 import { FigGlyph, getDominantFig } from '../ui/Figures';
+import { ExerciseThumb } from '../ui/ExerciseThumb';
+import { getWorkoutThumb } from '../../lib/demos';
 import { getTodayWorkoutIdx, calculateStreak } from '../../lib/workouts';
 
 export const Dashboard = ({ data, plans, onStartWorkout, onNavigate }) => {
@@ -88,7 +90,7 @@ export const Dashboard = ({ data, plans, onStartWorkout, onNavigate }) => {
         {plans.filter((_, i) => i !== todayIdx).slice(0, 2).map((w) => (
           <ListRow
             key={w.id}
-            leading={<FigGlyph figKey={getDominantFig(w.exercises)} size={26} />}
+            leading={<ExerciseThumb {...getWorkoutThumb(w.exercises)} size={38} />}
             title={w.name}
             subtitle={w.muscle}
             trailing={<RowValue>{w.exercises.length}</RowValue>}

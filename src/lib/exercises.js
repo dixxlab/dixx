@@ -65,3 +65,21 @@ export const exerciseLibrary = [
 ];
 
 export const muscleGroups = ['Todos', 'Peito', 'Costas', 'Pernas', 'Ombro', 'Bíceps', 'Tríceps', 'Abdômen', 'Antebraço', 'Glúteo', 'Cardio'];
+
+/* Os treinos padrão guardam alguns nomes abreviados que não batem com o
+   catálogo ("Desenvolvimento" x "Desenvolvimento Militar"). Sem essa ponte,
+   esses exercícios ficam sem foto, sem mapa muscular e sem demonstração.
+
+   Renomear em workouts.js resolveria também, mas quebraria a continuidade do
+   histórico já salvo: ele é indexado por nome, então o usuário perderia o
+   "última vez: Xkg" e veria o PR dividido em dois nomes. */
+const apelidos = {
+  'Mergulho': 'Mergulho (Dips)',
+  'Abdominal': 'Abdominal Reto',
+  'Desenvolvimento': 'Desenvolvimento Militar',
+  'Encolhimento': 'Encolhimento (Shrug)',
+};
+
+export const findExerciseByName = (name) =>
+  exerciseLibrary.find(e => e.name === name)
+  || exerciseLibrary.find(e => e.name === apelidos[name]);

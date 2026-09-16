@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { MoreVertical, Edit3, RotateCcw, BookOpen } from 'lucide-react';
 import { T as C } from '../../theme/tokens';
 import { getTodayWorkoutIdx } from '../../lib/workouts';
-import { FigGlyph, getDominantFig } from '../ui/Figures';
+import { ExerciseThumb } from '../ui/ExerciseThumb';
+import { getWorkoutThumb } from '../../lib/demos';
 import { RowValue } from '../ui/ListRow';
 import { useConfirm } from '../ui/ConfirmProvider';
 
@@ -33,7 +34,7 @@ export const WorkoutsList = ({ data, plans, onSelectWorkout, onOpenLibrary, onEd
                 className="flex-1 min-w-0 flex items-center gap-3 py-3.5 text-left transition-opacity active:opacity-60"
                 style={{ minHeight: 44 }}
               >
-                <FigGlyph figKey={getDominantFig(w.exercises)} size={28} opacity={isToday ? 1 : 0.6} />
+                <ExerciseThumb {...getWorkoutThumb(w.exercises)} size={38} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium truncate" style={{ color: isToday ? C.primary : C.text }}>{w.name}</span>
