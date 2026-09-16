@@ -18,8 +18,10 @@ export const ExerciseAnimStyles = () => (
     @keyframes ex-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
     @keyframes chart-draw { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
     @keyframes fade-up { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+    @keyframes ex-demo-fade { 0%, 40% { opacity: 0; } 50%, 90% { opacity: 1; } 100% { opacity: 0; } }
     .ex-anim { animation-duration: 2.4s; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
     .fig-static .ex-anim { animation: none; }
+    .ex-demo-frame { animation: ex-demo-fade 1.8s ease-in-out infinite; }
     .chart-line { stroke-dasharray: 1000; animation: chart-draw 1.5s ease-out forwards; }
     .fade-up { animation: fade-up 0.4s ease-out; }
   `}</style>

@@ -4,6 +4,7 @@ import { T as C } from '../../theme/tokens';
 import { SectionTitle } from '../ui/SectionTitle';
 import { StatRow } from '../ui/Stat';
 import { ExerciseCard } from '../ui/Figures';
+import { ExerciseDemo } from '../ui/ExerciseDemo';
 import { ExerciseSearchList } from './ExerciseSearchList';
 import { exerciseLibrary } from '../../lib/exercises';
 
@@ -35,6 +36,10 @@ export const Library = ({ onClose }) => {
               { value: selectedExercise.defaultReps, label: 'repetições' },
             ]}
           />
+        </div>
+
+        <div className="mt-5">
+          <ExerciseDemo key={selectedExercise.id} gifUrl={selectedExercise.gifUrl} muscle={selectedExercise.muscle} />
         </div>
 
         <SectionTitle className="mt-6 mb-2">Como executar</SectionTitle>

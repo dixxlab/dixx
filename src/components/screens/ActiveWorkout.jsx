@@ -7,6 +7,7 @@ import { getLastSession } from '../../lib/workouts';
 import { getMaxWeightEver } from '../../lib/stats';
 import { exerciseLibrary } from '../../lib/exercises';
 import { ExerciseCard } from '../ui/Figures';
+import { ExerciseDemo } from '../ui/ExerciseDemo';
 import { Confetti } from '../ui/Celebration';
 import { SkipModal } from './SkipModal';
 import { SubstituteModal } from './SubstituteModal';
@@ -46,7 +47,8 @@ export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote 
   const currentSets = sets[exerciseIdx];
   const last = getLastSession(data.history, ex.name);
   const note = data.notes[ex.name] || '';
-  const currentMuscle = exerciseLibrary.find(e => e.name === ex.name)?.muscle || null;
+  const libEx = exerciseLibrary.find(e => e.name === ex.name);
+  const currentMuscle = libEx?.muscle || null;
 
   const formatTime = (s) => { const m = Math.floor(s / 60); const sec = s % 60; return `${m}:${sec.toString().padStart(2, '0')}`; };
   useEffect(() => { const t = setInterval(() => setElapsed(e => e + 1), 1000); return () => clearInterval(t); }, []);
@@ -144,6 +146,9 @@ export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote 
           {last.weight > 0 ? `Última vez: ${last.weight}kg × ${last.reps} reps` : 'Primeira vez! Comece leve pra aprender execução'}
         </div>
       </div>
+      {/* O stick figure acima continua sendo o visual padrão: carrega na hora e
+          não depende de rede. A demonstração fotográfica é sob demanda. */}
+      <div className="mt-4"><ExerciseDemo key={ex.name} gifUrl={libEx?.gifUrl} muscle={currentMuscle} /></div>
       <NoteEditor key={ex.name} initialNote={note} onSave={(text) => onSaveNote(ex.name, text)} />
       <div className="space-y-2 mb-4">
         {currentSets.map((set, idx) => {

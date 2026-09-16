@@ -12,6 +12,21 @@ export default defineConfig({
       // não entra no precache e o app abre offline sem ela.
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // As demonstrações ficam FORA do precache de propósito: entrariam ~9MB no
+        // PWA instalado por algo que a maioria das séries nem abre. Em vez disso
+        // cada exercício é cacheado na primeira vez que o usuário abre a
+        // demonstração dele, e a partir daí funciona offline na academia.
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/gh\/yuhonas\/free-exercise-db@main\/exercises\//,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'dixx-demos-v1',
+              expiration: { maxEntries: 140, maxAgeSeconds: 60 * 60 * 24 * 60 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
       },
       manifest: {
         name: 'Dixx - Treino de Academia',
