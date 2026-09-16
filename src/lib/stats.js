@@ -166,3 +166,118 @@ export const buildHeatmap = (history) => {
   }
   return grid;
 };
+
+/* ---------------------------------------------------------------------------
+   Resumo da conclusão de treino.
+
+   Função pura de propósito: recebe a sessão recém-registrada e o histórico
+   ANTERIOR a ela, e devolve tudo que a tela de conclusão precisa. Fica aqui,
+   e não no App, pra poder ser conferida isoladamente — os cenários de borda
+   (primeiro treino, volume zero, recorde, comparação) são difíceis de
+   reproduzir clicando na interface.
+   --------------------------------------------------------------------------- */
+
+// Pesos e repetições chegam como texto digitado, e reps pode trazer sufixo
+// ("30s" numa prancha). Converte tolerando isso, sem nunca virar NaN.
+const aoNumero = (v) => {
+  const n = parseFloat(String(v ?? '').replace(',', '.'));
+  return Number.isFinite(n) ? n : 0;
+};
+
+const totaisDaSessao = (session) => {
+  let series = 0, reps = 0, volume = 0;
+  for (const ex of session.exercises || []) {
+    for (const s of ex.sets || []) {
+      series += 1;
+      const r = aoNumero(s.reps);
+      reps += r;
+      volume += aoNumero(s.weight) * r;
+    }
+  }
+  return { exercicios: (session.exercises || []).length, series, reps, volume };
+};
+
+const inicioDaSemana = (agora) => {
+  const d = new Date(agora);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - d.getDay());
+  return d.getTime();
+};
+
+export const buildWorkoutSummary = ({ session, workoutName, seconds, previousHistory = [] }) => {
+  const totais = totaisDaSessao(session);
+
+  // Detalhe por exercício, com o recorde de cada um resolvido contra o
+  // histórico anterior — nunca contra a própria sessão.
+  const exercicios = (session.exercises || []).map((ex) => {
+    const cargas = (ex.sets || []).map(s => aoNumero(s.weight));
+    const maiorHoje = cargas.length ? Math.max(...cargas) : 0;
+    const maiorAntes = getMaxWeightEver(previousHistory, ex.name);
+    const volume = (ex.sets || []).reduce((soma, s) => soma + aoNumero(s.weight) * aoNumero(s.reps), 0);
+    const maiorRepSerie = (ex.sets || []).reduce((m, s) => Math.max(m, aoNumero(s.reps)), 0);
+    // Guarda o texto original: numa prancha o usuário registra "30s", e exibir
+    // isso como "30 repetições" seria simplesmente errado.
+    const rotuloRep = (ex.sets || []).find(s => aoNumero(s.reps) === maiorRepSerie)?.reps;
+    return {
+      name: ex.name,
+      sets: (ex.sets || []).length,
+      volume,
+      maiorCarga: maiorHoje,
+      maiorRepSerie,
+      rotuloRep: rotuloRep == null ? String(maiorRepSerie) : String(rotuloRep),
+      // Sem carga anterior registrada não há com o que comparar: primeiro
+      // treino (ou exercício de peso corporal) não ganha recorde de graça.
+      isPR: maiorAntes > 0 && maiorHoje > maiorAntes,
+    };
+  });
+
+  const records = exercicios.filter(e => e.isPR);
+
+  // Destaque, na ordem de prioridade pedida: maior carga, senão maior volume,
+  // senão maior número de repetições numa série.
+  let highlight = null;
+  const porCarga = [...exercicios].filter(e => e.maiorCarga > 0).sort((a, b) => b.maiorCarga - a.maiorCarga)[0];
+  const porVolume = [...exercicios].filter(e => e.volume > 0).sort((a, b) => b.volume - a.volume)[0];
+  const porReps = [...exercicios].filter(e => e.maiorRepSerie > 0).sort((a, b) => b.maiorRepSerie - a.maiorRepSerie)[0];
+  if (porCarga) highlight = { tipo: 'carga', name: porCarga.name, valor: porCarga.maiorCarga, unidade: 'kg' };
+  else if (porVolume) highlight = { tipo: 'volume', name: porVolume.name, valor: porVolume.volume, unidade: 'kg' };
+  else if (porReps) highlight = { tipo: 'reps', name: porReps.name, valor: porReps.rotuloRep, unidade: /[a-z]$/i.test(porReps.rotuloRep) ? '' : 'reps' };
+
+  // Comparação com a última vez que este mesmo treino foi feito.
+  const anterior = [...previousHistory]
+    .filter(s => s.workoutId && s.workoutId === session.workoutId)
+    .sort((a, b) => new Date(b.date) - new Date(a.date))[0] || null;
+
+  let comparison = null;
+  if (anterior) {
+    const antes = totaisDaSessao(anterior);
+    // Só ganhos: um card dizendo que você fez menos não ajuda ninguém.
+    const ganhos = [];
+    if (totais.volume - antes.volume > 0) ganhos.push({ chave: 'volume', valor: Math.round(totais.volume - antes.volume), unidade: 'kg de volume' });
+    if (totais.series - antes.series > 0) ganhos.push({ chave: 'series', valor: totais.series - antes.series, unidade: totais.series - antes.series === 1 ? 'série' : 'séries' });
+    if (totais.reps - antes.reps > 0) ganhos.push({ chave: 'reps', valor: Math.round(totais.reps - antes.reps), unidade: 'repetições' });
+    if (ganhos.length > 0) comparison = { ganhos, dataAnterior: anterior.date };
+  }
+
+  // Conta a sessão atual junto com as da semana corrente.
+  const corte = inicioDaSemana(session.date ? new Date(session.date) : new Date());
+  const weekCount = previousHistory.filter(s => new Date(s.date).getTime() >= corte).length + 1;
+
+  const minutes = Math.max(0, Math.floor((seconds || 0) / 60));
+
+  return {
+    workoutName,
+    completedExercises: totais.exercicios,
+    completedSets: totais.series,
+    totalReps: Math.round(totais.reps),
+    totalVolumeKg: Math.round(totais.volume),
+    volumeTonnes: totais.volume / 1000,
+    minutes,
+    highlight,
+    exercises: exercicios,
+    comparison,
+    isFirstOfPlan: !anterior,
+    records,
+    weekCount,
+  };
+};

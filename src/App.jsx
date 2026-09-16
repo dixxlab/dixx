@@ -6,6 +6,7 @@ import { SplashScreen } from './components/ui/Splash';
 import { BottomNav } from './components/ui/BottomNav';
 import { loadData, saveData, resetData, initialData } from './lib/storage';
 import { getWorkoutPlans, divisionLabelToCount } from './lib/workouts';
+import { buildWorkoutSummary } from './lib/stats';
 import { watchServiceWorkerUpdate, setPodeRecarregar } from './lib/swUpdate';
 
 import { Onboarding } from './components/screens/Onboarding';
@@ -85,12 +86,12 @@ const AppShell = () => {
     if (session.exercises.length > 0) {
       const newData = { ...data, history: [...data.history, session] };
       setData(newData);
-      const totalVolume = session.exercises.reduce((sum, ex) => sum + ex.sets.reduce((s, set) => s + (parseFloat(set.weight) || 0) * (parseInt(set.reps) || 0), 0), 0);
-      setFinishedSummary({
-        exercises: session.exercises.length,
-        minutes: Math.floor(seconds / 60),
-        volume: (totalVolume / 1000).toFixed(1),
-      });
+      setFinishedSummary(buildWorkoutSummary({
+        session,
+        workoutName: workout.name,
+        seconds,
+        previousHistory: data.history,
+      }));
       setView('finished');
     } else {
       setView('main');
@@ -214,7 +215,13 @@ const AppShell = () => {
             <ActiveWorkout data={data} workout={activeWorkout} onFinish={handleFinishWorkout} onShowRest={handleShowRest} onSaveNote={handleSaveNote} />
           </div>
         )}
-        {view === 'finished' && finishedSummary && <WorkoutFinished summary={finishedSummary} onClose={() => { setView('main'); setActiveTab('home'); setFinishedSummary(null); }} />}
+        {view === 'finished' && finishedSummary && (
+          <WorkoutFinished
+            summary={finishedSummary}
+            onClose={() => { setView('main'); setActiveTab('home'); setFinishedSummary(null); }}
+            onSeeStats={() => { setView('main'); setActiveTab('stats'); setFinishedSummary(null); }}
+          />
+        )}
         {showRest && (
           <RestTimer
             restTime={data.restTime || 90}
