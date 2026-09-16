@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check } from 'lucide-react';
+import { Check, ChevronDown, Clock } from 'lucide-react';
 import { T as C } from '../../theme/tokens';
 import { playBeep } from '../../lib/audio';
-import { ExerciseThumb } from '../ui/ExerciseThumb';
 
 // Uma vez por sessão: pedir a cada série seria abusivo, e o navegador ignora
 // de qualquer jeito depois da primeira resposta.
@@ -34,12 +33,12 @@ const notifyRestOver = async () => {
   } catch { /* sem suporte; beep e vibração já cobrem */ }
 };
 
-export const RestTimer = ({ restTime, figKey, gifUrl, onSkip, onDone }) => {
+export const RestTimer = ({ restTime, minimized, onMinimize, onExpand, onSkip, onDone }) => {
   /* O relógio é um instante de término, não um contador decrescente. Navegador
      em segundo plano throttlea (ou congela) setTimeout, então contar pra baixo
-     dessincroniza — era por isso que o descanso "quebrava" ao sair e voltar.
-     Guardando o fim, recalcular vira uma subtração contra o relógio real, e o
-     tempo fora do app não importa mais. */
+     dessincroniza. Guardando o fim, recalcular vira uma subtração contra o
+     relógio real — e é isso que também deixa o timer sobreviver a minimizar e
+     navegar pelo app. */
   const [endAt, setEndAt] = useState(() => Date.now() + restTime * 1000);
   const [totalSec, setTotalSec] = useState(restTime);
   const [seconds, setSeconds] = useState(restTime);
@@ -83,12 +82,51 @@ export const RestTimer = ({ restTime, figKey, gifUrl, onSkip, onDone }) => {
   const progress = (Math.max(0, totalSec - seconds) / totalSec) * 283;
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
+  const tempo = `${m}:${s.toString().padStart(2, '0')}`;
   const urgent = seconds <= 3 && seconds > 0;
+
+  /* Minimizado o descanso vira uma pílula acima da navegação, e o app inteiro
+     volta a ser navegável. Como o componente continua montado, a contagem não
+     reinicia — e mesmo que reiniciasse, o tempo vem do timestamp. */
+  if (minimized) {
+    return (
+      <div
+        className="fixed left-0 right-0 mx-auto px-5 z-40 flex justify-center pointer-events-none"
+        style={{ maxWidth: '500px', bottom: 'calc(env(safe-area-inset-bottom) + 74px)' }}
+      >
+        <div
+          className="flex items-center gap-1 pointer-events-auto"
+          style={{ background: C.bgCard, border: `1px solid ${urgent ? C.primary : C.border}`, borderRadius: 999, boxShadow: C.shadowLg, paddingLeft: 4, paddingRight: 4 }}
+        >
+          <button
+            onClick={onExpand}
+            className="flex items-center gap-2 pl-3 pr-2 py-2 transition-opacity active:opacity-60"
+            style={{ minHeight: 44 }}
+            aria-label="Abrir o descanso"
+          >
+            <Clock size={14} style={{ color: C.primary }} />
+            <span className="tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 700, fontSize: 22, lineHeight: 1, color: C.primary }}>{tempo}</span>
+            <span className="text-xs" style={{ color: C.textMuted }}>descanso</span>
+          </button>
+          <button
+            onClick={onSkip}
+            className="px-3 py-2 text-xs font-medium transition-opacity active:opacity-60"
+            style={{ color: C.text, borderLeft: `1px solid ${C.border}`, minHeight: 44 }}
+          >
+            Pular
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col px-5 pt-6 pb-6" style={{ background: C.bg, paddingTop: 'calc(env(safe-area-inset-top) + 24px)', paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)' }}>
       <div className="flex justify-between items-center mb-12">
-        <div className="text-xs" style={{ color: C.textMuted }}>Descansando...</div>
+        <button onClick={onMinimize} className="p-2 -ml-2 flex items-center gap-1.5 transition-opacity active:opacity-60" style={{ color: C.textMuted, minHeight: 44 }} aria-label="Minimizar o descanso">
+          <ChevronDown size={18} />
+          <span className="text-xs">Descansando...</span>
+        </button>
         <div className="text-xs flex items-center gap-1" style={{ color: C.primary }}><Check size={12} /> Série concluída</div>
       </div>
       <div className="flex-1 flex flex-col items-center justify-center">
@@ -97,12 +135,11 @@ export const RestTimer = ({ restTime, figKey, gifUrl, onSkip, onDone }) => {
             <circle cx="50" cy="50" r="45" fill="none" stroke={C.bgCard} strokeWidth="4" />
             <circle cx="50" cy="50" r="45" fill="none" stroke={C.primary} strokeWidth="4" strokeDasharray="283" strokeDashoffset={283 - progress} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 0.25s linear' }} />
           </svg>
+          {/* Sem a foto do exercício: você acabou de vê-la na tela anterior, e
+              repetir aqui só tirava espaço do número, que é o que importa. */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            {/* Foto do exercício, não o desenho: a 72px o stick figure perdia a
-                silhueta e virava forma abstrata. Ver DESIGN.md, seção 5. */}
-            <div className="mb-2"><ExerciseThumb gifUrl={gifUrl} figKey={figKey} size={72} /></div>
-            <div className="text-6xl font-medium tabular-nums" style={{ color: C.primary, fontFamily: C.fontData }}>{m}:{s.toString().padStart(2, '0')}</div>
-            <div className="text-xs mt-1" style={{ color: C.textMuted }}>de {Math.floor(totalSec / 60)}:{(totalSec % 60).toString().padStart(2, '0')}</div>
+            <div className="tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 700, fontSize: 86, lineHeight: 1, color: C.primary }}>{tempo}</div>
+            <div className="text-xs mt-2" style={{ color: C.textMuted }}>de {Math.floor(totalSec / 60)}:{(totalSec % 60).toString().padStart(2, '0')}</div>
           </div>
         </motion.div>
       </div>

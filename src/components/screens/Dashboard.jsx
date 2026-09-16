@@ -9,7 +9,7 @@ import { ExerciseThumb } from '../ui/ExerciseThumb';
 import { getWorkoutThumb } from '../../lib/demos';
 import { getTodayWorkoutIdx, calculateStreak } from '../../lib/workouts';
 
-export const Dashboard = ({ data, plans, onStartWorkout, onNavigate }) => {
+export const Dashboard = ({ data, plans, onStartWorkout, onNavigate, emTreino }) => {
   const todayIdx = getTodayWorkoutIdx(data.history, plans);
   const todayWorkout = plans[todayIdx];
   const hour = new Date().getHours();
@@ -63,7 +63,7 @@ export const Dashboard = ({ data, plans, onStartWorkout, onNavigate }) => {
             className="w-full mt-4 p-3 font-medium flex items-center justify-center gap-2 transition-all active:scale-95"
             style={{ background: C.primary, color: C.primaryOn, borderRadius: C.radiusMd, minHeight: 44 }}
           >
-            <Play size={16} fill={C.primaryOn} /> Iniciar treino
+            <Play size={16} fill={C.primaryOn} /> {emTreino ? 'Voltar pro treino' : 'Iniciar treino'}
           </button>
           <div className="flex items-start gap-2 mt-3 text-xs" style={{ color: C.textMuted }}>
             <Lightbulb size={13} style={{ color: C.primary, flexShrink: 0, marginTop: 1 }} />

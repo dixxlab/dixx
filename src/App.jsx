@@ -32,7 +32,7 @@ const AppShell = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [activeWorkout, setActiveWorkout] = useState(null);
   const [showRest, setShowRest] = useState(false);
-  const [restExercise, setRestExercise] = useState(null);
+  const [restMinimized, setRestMinimized] = useState(false);
   const [restCallback, setRestCallback] = useState(null);
   const [finishedSummary, setFinishedSummary] = useState(null);
   const [showSplash, setShowSplash] = useState(true);
@@ -63,6 +63,10 @@ const AppShell = () => {
   };
 
   const handleStartWorkout = (workout) => {
+    // Durante o descanso minimizado o app fica navegável, e as telas de treino
+    // continuam oferecendo "iniciar". Tocar ali volta pro treino em andamento
+    // em vez de começar um segundo por cima.
+    if (activeWorkout) { setRestMinimized(false); return; }
     setActiveWorkout(workout);
     setView('workout');
   };
@@ -93,8 +97,8 @@ const AppShell = () => {
     setActiveWorkout(null);
   };
 
-  const handleShowRest = (cb, exercise) => { setRestCallback(() => cb); setRestExercise(exercise); setShowRest(true); };
-  const handleRestDone = () => { setShowRest(false); if (restCallback) restCallback(); };
+  const handleShowRest = (cb) => { setRestCallback(() => cb); setRestMinimized(false); setShowRest(true); };
+  const handleRestDone = () => { setShowRest(false); setRestMinimized(false); if (restCallback) restCallback(); };
 
   const handleReset = () => {
     resetData();
@@ -159,6 +163,8 @@ const AppShell = () => {
   };
 
   const showEvolution = !!evolutionExercise;
+  // Descanso minimizado: o app volta a ser navegável por cima do treino.
+  const navegandoNoDescanso = showRest && restMinimized;
   const contentKey = evolutionExercise || (editingWorkout ? 'edit' : (showLibrary ? 'library' : activeTab));
 
   return (
@@ -181,7 +187,7 @@ const AppShell = () => {
             <Onboarding onComplete={handleOnboardingComplete} />
           </div>
         )}
-        {view === 'main' && data.user && (
+        {(view === 'main' || navegandoNoDescanso) && data.user && (
           <>
             <div key={contentKey}>
               {showEvolution ? (
@@ -192,7 +198,7 @@ const AppShell = () => {
                 <Library onClose={() => setShowLibrary(false)} />
               ) : (
                 <>
-                  {activeTab === 'home' && <Dashboard data={data} plans={plans} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} />}
+                  {activeTab === 'home' && <Dashboard data={data} plans={plans} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} emTreino={!!activeWorkout} />}
                   {activeTab === 'workouts' && <WorkoutsList data={data} plans={plans} onSelectWorkout={handleStartWorkout} onOpenLibrary={() => setShowLibrary(true)} onEditWorkout={setEditingWorkout} onResetWorkout={handleResetWorkout} />}
                   {activeTab === 'stats' && <Stats data={data} onSelectExercise={setEvolutionExercise} onNavigate={setActiveTab} />}
                   {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} onChangePhoto={handleChangePhoto} onChangeRestTime={handleChangeRestTime} onChangeDivision={handleChangeDivision} />}
@@ -203,12 +209,21 @@ const AppShell = () => {
           </>
         )}
         {view === 'workout' && activeWorkout && (
-          <div key="workout" className="h-full">
+          <div key="workout" className="h-full" style={navegandoNoDescanso ? { display: 'none' } : undefined}>
             <ActiveWorkout data={data} workout={activeWorkout} onFinish={handleFinishWorkout} onShowRest={handleShowRest} onSaveNote={handleSaveNote} />
           </div>
         )}
         {view === 'finished' && finishedSummary && <WorkoutFinished summary={finishedSummary} onClose={() => { setView('main'); setActiveTab('home'); setFinishedSummary(null); }} />}
-        {showRest && <RestTimer restTime={data.restTime || 90} figKey={restExercise?.fig} gifUrl={restExercise?.gifUrl} onSkip={handleRestDone} onDone={handleRestDone} />}
+        {showRest && (
+          <RestTimer
+            restTime={data.restTime || 90}
+            minimized={restMinimized}
+            onMinimize={() => setRestMinimized(true)}
+            onExpand={() => setRestMinimized(false)}
+            onSkip={handleRestDone}
+            onDone={handleRestDone}
+          />
+        )}
       </div>
     </div>
   );
