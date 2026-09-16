@@ -11,16 +11,17 @@ export const LineChart = ({ data, height = 180, dataKey = 'oneRM', label = '1RM'
 
   if (data.length === 0) {
     return (
-      <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted, borderRadius: C.radiusLg }}>
-        <div className="flex justify-center mb-2"><BarChart2 size={36} color={C.textMuted} /></div>
-        <div className="text-sm">Sem dados ainda nesse período</div>
+      <div className="py-10 text-center">
+        <div className="flex justify-center mb-3"><BarChart2 size={32} color={C.textMuted} /></div>
+        <div className="text-sm" style={{ color: C.text }}>Nenhum treino desse exercício aqui</div>
+        <div className="text-xs mt-1" style={{ color: C.textMuted }}>Tenta um intervalo maior ali em cima.</div>
       </div>
     );
   }
 
   if (data.length === 1) {
     return (
-      <div className="rounded-2xl p-6 text-center" style={{ background: C.bgCard, color: C.textMuted, borderRadius: C.radiusLg }}>
+      <div className="p-6 text-center" style={{ background: C.bgCard, color: C.textMuted, borderRadius: C.radiusLg }}>
         <div className="flex justify-center mb-2"><MapPin size={36} color={C.textMuted} /></div>
         <div className="text-sm">Faz mais treinos pra ver evolução</div>
         <div className="text-xs mt-2" style={{ color: C.primary }}>Atual: {data[0][dataKey]}{dataKey === 'oneRM' || dataKey === 'weight' ? 'kg' : ''}</div>
@@ -57,7 +58,7 @@ export const LineChart = ({ data, height = 180, dataKey = 'oneRM', label = '1RM'
   const active = activeIdx !== null ? data[activeIdx] : null;
 
   return (
-    <div className="rounded-2xl p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg, border: `1px solid ${C.border}` }} role="img" aria-label={`Gráfico de ${label}, ${data.length} pontos, último valor ${data[data.length - 1][dataKey]}`}>
+    <div className="p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg, border: `1px solid ${C.border}` }} role="img" aria-label={`Gráfico de ${label}, ${data.length} pontos, último valor ${data[data.length - 1][dataKey]}`}>
       <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: 'auto', overflow: 'visible' }}>
         <defs>
           <linearGradient id={`grad-${dataKey}`} x1="0" y1="0" x2="0" y2="1">

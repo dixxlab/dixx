@@ -19,14 +19,14 @@ export const ConfirmSheet = ({ open, title, message, confirmLabel = 'Confirmar',
       </div>
       <div className="flex gap-2">
         {onConfirm && (
-          <button onClick={onClose} className="flex-1 p-4 rounded-2xl font-medium transition-all active:scale-95" style={{ background: C.bg, color: C.text, border: `1px solid ${C.border}`, minHeight: 44 }}>
+          <button onClick={onClose} className="flex-1 p-4 font-medium transition-all active:scale-95" style={{ background: C.bg, color: C.text, border: `1px solid ${C.border}`, borderRadius: C.radiusMd, minHeight: 44 }}>
             {cancelLabel}
           </button>
         )}
         <button
           onClick={() => { if (onConfirm) onConfirm(); onClose(); }}
-          className="flex-1 p-4 rounded-2xl font-medium transition-all active:scale-95"
-          style={{ background: danger ? C.danger : C.primary, color: danger ? '#fff' : C.primaryOn, minHeight: 44 }}
+          className="flex-1 p-4 font-medium transition-all active:scale-95"
+          style={{ background: danger ? C.danger : C.primary, color: danger ? C.dangerOn : C.primaryOn, borderRadius: C.radiusMd, minHeight: 44 }}
         >
           {onConfirm ? confirmLabel : 'Entendi'}
         </button>

@@ -27,7 +27,8 @@ export const ExerciseSearchList = ({ initialFilter = 'Todos', onPick, renderTrai
         {filtered.length === 0 ? (
           <div className="py-10 text-center" style={{ color: C.textMuted }}>
             <div className="flex justify-center mb-3"><Search size={32} color={C.textMuted} /></div>
-            <div className="text-sm">Nenhum exercício encontrado</div>
+            <div className="text-sm" style={{ color: C.text }}>Nada com esse nome</div>
+            <div className="text-xs mt-1">Tenta outro termo ou troca o filtro de grupo.</div>
           </div>
         ) : filtered.map((ex) => (
           <ListRow

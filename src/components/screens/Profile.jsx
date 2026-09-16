@@ -85,7 +85,7 @@ export const Profile = ({ data, onReset, onExport, onChangePhoto, onChangeRestTi
           <ChevronRight size={14} style={{ color: C.textMuted }} />
         </button>
         <button onClick={handleReset} className="w-full py-3.5 text-left transition-opacity active:opacity-60" style={{ color: C.danger, borderBottom: `1px solid ${C.border}`, minHeight: 44 }}>
-          <div className="text-sm">Resetar dados (refazer onboarding)</div>
+          <div className="text-sm">Apagar tudo e começar de novo</div>
         </button>
       </div>
 

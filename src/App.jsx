@@ -31,6 +31,7 @@ const AppShell = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [activeWorkout, setActiveWorkout] = useState(null);
   const [showRest, setShowRest] = useState(false);
+  const [restFig, setRestFig] = useState(null);
   const [restCallback, setRestCallback] = useState(null);
   const [finishedSummary, setFinishedSummary] = useState(null);
   const [showSplash, setShowSplash] = useState(true);
@@ -86,7 +87,7 @@ const AppShell = () => {
     setActiveWorkout(null);
   };
 
-  const handleShowRest = (cb) => { setRestCallback(() => cb); setShowRest(true); };
+  const handleShowRest = (cb, fig) => { setRestCallback(() => cb); setRestFig(fig); setShowRest(true); };
   const handleRestDone = () => { setShowRest(false); if (restCallback) restCallback(); };
 
   const handleReset = () => {
@@ -187,7 +188,7 @@ const AppShell = () => {
                 <>
                   {activeTab === 'home' && <Dashboard data={data} plans={plans} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} />}
                   {activeTab === 'workouts' && <WorkoutsList data={data} plans={plans} onSelectWorkout={handleStartWorkout} onOpenLibrary={() => setShowLibrary(true)} onEditWorkout={setEditingWorkout} onResetWorkout={handleResetWorkout} />}
-                  {activeTab === 'stats' && <Stats data={data} onSelectExercise={setEvolutionExercise} />}
+                  {activeTab === 'stats' && <Stats data={data} onSelectExercise={setEvolutionExercise} onNavigate={setActiveTab} />}
                   {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} onChangePhoto={handleChangePhoto} onChangeRestTime={handleChangeRestTime} onChangeDivision={handleChangeDivision} />}
                 </>
               )}
@@ -201,7 +202,7 @@ const AppShell = () => {
           </div>
         )}
         {view === 'finished' && finishedSummary && <WorkoutFinished summary={finishedSummary} onClose={() => { setView('main'); setActiveTab('home'); setFinishedSummary(null); }} />}
-        {showRest && <RestTimer restTime={data.restTime || 90} onSkip={handleRestDone} onDone={handleRestDone} />}
+        {showRest && <RestTimer restTime={data.restTime || 90} figKey={restFig} onSkip={handleRestDone} onDone={handleRestDone} />}
       </div>
     </div>
   );

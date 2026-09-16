@@ -15,7 +15,7 @@ export const WorkoutFinished = ({ summary, onClose }) => (
       </motion.div>
     </div>
     <h1 className="text-3xl font-medium mb-2" style={{ color: C.text }}>Treino concluído!</h1>
-    <p className="text-sm text-center mb-8" style={{ color: C.textMuted }}>Mais um dia somado na sua jornada.</p>
+    <p className="text-sm text-center mb-8" style={{ color: C.textMuted }}>Mais um dia na conta.</p>
     <div className="w-full max-w-md mb-8 py-5" style={{ borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
       <StatRow
         size="lg"

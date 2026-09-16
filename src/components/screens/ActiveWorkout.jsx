@@ -25,7 +25,7 @@ const NoteEditor = ({ initialNote, onSave }) => {
       {showNote && (
         <div className="mb-4">
           <textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} onBlur={() => onSave(noteText)} placeholder="Ex: subir 2kg semana que vem"
-            className="w-full p-3 rounded-xl text-sm outline-none resize-none"
+            className="w-full p-3 text-sm outline-none resize-none"
             style={{ background: C.bgCard, border: `1px solid ${C.border}`, color: C.text, borderRadius: C.radiusMd }} rows={2} />
         </div>
       )}
@@ -93,7 +93,7 @@ export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote 
           onFinish(sets, { ...workout, exercises }, elapsed);
         }
       }
-    });
+    }, ex.fig);
   };
 
   const updateSet = (idx, field, value) => { const newSets = [...sets]; newSets[exerciseIdx][idx][field] = value; setSets(newSets); };
@@ -156,7 +156,7 @@ export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote 
           const isDone = set.done;
           const isPending = idx > activeSetIdx;
           return (
-            <div key={idx} className="rounded-xl p-3 flex items-center gap-3 transition-all"
+            <div key={idx} className="p-3 flex items-center gap-3 transition-all"
               style={{ background: C.bgCard, border: isActive ? `1px solid ${C.primary}` : 'none', opacity: isPending ? 0.5 : 1, borderRadius: C.radiusMd }}>
               <motion.div
                 key={`${idx}-${isDone}`}
@@ -203,10 +203,10 @@ export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote 
             <Trophy size={14} /> Novo PR!
           </motion.div>
         )}
-        <button onClick={() => setShowSkipModal(true)} className="px-4 rounded-2xl font-medium transition-all active:scale-95 flex items-center justify-center gap-2" style={{ background: C.bgCard, color: C.textMuted, borderRadius: C.radiusLg, minHeight: 44, minWidth: 44 }} aria-label="Pular exercício">
+        <button onClick={() => setShowSkipModal(true)} className="px-4 font-medium transition-all active:scale-95 flex items-center justify-center gap-2" style={{ background: C.bgCard, color: C.textMuted, borderRadius: C.radiusLg, minHeight: 44, minWidth: 44 }} aria-label="Pular exercício">
           <SkipForward size={18} />
         </button>
-        <button onClick={completeSet} className="flex-1 p-4 rounded-2xl font-medium transition-all active:scale-95 flex items-center justify-center gap-2" style={{ background: C.primary, color: C.primaryOn, borderRadius: C.radiusLg, minHeight: 44 }}>
+        <button onClick={completeSet} className="flex-1 p-4 font-medium transition-all active:scale-95 flex items-center justify-center gap-2" style={{ background: C.primary, color: C.primaryOn, borderRadius: C.radiusLg, minHeight: 44 }}>
           <Check size={18} strokeWidth={2.5} /> Concluir série {activeSetIdx + 1}
         </button>
       </div>

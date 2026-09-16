@@ -14,6 +14,7 @@ export const T = {
   textMuted: 'var(--text-muted)',
   border: 'var(--border)',
   danger: 'var(--danger)',
+  dangerOn: 'var(--danger-on)',
   warning: 'var(--warning)',
   info: 'var(--info)',
   success: 'var(--success)',

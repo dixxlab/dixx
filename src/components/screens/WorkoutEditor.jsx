@@ -56,7 +56,7 @@ export const WorkoutEditor = ({ workout, onSave, onClose }) => {
         <button onClick={onClose} className="p-2 -ml-2 transition-all active:scale-95" style={{ minWidth: 44, minHeight: 44 }} aria-label="Voltar">
           <ArrowLeft size={20} color={C.text} />
         </button>
-        <button onClick={handleSave} className="px-4 py-2 rounded-xl text-sm font-medium transition-all active:scale-95" style={{ background: C.primary, color: C.primaryOn, minHeight: 44 }}>
+        <button onClick={handleSave} className="px-4 py-2 text-sm font-medium transition-all active:scale-95" style={{ background: C.primary, color: C.primaryOn, borderRadius: C.radiusMd, minHeight: 44 }}>
           Salvar
         </button>
       </div>

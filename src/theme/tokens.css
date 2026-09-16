@@ -58,6 +58,7 @@
   --warning: #f5b942;
   --info: #45c1ff;
   --success: #34d399;
+  --danger-on: #ffffff;
   --chart-alt: #a78bfa;
   --color-scheme: dark;
 }
@@ -79,6 +80,7 @@
   --warning: #f5b942;
   --info: #5eb8ff;
   --success: #34d399;
+  --danger-on: #ffffff;
   --chart-alt: #c4a5fb;
   --color-scheme: dark;
 }
@@ -100,6 +102,7 @@
   --warning: #b45309;
   --info: #2563eb;
   --success: #15803d;
+  --danger-on: #ffffff;
   --chart-alt: #7c3aed;
   --color-scheme: light;
 

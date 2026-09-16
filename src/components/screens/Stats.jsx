@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Flame, TrendingUp, Trophy, Dumbbell } from 'lucide-react';
+import { Flame, TrendingUp, Trophy, Play } from 'lucide-react';
 import { T as C } from '../../theme/tokens';
 import { exerciseLibrary } from '../../lib/exercises';
 import { calculateStreak, calculatePRs, formatRelative } from '../../lib/workouts';
@@ -9,7 +9,7 @@ import { SectionTitle } from '../ui/SectionTitle';
 import { ListRow, RowValue } from '../ui/ListRow';
 import { FigGlyph } from '../ui/Figures';
 
-export const Stats = ({ data, onSelectExercise }) => {
+export const Stats = ({ data, onSelectExercise, onNavigate }) => {
   const streak = calculateStreak(data.history);
   const prs = calculatePRs(data.history);
   const today = new Date();
@@ -47,10 +47,29 @@ export const Stats = ({ data, onSelectExercise }) => {
     (totalSessions / Math.max(1, Math.ceil((Date.now() - new Date(data.history[0].date)) / (1000 * 60 * 60 * 24 * 7)))).toFixed(1) : 0;
   /* eslint-enable react-hooks/purity */
 
+  // Sem histórico a tela é só o convite: liderar com "0.0 toneladas" e um
+  // calendário vazio seria o aviso cinza de ausência de dados, só que maior.
+  if (data.history.length === 0) {
+    return (
+      <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
+        <h1 className="text-2xl font-medium mb-1" style={{ color: C.text }}>Sua evolução</h1>
+        <p className="text-sm" style={{ color: C.textMuted }}>Tudo que você já levantou</p>
+        <div className="py-16 text-center">
+          <div className="flex justify-center mb-4"><FigGlyph figKey="agacha" size={76} opacity={0.35} /></div>
+          <div className="text-base font-medium mb-1" style={{ color: C.text }}>Seu histórico começa no primeiro treino</div>
+          <p className="text-sm mb-6" style={{ color: C.textMuted }}>Cada série que você registrar vira gráfico, PR e streak aqui.</p>
+          <button onClick={() => onNavigate('home')} className="px-5 py-3 font-medium text-sm inline-flex items-center gap-2 transition-all active:scale-95" style={{ background: C.primary, color: C.primaryOn, borderRadius: C.radiusMd, minHeight: 44 }}>
+            <Play size={15} fill={C.primaryOn} /> Ver treino de hoje
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="px-5 pt-6 pb-28" style={{ background: C.bg, minHeight: '100%' }}>
       <h1 className="text-2xl font-medium mb-1" style={{ color: C.text }}>Sua evolução</h1>
-      <p className="text-sm mb-5" style={{ color: C.textMuted }}>Análise completa do progresso</p>
+      <p className="text-sm mb-5" style={{ color: C.textMuted }}>Tudo que você já levantou</p>
 
       {/* Herói da tela: o volume acumulado é o número que cresce a cada treino,
           então ele carrega a escala e os demais viram apoio. */}
@@ -143,12 +162,6 @@ export const Stats = ({ data, onSelectExercise }) => {
         </>
       )}
 
-      {data.history.length === 0 && (
-        <div className="py-10 text-center" style={{ color: C.textMuted }}>
-          <div className="flex justify-center mb-3"><Dumbbell size={40} color={C.textMuted} /></div>
-          <div className="text-sm">Comece seu primeiro treino<br />pra ver suas estatísticas evoluindo!</div>
-        </div>
-      )}
     </div>
   );
 };

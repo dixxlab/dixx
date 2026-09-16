@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { T as C } from '../../theme/tokens';
 import { playBeep } from '../../lib/audio';
+import { FigGlyph } from '../ui/Figures';
 
-export const RestTimer = ({ restTime, onSkip, onDone }) => {
+export const RestTimer = ({ restTime, figKey, onSkip, onDone }) => {
   const [seconds, setSeconds] = useState(restTime);
   const onDoneRef = useRef(onDone);
   useEffect(() => { onDoneRef.current = onDone; }, [onDone]);
@@ -40,14 +41,17 @@ export const RestTimer = ({ restTime, onSkip, onDone }) => {
             <circle cx="50" cy="50" r="45" fill="none" stroke={C.primary} strokeWidth="4" strokeDasharray="283" strokeDashoffset={283 - progress} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 1s linear' }} />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
+            {/* O stick figure do exercício dá rosto ao descanso: durante o
+                intervalo a tela deixa de ser só um número. */}
+            {figKey && <div className="mb-1"><FigGlyph figKey={figKey} size={62} opacity={0.55} /></div>}
             <div className="text-6xl font-medium tabular-nums" style={{ color: C.primary, fontFamily: C.fontData }}>{m}:{s.toString().padStart(2, '0')}</div>
             <div className="text-xs mt-2" style={{ color: C.textMuted }}>de {Math.floor(restTime / 60)}:{(restTime % 60).toString().padStart(2, '0')}</div>
           </div>
         </motion.div>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <button onClick={() => setSeconds(s => s + 30)} className="p-4 rounded-2xl font-medium transition-all active:scale-95" style={{ background: C.bgCard, color: C.text, borderRadius: C.radiusLg, minHeight: 44 }}>+30s</button>
-        <button onClick={onSkip} className="p-4 rounded-2xl font-medium transition-all active:scale-95" style={{ background: C.primary, color: C.primaryOn, borderRadius: C.radiusLg, minHeight: 44 }}>Pular</button>
+        <button onClick={() => setSeconds(s => s + 30)} className="p-4 font-medium transition-all active:scale-95" style={{ background: C.bgCard, color: C.text, borderRadius: C.radiusLg, minHeight: 44 }}>+30s</button>
+        <button onClick={onSkip} className="p-4 font-medium transition-all active:scale-95" style={{ background: C.primary, color: C.primaryOn, borderRadius: C.radiusLg, minHeight: 44 }}>Pular</button>
       </div>
     </div>
   );

@@ -12,11 +12,11 @@ export const RestTimePicker = ({ open, currentValue, onSave, onClose }) => {
         <h2 className="text-lg font-medium" style={{ color: C.text }}>Tempo de descanso</h2>
         <button onClick={onClose} className="p-1 transition-all active:scale-95" style={{ minWidth: 44, minHeight: 44 }} aria-label="Fechar"><X size={20} color={C.textMuted} /></button>
       </div>
-      <p className="text-xs mb-4" style={{ color: C.textMuted }}>Escolha entre as opções rápidas ou defina um valor customizado.</p>
+      <p className="text-xs mb-4" style={{ color: C.textMuted }}>Escolha uma opção rápida ou digite o seu.</p>
       <div className="grid grid-cols-2 gap-2 mb-4">
         {presets.map((sec) => (
           <button key={sec} onClick={() => onSave(sec)}
-            className="p-4 rounded-2xl font-medium transition-all active:scale-95"
+            className="p-4 font-medium transition-all active:scale-95"
             style={{ background: currentValue === sec ? C.primary : C.bg, color: currentValue === sec ? C.primaryOn : C.text, border: `1px solid ${currentValue === sec ? C.primary : C.border}`, borderRadius: C.radiusLg, minHeight: 44 }}>
             <span className="tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 22 }}>{sec}<span style={{ fontSize: 13 }}>s</span></span>
           </button>
@@ -25,11 +25,11 @@ export const RestTimePicker = ({ open, currentValue, onSave, onClose }) => {
       <div className="text-xs mb-2" style={{ color: C.textMuted }}>Customizado</div>
       <div className="flex gap-2">
         <input type="number" value={custom} onChange={(e) => setCustom(e.target.value)} placeholder="Ex: 75"
-          className="flex-1 p-3 rounded-xl outline-none text-sm"
-          style={{ background: C.bg, border: `1px solid ${C.border}`, color: C.text }} />
+          className="flex-1 p-3 outline-none text-sm"
+          style={{ background: C.bg, border: `1px solid ${C.border}`, color: C.text, borderRadius: C.radiusMd }} />
         <button onClick={() => { const val = parseInt(custom); if (val > 0) onSave(val); }} disabled={!custom || parseInt(custom) <= 0}
-          className="px-5 rounded-xl font-medium transition-all active:scale-95"
-          style={{ background: custom && parseInt(custom) > 0 ? C.primary : C.bg, color: custom && parseInt(custom) > 0 ? C.primaryOn : C.textMuted, opacity: custom && parseInt(custom) > 0 ? 1 : 0.5, minHeight: 44 }}>
+          className="px-5 font-medium transition-all active:scale-95"
+          style={{ background: custom && parseInt(custom) > 0 ? C.primary : C.bg, color: custom && parseInt(custom) > 0 ? C.primaryOn : C.textMuted, opacity: custom && parseInt(custom) > 0 ? 1 : 0.5, borderRadius: C.radiusMd, minHeight: 44 }}>
           Salvar
         </button>
       </div>
