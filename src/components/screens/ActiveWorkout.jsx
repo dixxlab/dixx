@@ -137,7 +137,7 @@ export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote 
           animate={{ width: `${((exerciseIdx + activeSetIdx / ex.sets) / exercises.length) * 100}%` }}
           transition={{ duration: 0.4, ease: 'easeOut' }} />
       </div>
-      <div className="mb-4"><ExerciseCard figKey={ex.fig} size={110} /></div>
+      <div className="mb-4"><ExerciseCard figKey={ex.fig} size={110} live /></div>
       <div className="mb-1">
         <h2 className="text-xl font-medium" style={{ color: C.text }}>{ex.name}</h2>
         <div className="text-xs mt-1" style={{ color: C.textMuted }}>

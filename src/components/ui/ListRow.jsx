@@ -27,9 +27,11 @@ export const ListRow = ({ leading, title, subtitle, trailing, onClick, danger })
   );
 };
 
-/* Valor à direita de uma ListRow, na fonte de display. */
-export const RowValue = ({ children, color }) => (
-  <span className="tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 19, color: color || C.textMuted }}>
+/* Valor à direita de uma ListRow, na fonte de display. A unidade fica menor,
+   muda e com um respiro do número — sem isso "96.0" + "1RM" lê como 96.01. */
+export const RowValue = ({ children, unit, color }) => (
+  <span className="flex items-baseline tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 19, color: color || C.textMuted }}>
     {children}
+    {unit && <span style={{ fontSize: 11, marginLeft: 2, color: C.textMuted }}>{unit}</span>}
   </span>
 );

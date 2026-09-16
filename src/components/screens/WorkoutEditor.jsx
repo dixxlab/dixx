@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { ArrowLeft, ArrowUp, ArrowDown, Trash2, Edit3, Plus } from 'lucide-react';
 import { T as C } from '../../theme/tokens';
+import { SectionTitle } from '../ui/SectionTitle';
+import { FigGlyph } from '../ui/Figures';
 import { AddExerciseModal } from './AddExerciseModal';
 import { useConfirm } from '../ui/ConfirmProvider';
 
@@ -69,12 +71,13 @@ export const WorkoutEditor = ({ workout, onSave, onClose }) => {
         className="w-full p-3 outline-none text-sm mb-6"
         style={{ background: C.bgCard, border: `1px solid ${C.border}`, color: C.text, borderRadius: C.radiusLg }} />
       <div className="flex items-center justify-between mb-3">
-        <div className="text-xs" style={{ color: C.textMuted }}>Exercícios ({exercises.length})</div>
+        <SectionTitle>Exercícios ({exercises.length})</SectionTitle>
       </div>
       <div className="space-y-2 mb-3">
         {exercises.map((ex, idx) => (
           <div key={idx} className="p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
             <div className="flex items-start gap-2 mb-2">
+              <FigGlyph figKey={ex.fig} size={26} opacity={0.75} />
               <div className="flex-1">
                 <div className="text-sm font-medium mb-1" style={{ color: C.text }}>{ex.name}</div>
                 {editingIdx === idx ? (

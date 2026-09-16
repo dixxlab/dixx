@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, Trophy } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { T as C } from '../../theme/tokens';
 import { SectionTitle } from '../ui/SectionTitle';
+import { StatRow } from '../ui/Stat';
+import { ListRow, RowValue } from '../ui/ListRow';
 import { buildChartData, generateInsights } from '../../lib/stats';
 import { formatRelative } from '../../lib/workouts';
 import { LineChart } from '../charts/LineChart';
@@ -22,11 +24,14 @@ export const ExerciseEvolution = ({ history, exerciseName, onClose }) => {
     { val: 'all', label: 'Tudo' },
   ];
 
+  // Quatro cores distintas de verdade: --info é igual a --accent nos três temas,
+  // então usá-lo aqui deixava duas chips idênticas. --chart-alt entrou nos tokens
+  // pra substituir o roxo que estava hardcoded e não acompanhava o tema.
   const metrics = [
     { val: 'oneRM', label: '1RM estimado', color: C.primary, unit: 'kg' },
-    { val: 'weight', label: 'Peso máximo', color: C.info, unit: 'kg' },
-    { val: 'volume', label: 'Volume total', color: C.warning, unit: 'kg' },
-    { val: 'totalReps', label: 'Reps totais', color: '#a855f7', unit: '' },
+    { val: 'weight', label: 'Peso máximo', color: C.warning, unit: 'kg' },
+    { val: 'volume', label: 'Volume total', color: C.success, unit: 'kg' },
+    { val: 'totalReps', label: 'Reps totais', color: C.chartAlt, unit: '' },
   ];
 
   const currentMetric = metrics.find(m => m.val === metric);
@@ -63,29 +68,31 @@ export const ExerciseEvolution = ({ history, exerciseName, onClose }) => {
         ))}
       </div>
 
+      {/* Herói: o peso que você está levantando agora. Os quatro cards genéricos
+          idênticos viraram um número grande e três stats de apoio. */}
       {stats && (
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          <div className="p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-            <div className="text-xs mb-1" style={{ color: C.textMuted }}>Peso atual</div>
-            <div className="text-xl font-medium tabular-nums" style={{ color: C.text, fontFamily: C.fontData }}>{stats.lastP.weight}kg</div>
-            <div className="text-[10px]" style={{ color: C.textMuted }}>× {stats.lastP.reps} reps</div>
+        <section
+          className="-mx-5 px-5 py-5 mb-4"
+          style={{ background: C.bgCard, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}
+        >
+          <div className="text-xs" style={{ color: C.textMuted }}>Peso atual</div>
+          <div
+            className="flex items-baseline gap-1 tabular-nums mt-1"
+            style={{ fontFamily: C.fontData, fontWeight: 700, fontSize: 46, lineHeight: 1, color: C.text }}
+          >
+            {stats.lastP.weight}
+            <span style={{ fontSize: 24, color: C.textMuted }}>kg</span>
           </div>
-          <div className="p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-            <div className="text-xs mb-1" style={{ color: C.textMuted }}>1RM estimado</div>
-            <div className="text-xl font-medium tabular-nums" style={{ color: C.warning, fontFamily: C.fontData }}>{stats.max1RM.toFixed(1)}kg</div>
-            <div className="text-[10px]" style={{ color: C.textMuted }}>máximo teórico</div>
-          </div>
-          <div className="p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-            <div className="text-xs mb-1" style={{ color: C.textMuted }}>PR de peso</div>
-            <div className="text-xl font-medium flex items-center gap-1 tabular-nums" style={{ color: C.warning, fontFamily: C.fontData }}>{stats.maxWeight}kg <Trophy size={16} color={C.warning} /></div>
-            <div className="text-[10px]" style={{ color: C.textMuted }}>recorde absoluto</div>
-          </div>
-          <div className="p-3" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-            <div className="text-xs mb-1" style={{ color: C.textMuted }}>Volume total</div>
-            <div className="text-xl font-medium tabular-nums" style={{ color: C.info, fontFamily: C.fontData }}>{(stats.totalVolume / 1000).toFixed(1)}t</div>
-            <div className="text-[10px]" style={{ color: C.textMuted }}>no período</div>
-          </div>
-        </div>
+          <div className="text-xs mb-5 mt-1" style={{ color: C.textMuted }}>× {stats.lastP.reps} repetições</div>
+          <StatRow
+            gap={26}
+            items={[
+              { value: stats.max1RM.toFixed(1), unit: 'kg', label: '1RM estimado' },
+              { value: stats.maxWeight, unit: 'kg', label: 'PR de peso', color: C.warning },
+              { value: (stats.totalVolume / 1000).toFixed(1), unit: 't', label: 'volume' },
+            ]}
+          />
+        </section>
       )}
 
       <InsightCard insights={insights} />
@@ -105,19 +112,20 @@ export const ExerciseEvolution = ({ history, exerciseName, onClose }) => {
 
       {chartData.length > 0 && (
         <>
-          <SectionTitle className="mb-3 mt-6">Últimos treinos</SectionTitle>
-          <div className="space-y-2">
+          <SectionTitle className="mb-1 mt-6">Últimos treinos</SectionTitle>
+          <div>
             {[...chartData].reverse().slice(0, 5).map((p, i) => (
-              <div key={i} className="p-3 flex justify-between items-center" style={{ background: C.bgCard, borderRadius: C.radiusLg }}>
-                <div>
-                  <div className="text-sm font-medium tabular-nums" style={{ color: C.text }}>{p.weight}kg × {p.reps} reps</div>
-                  <div className="text-[10px]" style={{ color: C.textMuted }}>{formatRelative(p.date)} • {p.setsCount} sets • {(p.volume / 1000).toFixed(1)}t</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-medium tabular-nums" style={{ color: C.primary }}>{p.oneRM.toFixed(1)}kg</div>
-                  <div className="text-[9px]" style={{ color: C.textMuted }}>1RM</div>
-                </div>
-              </div>
+              <ListRow
+                key={i}
+                title={`${p.weight}kg × ${p.reps} reps`}
+                subtitle={formatRelative(p.date)}
+                trailing={
+                  <>
+                    <RowValue unit="séries">{p.setsCount}</RowValue>
+                    <RowValue unit="1RM" color={C.primary}>{p.oneRM.toFixed(1)}</RowValue>
+                  </>
+                }
+              />
             ))}
           </div>
         </>

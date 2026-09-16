@@ -190,14 +190,19 @@ export const FigGlyph = ({ figKey, size = 26, opacity = 1 }) => {
   );
 };
 
-export const ExerciseCard = ({ figKey, size = 110 }) => {
+/* `live` é opt-in: o selo pulsante só faz sentido onde algo está de fato
+   acontecendo agora (a série em execução). Em tela de consulta — biblioteca,
+   detalhe de exercício — ele é ruído, então o padrão é não mostrar. */
+export const ExerciseCard = ({ figKey, size = 110, live = false }) => {
   const Fig = getExerciseFig(figKey);
   return (
     <div style={{ background: 'linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-inset) 100%)', borderRadius: 'var(--radius-lg)', padding: '14px', position: 'relative', minHeight: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}` }}>
-      <div style={{ position: 'absolute', top: '10px', right: '10px', background: C.primarySoft, color: C.primary, fontSize: '9px', padding: '2px 6px', borderRadius: '4px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
-        <span style={{ width: '5px', height: '5px', background: C.primary, borderRadius: '50%', animation: 'ex-pulse 1.5s ease-in-out infinite' }} />
-        LIVE
-      </div>
+      {live && (
+        <div style={{ position: 'absolute', top: '10px', right: '10px', background: C.primarySoft, color: C.primary, fontSize: '9px', padding: '2px 6px', borderRadius: '4px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span style={{ width: '5px', height: '5px', background: C.primary, borderRadius: '50%', animation: 'ex-pulse 1.5s ease-in-out infinite' }} />
+          LIVE
+        </div>
+      )}
       {/* eslint-disable-next-line react-hooks/static-components -- getExerciseFig só faz lookup num mapa estático de componentes já declarados no módulo, nunca cria um novo */}
       <Fig size={size} />
     </div>

@@ -18,7 +18,7 @@ export const RestTimePicker = ({ open, currentValue, onSave, onClose }) => {
           <button key={sec} onClick={() => onSave(sec)}
             className="p-4 rounded-2xl font-medium transition-all active:scale-95"
             style={{ background: currentValue === sec ? C.primary : C.bg, color: currentValue === sec ? C.primaryOn : C.text, border: `1px solid ${currentValue === sec ? C.primary : C.border}`, borderRadius: C.radiusLg, minHeight: 44 }}>
-            {sec}s
+            <span className="tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 22 }}>{sec}<span style={{ fontSize: 13 }}>s</span></span>
           </button>
         ))}
       </div>

@@ -40,7 +40,7 @@ export const DivisionPicker = ({ open, currentValue, onSave, onClose }) => {
             className="w-full p-4 text-left transition-all active:scale-[0.98] flex justify-between items-center"
             style={{ background: currentValue === opt.count ? C.primary : C.bg, color: currentValue === opt.count ? C.primaryOn : C.text, border: `1px solid ${currentValue === opt.count ? C.primary : C.border}`, borderRadius: C.radiusLg, minHeight: 44 }}>
             <div>
-              <div className="text-base font-medium">{opt.label}</div>
+              <div style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 22, lineHeight: 1 }}>{opt.label}</div>
               <div className="text-xs mt-0.5" style={{ color: currentValue === opt.count ? C.primaryOn : C.textMuted, opacity: currentValue === opt.count ? 0.7 : 1 }}>{opt.desc}</div>
             </div>
             {currentValue === opt.count && <Check size={18} />}

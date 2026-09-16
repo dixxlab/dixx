@@ -3,15 +3,8 @@ import { MoreVertical, Edit3, RotateCcw, BookOpen } from 'lucide-react';
 import { T as C } from '../../theme/tokens';
 import { getTodayWorkoutIdx } from '../../lib/workouts';
 import { FigGlyph, getDominantFig } from '../ui/Figures';
+import { RowValue } from '../ui/ListRow';
 import { useConfirm } from '../ui/ConfirmProvider';
-
-/* Valor + unidade na fonte de display: o par estruturado que substitui o
-   "{muscle} • {n} exercícios • ~{duration}min" montado com bullets. */
-const RowMeta = ({ value, unit }) => (
-  <span className="flex items-baseline gap-0.5 tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 18, color: C.textMuted }}>
-    {value}<span style={{ fontSize: 11 }}>{unit}</span>
-  </span>
-);
 
 export const WorkoutsList = ({ data, plans, onSelectWorkout, onOpenLibrary, onEditWorkout, onResetWorkout }) => {
   const [menuOpenId, setMenuOpenId] = useState(null);
@@ -50,8 +43,8 @@ export const WorkoutsList = ({ data, plans, onSelectWorkout, onOpenLibrary, onEd
                   <div className="text-xs mt-0.5 truncate" style={{ color: C.textMuted }}>{w.muscle}</div>
                 </div>
                 <div className="flex items-baseline gap-3 flex-shrink-0">
-                  <RowMeta value={w.exercises.length} unit="ex" />
-                  <RowMeta value={w.duration} unit="min" />
+                  <RowValue unit="ex">{w.exercises.length}</RowValue>
+                  <RowValue unit="min">{w.duration}</RowValue>
                 </div>
               </button>
               <button

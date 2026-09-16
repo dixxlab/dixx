@@ -113,7 +113,7 @@ export const Stats = ({ data, onSelectExercise }) => {
                 leading={<Trophy size={16} style={{ color: C.warning }} />}
                 title={pr.exercise}
                 subtitle={formatRelative(pr.date)}
-                trailing={<RowValue color={C.primary}>{pr.weight}<span style={{ fontSize: 11 }}>kg</span></RowValue>}
+                trailing={<RowValue unit="kg" color={C.primary}>{pr.weight}</RowValue>}
               />
             ))}
           </div>
