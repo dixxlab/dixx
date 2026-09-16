@@ -3,8 +3,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* O fundo vai explícito nos dois, não só no body. O body sozinho depende da
+   propagação pro canvas, e em PWA instalado qualquer área que sobre fora dele
+   — perto da barra de navegação do Android — acabava pintada com o padrão do
+   sistema em vez da cor do tema. */
 html {
   color-scheme: var(--color-scheme, dark);
+  background: var(--bg);
 }
 
 body {

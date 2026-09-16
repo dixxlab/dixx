@@ -174,10 +174,16 @@ const AppShell = () => {
       className="w-full mx-auto relative overflow-hidden flex flex-col"
       style={{
         fontFamily: 'var(--font-ui)',
+        // Fundo explícito também aqui: o container tem altura fixa, e sem cor
+        // própria qualquer folga entre ele e a borda da tela ficava sem pintura.
+        background: 'var(--bg)',
         minHeight: '100dvh',
         height: '100dvh',
         maxWidth: '500px',
         paddingTop: 'env(safe-area-inset-top)',
+        // Simétrico ao topo: reserva a área segura de baixo pra nada renderizar
+        // debaixo da barra de gestos.
+        paddingBottom: 'env(safe-area-inset-bottom)',
       }}
     >
       <ExerciseAnimStyles />
