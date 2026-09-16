@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-labelledby="title">
+  <title id="title">DIXx Totem brand proposal</title>
+  <rect width="1200" height="1200" rx="116" fill="#070809"/>
+  <path d="M600 204 854 350v500L600 996 346 850V350L600 204Zm0 100-166 96v400l166 96 166-96V400l-166-96Z" fill="#F3F2EE"/>
+  <path d="m600 370 111 64v132l-111 64-111-64V434l111-64Zm-38 108v44l38 22 38-22v-44l-38-22-38 22Z" fill="#C7FF3D"/>
+  <path d="M476 690h248v74H476z" fill="#C7FF3D"/>
+  <text x="600" y="1090" fill="#F3F2EE" font-family="Arial, Helvetica, sans-serif" font-size="100" font-weight="900" letter-spacing="16" text-anchor="middle">DIXx</text>
+</svg>

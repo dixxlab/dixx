@@ -12,6 +12,9 @@ export default defineConfig({
       // não entra no precache e o app abre offline sem ela.
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // As propostas de marca são material de referência: continuam
+        // publicadas, mas não têm por que ocupar o cache offline do app.
+        globIgnores: ['**/brand-proposals/**'],
         // As demonstrações ficam FORA do precache de propósito: entrariam ~9MB no
         // PWA instalado por algo que a maioria das séries nem abre. Em vez disso
         // cada exercício é cacheado na primeira vez que o usuário abre a

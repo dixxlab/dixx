@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1200" role="img" aria-labelledby="title">
+  <title id="title">DIXx Monolith brand proposal</title>
+  <defs>
+    <linearGradient id="d-face" x1="310" y1="246" x2="910" y2="954" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset=".46" stop-color="#EEF2F4"/>
+      <stop offset="1" stop-color="#B8C0C8"/>
+    </linearGradient>
+    <linearGradient id="x-blue" x1="850" y1="690" x2="978" y2="790" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C9F2FF"/>
+      <stop offset=".4" stop-color="#45C1FF"/>
+      <stop offset="1" stop-color="#087DB8"/>
+    </linearGradient>
+    <filter id="lift" x="260" y="196" width="710" height="820" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="23" stdDeviation="19" flood-color="#000000" flood-opacity=".72"/>
+    </filter>
+    <filter id="glow" x="800" y="640" width="230" height="200" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="0" stdDeviation="17" flood-color="#45C1FF" flood-opacity=".8"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="1200" rx="116" fill="#070809"/>
+  <path d="M370 246h196c201 0 344 146 344 354s-143 354-344 354H370c-33 0-60-27-60-60V306c0-33 27-60 60-60Zm114 151v406h73c108 0 177-79 177-203s-69-203-177-203h-73Z" fill="url(#d-face)" fill-rule="evenodd" filter="url(#lift)"/>
+  <path d="m866 706 96 96M962 706l-96 96" fill="none" stroke="url(#x-blue)" stroke-linecap="round" stroke-width="26" filter="url(#glow)"/>
+  <path d="M344 275h201" stroke="#FFFFFF" stroke-linecap="round" stroke-opacity=".55" stroke-width="8"/>
+</svg>

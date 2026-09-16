@@ -43,7 +43,8 @@ const AppShell = () => {
   const plans = getWorkoutPlans(data.customWorkouts).slice(0, data.divisionCount || 4);
 
   useEffect(() => {
-    const t = setTimeout(() => setShowSplash(false), 3000);
+    // Acompanha a animação da abertura (2,3s), que já faz o próprio fade de saída.
+    const t = setTimeout(() => setShowSplash(false), 2300);
     return () => clearTimeout(t);
   }, []);
 
