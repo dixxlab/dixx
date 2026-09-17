@@ -9,7 +9,7 @@ import { ExerciseThumb } from '../ui/ExerciseThumb';
 import { getWorkoutThumb } from '../../lib/demos';
 import { getTodayWorkoutIdx, calculateStreak } from '../../lib/workouts';
 
-export const Dashboard = ({ data, plans, onStartWorkout, onNavigate, emTreino }) => {
+export const Dashboard = ({ data, plans, onStartWorkout, onNavigate, idEmAndamento }) => {
   const todayIdx = getTodayWorkoutIdx(data.history, plans);
   const todayWorkout = plans[todayIdx];
   const hour = new Date().getHours();
@@ -21,6 +21,8 @@ export const Dashboard = ({ data, plans, onStartWorkout, onNavigate, emTreino })
   const weekVolume = data.history.filter(s => new Date(s.date).getTime() > weekCutoff)
     .reduce((sum, s) => sum + s.exercises.reduce((es, ex) => es + ex.sets.reduce((ss, set) => ss + (parseFloat(set.weight) || 0) * (parseInt(set.reps) || 0), 0), 0), 0);
   const todaySets = todayWorkout.exercises.reduce((sum, ex) => sum + ex.sets, 0);
+  // Só é "voltar" se o treino em andamento for justamente o de hoje.
+  const emTreino = idEmAndamento === todayWorkout.id;
   const todayLabel = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
 
   return (

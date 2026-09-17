@@ -7,7 +7,7 @@ import { getWorkoutThumb } from '../../lib/demos';
 import { RowValue } from '../ui/ListRow';
 import { useConfirm } from '../ui/ConfirmProvider';
 
-export const WorkoutsList = ({ data, plans, onSelectWorkout, onOpenLibrary, onEditWorkout, onResetWorkout }) => {
+export const WorkoutsList = ({ data, plans, onSelectWorkout, onOpenLibrary, onEditWorkout, onResetWorkout, idEmAndamento }) => {
   const [menuOpenId, setMenuOpenId] = useState(null);
   const todayIdx = getTodayWorkoutIdx(data.history, plans);
   const { confirm } = useConfirm();
@@ -39,6 +39,7 @@ export const WorkoutsList = ({ data, plans, onSelectWorkout, onOpenLibrary, onEd
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium truncate" style={{ color: isToday ? C.primary : C.text }}>{w.name}</span>
                     {isToday && <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: C.primarySoft, color: C.primary }}>hoje</span>}
+                    {idEmAndamento === w.id && <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: C.bgCard, color: C.warning, border: `1px solid ${C.warning}` }}>em andamento</span>}
                     {isCustom && <span className="text-[10px]" style={{ color: C.textMuted }}>custom</span>}
                   </div>
                   <div className="text-xs mt-0.5 truncate" style={{ color: C.textMuted }}>{w.muscle}</div>

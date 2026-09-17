@@ -22,15 +22,34 @@ const NoteField = ({ initialNote, onSave }) => {
   );
 };
 
-export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote }) => {
-  const [exercises, setExercises] = useState(workout.exercises);
-  const [exerciseIdx, setExerciseIdx] = useState(0);
-  const [postponed, setPostponed] = useState([]);
+/* Só retoma se o estado salvo ainda casar com a estrutura esperada. Um
+   inProgressWorkout de uma versão antiga, ou corrompido, volta a começar do
+   zero em vez de quebrar a tela. */
+const retomavel = (r) => {
+  if (!r || !Array.isArray(r.exercises) || !Array.isArray(r.sets)) return null;
+  if (r.exercises.length === 0 || r.exercises.length !== r.sets.length) return null;
+  if (r.sets.some((linha) => !Array.isArray(linha))) return null;
+  const idx = Number.isInteger(r.exerciseIdx) ? r.exerciseIdx : 0;
+  if (idx < 0 || idx >= r.exercises.length) return null;
+  return { ...r, exerciseIdx: idx };
+};
+
+// A série ativa é derivada, não salva: é sempre a primeira ainda não concluída.
+const primeiraPendente = (linha = []) => {
+  const i = linha.findIndex((s) => !s?.done);
+  return i < 0 ? 0 : i;
+};
+
+export const ActiveWorkout = ({ data, workout, resume, onFinish, onExit, onShowRest, onSaveNote }) => {
+  const retomado = retomavel(resume);
+  const [exercises, setExercises] = useState(retomado?.exercises ?? workout.exercises);
+  const [exerciseIdx, setExerciseIdx] = useState(retomado?.exerciseIdx ?? 0);
+  const [postponed, setPostponed] = useState(retomado?.postponed ?? []);
   const [showSkipModal, setShowSkipModal] = useState(false);
   const [showSubstituteModal, setShowSubstituteModal] = useState(false);
-  const [sets, setSets] = useState(workout.exercises.map(ex => Array(ex.sets).fill(null).map(() => ({ weight: '', reps: '', done: false }))));
-  const [activeSetIdx, setActiveSetIdx] = useState(0);
-  const [elapsed, setElapsed] = useState(0);
+  const [sets, setSets] = useState(retomado?.sets ?? workout.exercises.map(ex => Array(ex.sets).fill(null).map(() => ({ weight: '', reps: '', done: false }))));
+  const [activeSetIdx, setActiveSetIdx] = useState(retomado ? primeiraPendente(retomado.sets[retomado.exerciseIdx]) : 0);
+  const [elapsed, setElapsed] = useState(retomado?.elapsed ?? 0);
   const [celebration, setCelebration] = useState({ key: 0, isPR: false });
   const [noteOpenFor, setNoteOpenFor] = useState(null);
   const ex = exercises[exerciseIdx];
@@ -126,7 +145,7 @@ export const ActiveWorkout = ({ data, workout, onFinish, onShowRest, onSaveNote 
           o desenho abstrato sempre visível e a foto escondida atrás de um link. */}
       <section className="-mx-5 px-5 pb-3" style={{ background: C.bgCard, borderBottom: `1px solid ${C.border}` }}>
         <div className="flex justify-between items-center">
-          <button onClick={() => onFinish(sets, { ...workout, exercises }, elapsed)} className="p-2 -ml-2" style={{ minWidth: 44, minHeight: 44 }} aria-label="Sair do treino"><X size={20} color={C.textMuted} /></button>
+          <button onClick={() => onExit({ exercises, exerciseIdx, sets, postponed, elapsed })} className="p-2 -ml-2" style={{ minWidth: 44, minHeight: 44 }} aria-label="Sair do treino"><X size={20} color={C.textMuted} /></button>
           <div className="text-xs tabular-nums" style={{ color: C.textMuted }}>Exercício {exerciseIdx + 1} de {exercises.length}</div>
           <div className="flex items-center gap-1.5" style={{ color: C.primary }}><Clock size={13} /><span className="tabular-nums" style={{ fontFamily: C.fontData, fontWeight: 600, fontSize: 19, lineHeight: 1 }}>{formatTime(elapsed)}</span></div>
         </div>

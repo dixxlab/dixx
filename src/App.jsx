@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ThemeProvider } from './theme/ThemeContext';
 import { ConfirmProvider } from './components/ui/ConfirmProvider';
+import { ConfirmSheet } from './components/ui/ConfirmSheet';
 import { ExerciseAnimStyles } from './components/ui/Figures';
 import { SplashScreen } from './components/ui/Splash';
 import { BottomNav } from './components/ui/BottomNav';
@@ -40,6 +41,9 @@ const AppShell = () => {
   const [showLibrary, setShowLibrary] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState(null);
   const [evolutionExercise, setEvolutionExercise] = useState(null);
+  // Treino que o usuário tentou iniciar tendo outro pausado.
+  const [conflito, setConflito] = useState(null);
+  const decisaoRef = useRef(null);
 
   const plans = getWorkoutPlans(data.customWorkouts).slice(0, data.divisionCount || 4);
 
@@ -64,13 +68,46 @@ const AppShell = () => {
     setView('main');
   };
 
+  const pausado = data.inProgressWorkout;
+
+  const abrirTreino = (workout) => { setActiveWorkout(workout); setView('workout'); };
+
+  const retomarPausado = () => {
+    const plano = plans.find(w => w.id === pausado?.workoutId);
+    // O plano pode ter sumido (divisão reduzida, custom resetado): descarta.
+    if (!plano) { setData(d => ({ ...d, inProgressWorkout: null })); return; }
+    abrirTreino(plano);
+  };
+
   const handleStartWorkout = (workout) => {
-    // Durante o descanso minimizado o app fica navegável, e as telas de treino
-    // continuam oferecendo "iniciar". Tocar ali volta pro treino em andamento
-    // em vez de começar um segundo por cima.
-    if (activeWorkout) { setRestMinimized(false); return; }
-    setActiveWorkout(workout);
-    setView('workout');
+    // Mesmo treino já aberto (descanso minimizado, ou pausado nesta sessão):
+    // tocar em "iniciar" volta pra ele.
+    if (activeWorkout?.id === workout.id) { setRestMinimized(false); setView('workout'); return; }
+    // Treino diferente por cima de um em andamento ou pausado: pergunta antes
+    // de descartar o progresso, em vez de trocar por baixo do usuário.
+    if (activeWorkout || pausado) { setConflito(workout); return; }
+    abrirTreino(workout);
+  };
+
+  /* Sair não é terminar. O progresso vai pro inProgressWorkout e o treino
+     continua em andamento — activeWorkout não é zerado. */
+  const handleExitWorkout = (estado) => {
+    setShowRest(false);
+    setRestMinimized(false);
+    setData(d => ({
+      ...d,
+      inProgressWorkout: {
+        workoutId: activeWorkout?.id ?? null,
+        exercises: estado.exercises,
+        exerciseIdx: estado.exerciseIdx,
+        sets: estado.sets,
+        postponed: estado.postponed,
+        elapsed: estado.elapsed,
+        startedAt: d.inProgressWorkout?.startedAt ?? new Date().toISOString(),
+      },
+    }));
+    setView('main');
+    setActiveTab('home');
   };
 
   const handleFinishWorkout = (sets, workout, seconds) => {
@@ -84,7 +121,8 @@ const AppShell = () => {
     };
 
     if (session.exercises.length > 0) {
-      const newData = { ...data, history: [...data.history, session] };
+      // Concluído de verdade: nada de resquício "em andamento" pra trás.
+      const newData = { ...data, history: [...data.history, session], inProgressWorkout: null };
       setData(newData);
       setFinishedSummary(buildWorkoutSummary({
         session,
@@ -94,6 +132,7 @@ const AppShell = () => {
       }));
       setView('finished');
     } else {
+      setData(d => ({ ...d, inProgressWorkout: null }));
       setView('main');
     }
     setActiveWorkout(null);
@@ -165,6 +204,10 @@ const AppShell = () => {
   };
 
   const showEvolution = !!evolutionExercise;
+  // Vale tanto pro treino aberto nesta sessão quanto pro pausado que sobreviveu
+  // a fechar o app.
+  const idEmAndamento = activeWorkout?.id ?? pausado?.workoutId ?? null;
+  const nomeEmAndamento = activeWorkout?.name ?? plans.find(w => w.id === pausado?.workoutId)?.name ?? 'Treino';
   // Descanso minimizado: o app volta a ser navegável por cima do treino.
   const navegandoNoDescanso = showRest && restMinimized;
   const contentKey = evolutionExercise || (editingWorkout ? 'edit' : (showLibrary ? 'library' : activeTab));
@@ -206,8 +249,8 @@ const AppShell = () => {
                 <Library onClose={() => setShowLibrary(false)} />
               ) : (
                 <>
-                  {activeTab === 'home' && <Dashboard data={data} plans={plans} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} emTreino={!!activeWorkout} />}
-                  {activeTab === 'workouts' && <WorkoutsList data={data} plans={plans} onSelectWorkout={handleStartWorkout} onOpenLibrary={() => setShowLibrary(true)} onEditWorkout={setEditingWorkout} onResetWorkout={handleResetWorkout} />}
+                  {activeTab === 'home' && <Dashboard data={data} plans={plans} onStartWorkout={handleStartWorkout} onNavigate={setActiveTab} idEmAndamento={idEmAndamento} />}
+                  {activeTab === 'workouts' && <WorkoutsList data={data} plans={plans} onSelectWorkout={handleStartWorkout} onOpenLibrary={() => setShowLibrary(true)} onEditWorkout={setEditingWorkout} onResetWorkout={handleResetWorkout} idEmAndamento={idEmAndamento} />}
                   {activeTab === 'stats' && <Stats data={data} onSelectExercise={setEvolutionExercise} onNavigate={setActiveTab} />}
                   {activeTab === 'profile' && <Profile data={data} onReset={handleReset} onExport={handleExport} onChangePhoto={handleChangePhoto} onChangeRestTime={handleChangeRestTime} onChangeDivision={handleChangeDivision} />}
                 </>
@@ -218,7 +261,15 @@ const AppShell = () => {
         )}
         {view === 'workout' && activeWorkout && (
           <div key="workout" className="h-full" style={navegandoNoDescanso ? { display: 'none' } : undefined}>
-            <ActiveWorkout data={data} workout={activeWorkout} onFinish={handleFinishWorkout} onShowRest={handleShowRest} onSaveNote={handleSaveNote} />
+            <ActiveWorkout
+              data={data}
+              workout={activeWorkout}
+              resume={pausado?.workoutId === activeWorkout.id ? pausado : null}
+              onFinish={handleFinishWorkout}
+              onExit={handleExitWorkout}
+              onShowRest={handleShowRest}
+              onSaveNote={handleSaveNote}
+            />
           </div>
         )}
         {view === 'finished' && finishedSummary && (
@@ -226,6 +277,37 @@ const AppShell = () => {
             summary={finishedSummary}
             onClose={() => { setView('main'); setActiveTab('home'); setFinishedSummary(null); }}
             onSeeStats={() => { setView('main'); setActiveTab('stats'); setFinishedSummary(null); }}
+          />
+        )}
+        {conflito && (
+          <ConfirmSheet
+            open
+            danger
+            title={`${nomeEmAndamento} em andamento`}
+            message={pausado
+              ? `Você parou no exercício ${(pausado.exerciseIdx ?? 0) + 1} de ${pausado.exercises?.length ?? 0}. Começar o ${conflito.name} agora descarta esse progresso.`
+              : `Começar o ${conflito.name} agora descarta o progresso do ${nomeEmAndamento}.`}
+            confirmLabel={`Começar ${conflito.name}`}
+            cancelLabel="Continuar o de antes"
+            onConfirm={() => { decisaoRef.current = 'novo'; }}
+            onClose={() => {
+              // onClose roda depois do onConfirm também, então a decisão fica no ref.
+              const decisao = decisaoRef.current;
+              decisaoRef.current = null;
+              const novo = conflito;
+              setConflito(null);
+              if (decisao === 'novo') {
+                setShowRest(false);
+                setRestMinimized(false);
+                setData(d => ({ ...d, inProgressWorkout: null }));
+                abrirTreino(novo);
+              } else if (activeWorkout) {
+                setRestMinimized(false);
+                setView('workout');
+              } else {
+                retomarPausado();
+              }
+            }}
           />
         )}
         {showRest && (

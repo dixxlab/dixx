@@ -16,4 +16,8 @@ export const resetData = () => {
   try { localStorage.removeItem(STORAGE_KEY); } catch { /* storage indisponível */ }
 };
 
-export const initialData = { user: null, history: [], notes: {}, customWorkouts: {}, photo: null, restTime: 90, divisionCount: 4 };
+/* inProgressWorkout guarda um treino pausado — o usuário saiu pelo X sem
+   terminar. Sair deixou de ser o mesmo que finalizar: o progresso fica aqui,
+   sobrevive a fechar o app, e é limpo quando o treino é concluído de verdade.
+   Formato: { workoutId, exercises, exerciseIdx, sets, postponed, elapsed, startedAt } */
+export const initialData = { user: null, history: [], notes: {}, customWorkouts: {}, photo: null, restTime: 90, divisionCount: 4, inProgressWorkout: null };
