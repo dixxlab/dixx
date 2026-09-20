@@ -40,7 +40,7 @@ const primeiraPendente = (linha = []) => {
   return i < 0 ? 0 : i;
 };
 
-export const ActiveWorkout = ({ data, workout, resume, onFinish, onExit, onShowRest, onSaveNote }) => {
+export const ActiveWorkout = ({ data, workout, resume, descansando, onFinish, onExit, onShowRest, onSaveNote }) => {
   const retomado = retomavel(resume);
   const [exercises, setExercises] = useState(retomado?.exercises ?? workout.exercises);
   const [exerciseIdx, setExerciseIdx] = useState(retomado?.exerciseIdx ?? 0);
@@ -138,8 +138,12 @@ export const ActiveWorkout = ({ data, workout, resume, onFinish, onExit, onShowR
     setSets(newSetsArr);
   };
 
+  /* Com o descanso rodando, a pílula flutua 74px acima da borda e encostava
+     no topo do "Concluir série" com a tela rolada até o fim. O espaço só é
+     reservado enquanto ela existe, senão sobraria um vão morto no resto do
+     treino. 138 = 74 do deslocamento + 52 da pílula + 12 de respiro. */
   return (
-    <div className="px-5 pt-4 pb-6" style={{ background: C.bg, minHeight: '100%' }}>
+    <div className="px-5 pt-4 pb-6" style={{ background: C.bg, minHeight: '100%', paddingBottom: descansando ? 138 : undefined }}>
       {/* Um bloco só no topo: cabeçalho, progresso, nome e demonstração. Antes
           eram peças empilhadas soltas, e a demonstração aparecia duas vezes —
           o desenho abstrato sempre visível e a foto escondida atrás de um link. */}

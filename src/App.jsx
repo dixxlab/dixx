@@ -34,7 +34,6 @@ const AppShell = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [activeWorkout, setActiveWorkout] = useState(null);
   const [showRest, setShowRest] = useState(false);
-  const [restMinimized, setRestMinimized] = useState(false);
   const [restCallback, setRestCallback] = useState(null);
   const [finishedSummary, setFinishedSummary] = useState(null);
   const [showSplash, setShowSplash] = useState(true);
@@ -80,9 +79,9 @@ const AppShell = () => {
   };
 
   const handleStartWorkout = (workout) => {
-    // Mesmo treino já aberto (descanso minimizado, ou pausado nesta sessão):
+    // Mesmo treino já aberto (pausado nesta sessão, ou saído pelo X):
     // tocar em "iniciar" volta pra ele.
-    if (activeWorkout?.id === workout.id) { setRestMinimized(false); setView('workout'); return; }
+    if (activeWorkout?.id === workout.id) { setView('workout'); return; }
     // Treino diferente por cima de um em andamento ou pausado: pergunta antes
     // de descartar o progresso, em vez de trocar por baixo do usuário.
     if (activeWorkout || pausado) { setConflito(workout); return; }
@@ -93,7 +92,6 @@ const AppShell = () => {
      continua em andamento — activeWorkout não é zerado. */
   const handleExitWorkout = (estado) => {
     setShowRest(false);
-    setRestMinimized(false);
     setData(d => ({
       ...d,
       inProgressWorkout: {
@@ -138,8 +136,8 @@ const AppShell = () => {
     setActiveWorkout(null);
   };
 
-  const handleShowRest = (cb) => { setRestCallback(() => cb); setRestMinimized(false); setShowRest(true); };
-  const handleRestDone = () => { setShowRest(false); setRestMinimized(false); if (restCallback) restCallback(); };
+  const handleShowRest = (cb) => { setRestCallback(() => cb); setShowRest(true); };
+  const handleRestDone = () => { setShowRest(false); if (restCallback) restCallback(); };
 
   const handleReset = () => {
     resetData();
@@ -208,8 +206,6 @@ const AppShell = () => {
   // a fechar o app.
   const idEmAndamento = activeWorkout?.id ?? pausado?.workoutId ?? null;
   const nomeEmAndamento = activeWorkout?.name ?? plans.find(w => w.id === pausado?.workoutId)?.name ?? 'Treino';
-  // Descanso minimizado: o app volta a ser navegável por cima do treino.
-  const navegandoNoDescanso = showRest && restMinimized;
   const contentKey = evolutionExercise || (editingWorkout ? 'edit' : (showLibrary ? 'library' : activeTab));
 
   return (
@@ -238,7 +234,7 @@ const AppShell = () => {
             <Onboarding onComplete={handleOnboardingComplete} />
           </div>
         )}
-        {(view === 'main' || navegandoNoDescanso) && data.user && (
+        {view === 'main' && data.user && (
           <>
             <div key={contentKey}>
               {showEvolution ? (
@@ -260,11 +256,12 @@ const AppShell = () => {
           </>
         )}
         {view === 'workout' && activeWorkout && (
-          <div key="workout" className="h-full" style={navegandoNoDescanso ? { display: 'none' } : undefined}>
+          <div key="workout" className="h-full">
             <ActiveWorkout
               data={data}
               workout={activeWorkout}
               resume={pausado?.workoutId === activeWorkout.id ? pausado : null}
+              descansando={showRest}
               onFinish={handleFinishWorkout}
               onExit={handleExitWorkout}
               onShowRest={handleShowRest}
@@ -298,11 +295,9 @@ const AppShell = () => {
               setConflito(null);
               if (decisao === 'novo') {
                 setShowRest(false);
-                setRestMinimized(false);
                 setData(d => ({ ...d, inProgressWorkout: null }));
                 abrirTreino(novo);
               } else if (activeWorkout) {
-                setRestMinimized(false);
                 setView('workout');
               } else {
                 retomarPausado();
@@ -313,9 +308,6 @@ const AppShell = () => {
         {showRest && (
           <RestTimer
             restTime={data.restTime || 90}
-            minimized={restMinimized}
-            onMinimize={() => setRestMinimized(true)}
-            onExpand={() => setRestMinimized(false)}
             onSkip={handleRestDone}
             onDone={handleRestDone}
           />
