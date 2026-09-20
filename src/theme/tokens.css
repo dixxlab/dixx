@@ -58,6 +58,7 @@
   --warning: #f5b942;
   --info: #45c1ff;
   --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.14);
   --danger-on: #ffffff;
   --chart-alt: #a78bfa;
   --color-scheme: dark;
@@ -80,6 +81,7 @@
   --warning: #f5b942;
   --info: #5eb8ff;
   --success: #34d399;
+  --success-soft: rgba(52, 211, 153, 0.14);
   --danger-on: #ffffff;
   --chart-alt: #c4a5fb;
   --color-scheme: dark;
@@ -102,6 +104,7 @@
   --warning: #b45309;
   --info: #2563eb;
   --success: #15803d;
+  --success-soft: rgba(21, 128, 61, 0.12);
   --danger-on: #ffffff;
   --chart-alt: #7c3aed;
   --color-scheme: light;

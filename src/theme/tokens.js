@@ -18,6 +18,7 @@ export const T = {
   warning: 'var(--warning)',
   info: 'var(--info)',
   success: 'var(--success)',
+  successSoft: 'var(--success-soft)',
   chartAlt: 'var(--chart-alt)',
   radiusSm: 'var(--radius-sm)',
   radiusMd: 'var(--radius-md)',

@@ -4,11 +4,13 @@ import { ConfirmProvider } from './components/ui/ConfirmProvider';
 import { ConfirmSheet } from './components/ui/ConfirmSheet';
 import { ExerciseAnimStyles } from './components/ui/Figures';
 import { SplashScreen } from './components/ui/Splash';
+import { LockScreen } from './components/ui/LockScreen';
 import { BottomNav } from './components/ui/BottomNav';
 import { loadData, saveData, resetData, initialData } from './lib/storage';
 import { getWorkoutPlans, divisionLabelToCount } from './lib/workouts';
 import { buildWorkoutSummary } from './lib/stats';
 import { watchServiceWorkerUpdate, setPodeRecarregar } from './lib/swUpdate';
+import { isUnlocked } from './lib/access';
 
 import { Onboarding } from './components/screens/Onboarding';
 import { Dashboard } from './components/screens/Dashboard';
@@ -37,6 +39,9 @@ const AppShell = () => {
   const [restCallback, setRestCallback] = useState(null);
   const [finishedSummary, setFinishedSummary] = useState(null);
   const [showSplash, setShowSplash] = useState(true);
+  // Desbloqueado só vale enquanto a senha gravada bater com a que está no
+  // código: trocar APP_PASSWORD joga todo aparelho de volta pra trava.
+  const [locked, setLocked] = useState(!isUnlocked());
   const [showLibrary, setShowLibrary] = useState(false);
   const [editingWorkout, setEditingWorkout] = useState(null);
   const [evolutionExercise, setEvolutionExercise] = useState(null);
@@ -227,6 +232,15 @@ const AppShell = () => {
     >
       <ExerciseAnimStyles />
       {showSplash && <SplashScreen key="splash" />}
+      {/* Acima de tudo menos da abertura, e montado desde o primeiro quadro: o
+          fundo opaco dele é o que garante que o dashboard nunca pisque antes
+          da senha conferir. */}
+      {locked && (
+        <LockScreen
+          aparecer={!showSplash}
+          onUnlock={() => setLocked(false)}
+        />
+      )}
 
       <div className="flex-1 overflow-y-auto overflow-x-hidden relative">
         {view === 'onboarding' && (
